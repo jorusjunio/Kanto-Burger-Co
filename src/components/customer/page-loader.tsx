@@ -1,0 +1,185 @@
+"use client";
+
+import { useCallback, useEffect, useRef, useState } from "react";
+import { usePathname } from "next/navigation";
+
+// Routes that trigger the cinematic loading screen
+const LOADING_ROUTES = new Set(["/", "/menu"]);
+
+export function PageLoader() {
+  const pathname = usePathname();
+  const prevPathname = useRef<string | null>(null);
+
+  const [visible, setVisible] = useState(false);
+  const [phase, setPhase] = useState<
+    "idle" | "enter" | "hold" | "exit" | "done"
+  >("idle");
+  const [progress, setProgress] = useState(0);
+
+  const rafRef = useRef<number>(0);
+  const timerRefs = useRef<ReturnType<typeof setTimeout>[]>([]);
+
+  const clearTimers = useCallback(() => {
+    timerRefs.current.forEach(clearTimeout);
+    timerRefs.current = [];
+    cancelAnimationFrame(rafRef.current);
+  }, []);
+
+  const timer = useCallback((fn: () => void, ms: number) => {
+    const id = setTimeout(fn, ms);
+    timerRefs.current.push(id);
+    return id;
+  }, []);
+
+  // Smooth progress using requestAnimationFrame for jank-free interpolation
+  const animateProgress = useCallback(
+    (from: number, to: number, duration: number, onDone?: () => void) => {
+      const start = performance.now();
+      const step = (now: number) => {
+        const elapsed = now - start;
+        // Ease out cubic for silky deceleration
+        const t = Math.min(elapsed / duration, 1);
+        const eased = 1 - Math.pow(1 - t, 3);
+        setProgress(from + (to - from) * eased);
+        if (t < 1) {
+          rafRef.current = requestAnimationFrame(step);
+        } else {
+          onDone?.();
+        }
+      };
+      rafRef.current = requestAnimationFrame(step);
+    },
+    [],
+  );
+
+  const runLoader = useCallback((isMenu: boolean) => {
+    clearTimers();
+    setProgress(0);
+    setPhase("enter");
+    setVisible(true);
+    document.documentElement.classList.add("is-page-loading");
+
+    if (isMenu) {
+      // Menu timings: ~1000ms load + 500ms exit = ~1.5s total
+      timer(() => {
+        animateProgress(0, 70, 300, () => {
+          animateProgress(70, 90, 400, () => {
+            setPhase("hold");
+            timer(() => {
+              animateProgress(90, 100, 150, () => {
+                setPhase("exit");
+                timer(() => {
+                  setPhase("done");
+                  timer(() => {
+                    setVisible(false);
+                    setPhase("idle");
+                    setProgress(0);
+                    document.documentElement.classList.remove("is-page-loading");
+                  }, 520); // 500ms CSS exit duration
+                }, 40);
+              });
+            }, 100);
+          });
+        });
+      }, 50);
+    } else {
+      // Home timings: ~1600ms load + 1000ms exit = ~2.6s total
+      timer(() => {
+        animateProgress(0, 70, 450, () => {
+          animateProgress(70, 90, 600, () => {
+            setPhase("hold");
+            timer(() => {
+              animateProgress(90, 100, 200, () => {
+                setPhase("exit");
+                timer(() => {
+                  setPhase("done");
+                  timer(() => {
+                    setVisible(false);
+                    setPhase("idle");
+                    setProgress(0);
+                    document.documentElement.classList.remove("is-page-loading");
+                  }, 1020); // 1000ms CSS exit duration
+                }, 40);
+              });
+            }, 300);
+          });
+        });
+      }, 50);
+    }
+  }, [clearTimers, timer, animateProgress]);
+
+  // Initial page load
+  useEffect(() => {
+    if (LOADING_ROUTES.has(pathname)) {
+      runLoader(pathname === "/menu");
+    }
+    return clearTimers;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Route changes
+  useEffect(() => {
+    if (prevPathname.current === null) {
+      prevPathname.current = pathname;
+      return;
+    }
+    if (prevPathname.current !== pathname && LOADING_ROUTES.has(pathname)) {
+      runLoader(pathname === "/menu");
+    }
+    prevPathname.current = pathname;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pathname]);
+
+  if (!visible) return null;
+
+  const isMenu = pathname === "/menu";
+
+  return (
+    <div
+      aria-hidden="true"
+      className="page-loader"
+      data-phase={phase}
+      data-variant={isMenu ? "menu" : "home"}
+    >
+      <div className="page-loader__backdrop" />
+
+      <div className="page-loader__center">
+        {isMenu ? (
+          <div className="page-loader__menu-icon">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="36"
+              height="36"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="text-amber-400"
+            >
+              <path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2" />
+              <path d="M7 2v20" />
+              <path d="M21 15V2v0a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7" />
+            </svg>
+          </div>
+        ) : (
+          <>
+            <p className="page-loader__logo">
+              <span className="page-loader__logo-kanto">Kanto</span>
+              <span className="page-loader__logo-burger">Burger Co.</span>
+            </p>
+            <p className="page-loader__tagline">Hot, fresh &amp; made for you</p>
+          </>
+        )}
+      </div>
+
+      <div className="page-loader__track">
+        <div
+          className="page-loader__bar"
+          style={{ transform: `scaleX(${progress / 100})` }}
+        />
+      </div>
+    </div>
+  );
+}

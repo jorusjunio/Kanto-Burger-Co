@@ -1,36 +1,67 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Kanto Burger Co.
 
-## Getting Started
+A food ordering e-commerce website for a local burger and snack shop.
 
-First, run the development server:
+## Stack
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+```txt
+Next.js + TypeScript
+Tailwind CSS + shadcn/ui
+Neon Postgres + Prisma
+Auth.js / NextAuth
+Zustand
+React Hook Form + Zod
+Cloudinary
+Pusher
+Recharts
+Vercel
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Architecture
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```txt
+src/app
+├── (customer)       Public storefront routes
+├── admin            Protected admin/staff routes
+└── api              Route handlers
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+src/features
+├── cart             Zustand cart state
+├── customer         Customer-facing feature modules
+├── admin            Admin dashboard feature modules
+├── menu             Menu/product feature modules
+└── orders           Order feature modules
 
-## Learn More
+src/server
+├── auth             Auth configuration
+├── db               Prisma client
+└── services         Cloudinary, Pusher, and other integrations
+```
 
-To learn more about Next.js, take a look at the following resources:
+## Setup
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Read [docs/SETUP.md](docs/SETUP.md) for the full local setup flow.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Quick start:
 
-## Deploy on Vercel
+```bash
+npm install
+cp .env.example .env
+npx prisma generate
+npm run dev
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+On Windows PowerShell, use `npm.cmd` / `npx.cmd` if script execution blocks `npm.ps1`.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## MVP Scope
+
+- Customer menu browsing
+- Cart and checkout
+- Pickup and delivery orders
+- Cash, COD, and manual GCash
+- Admin/staff login
+- Realtime order updates
+- Menu management
+- Cloudinary product image upload
+- Product-level stock tracking
+- Basic reports
