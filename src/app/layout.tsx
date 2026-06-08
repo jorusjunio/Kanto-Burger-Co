@@ -33,11 +33,13 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
       data-scroll-behavior="smooth"
     >
-      <body className="flex min-h-full flex-col">
+      <body className="relative flex min-h-screen flex-col">
         <SmoothScroll />
         <PageLoader />
         <SiteHeader />
-        {children}
+        <main className="flex-1">
+          {children}
+        </main>
         <Toaster
           position="top-right"
           gap={8}
