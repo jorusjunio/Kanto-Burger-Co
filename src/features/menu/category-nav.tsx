@@ -169,13 +169,13 @@ export function CategoryNav({ categories }: CategoryNavProps) {
                 onClick={() => setActiveCategory("all")}
                 ref={isActive("all") ? activePillRef : undefined}
                 className={cn(
-                  "cat-pill group relative shrink-0 select-none rounded-xl px-4 py-2 text-sm font-bold transition-all duration-300 overflow-hidden isolate",
+                  "shrink-0 rounded-xl px-4 py-2 text-sm font-bold transition-colors duration-200",
                   isActive("all")
-                    ? "cat-pill--active bg-gradient-to-b from-red-600 to-red-700 text-white shadow-md shadow-red-500/8 ring-1 ring-red-700/10"
-                    : "border border-orange-900/10 bg-white/70 text-orange-950/60 shadow-sm hover:border-red-700/25 hover:bg-white hover:text-red-700 hover:shadow-md",
+                    ? "bg-red-600 text-white"
+                    : "border border-orange-900/10 bg-white/70 text-orange-950/60 hover:bg-white hover:text-red-700",
                 )}
               >
-                <span className="relative z-10 flex items-center gap-2">
+                <span className="flex items-center gap-2">
                   <Sparkles
                     className={cn(
                       "size-4 transition-all duration-300",
@@ -204,13 +204,13 @@ export function CategoryNav({ categories }: CategoryNavProps) {
                     onClick={() => setActiveCategory(category.slug)}
                     ref={active ? activePillRef : undefined}
                     className={cn(
-                      "cat-pill group relative shrink-0 select-none rounded-xl px-4 py-2 text-sm font-bold transition-all duration-300 overflow-hidden isolate",
+                      "shrink-0 rounded-xl px-4 py-2 text-sm font-bold transition-colors duration-200",
                       active
-                        ? "cat-pill--active bg-gradient-to-b from-red-600 to-red-700 text-white shadow-md shadow-red-500/8 ring-1 ring-red-700/10"
-                        : "border border-orange-900/10 bg-white/70 text-orange-950/60 shadow-sm hover:border-red-700/25 hover:bg-white hover:text-red-700 hover:shadow-md",
+                        ? "bg-red-600 text-white"
+                        : "border border-orange-900/10 bg-white/70 text-orange-950/60 hover:bg-white hover:text-red-700",
                     )}
                   >
-                    <span className="relative z-10 flex items-center gap-2">
+                    <span className="flex items-center gap-2">
                       <Icon
                         className={cn(
                           "size-4 transition-all duration-300",
@@ -232,14 +232,6 @@ export function CategoryNav({ categories }: CategoryNavProps) {
                         {category.products.length}
                       </span>
                     </span>
-                    {/* Active shimmer */}
-                    {active ? (
-                      <span className="cat-pill-shimmer pointer-events-none absolute inset-0 rounded-xl" />
-                    ) : null}
-                    {/* Inactive hover glow */}
-                    {!active ? (
-                      <span className="cat-pill-glow pointer-events-none absolute inset-0 rounded-xl opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
-                    ) : null}
                   </Link>
                 );
               })}
