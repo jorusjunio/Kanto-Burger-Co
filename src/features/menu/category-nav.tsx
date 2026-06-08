@@ -169,9 +169,9 @@ export function CategoryNav({ categories }: CategoryNavProps) {
                 onClick={() => setActiveCategory("all")}
                 ref={isActive("all") ? activePillRef : undefined}
                 className={cn(
-                  "cat-pill group relative shrink-0 select-none rounded-xl px-4 py-2 text-sm font-bold transition-all duration-300",
+                  "cat-pill group relative shrink-0 select-none rounded-xl px-4 py-2 text-sm font-bold transition-all duration-300 overflow-hidden",
                   isActive("all")
-                    ? "cat-pill--active bg-gradient-to-b from-red-600 to-red-700 text-white shadow-lg shadow-red-700/30"
+                    ? "cat-pill--active bg-gradient-to-b from-red-600 to-red-700 text-white shadow-lg shadow-red-500/25 ring-1 ring-red-700/10"
                     : "border border-orange-900/10 bg-white/70 text-orange-950/60 shadow-sm hover:border-red-700/25 hover:bg-white hover:text-red-700 hover:shadow-md",
                 )}
               >
@@ -204,9 +204,9 @@ export function CategoryNav({ categories }: CategoryNavProps) {
                     onClick={() => setActiveCategory(category.slug)}
                     ref={active ? activePillRef : undefined}
                     className={cn(
-                      "cat-pill group relative shrink-0 select-none rounded-xl px-4 py-2 text-sm font-bold transition-all duration-300",
+                      "cat-pill group relative shrink-0 select-none rounded-xl px-4 py-2 text-sm font-bold transition-all duration-300 overflow-hidden",
                       active
-                        ? "cat-pill--active bg-gradient-to-b from-red-600 to-red-700 text-white shadow-lg shadow-red-700/30"
+                        ? "cat-pill--active bg-gradient-to-b from-red-600 to-red-700 text-white shadow-lg shadow-red-500/25 ring-1 ring-red-700/10"
                         : "border border-orange-900/10 bg-white/70 text-orange-950/60 shadow-sm hover:border-red-700/25 hover:bg-white hover:text-red-700 hover:shadow-md",
                     )}
                   >
