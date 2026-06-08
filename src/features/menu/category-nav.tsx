@@ -71,22 +71,20 @@ export function CategoryNav({ categories }: CategoryNavProps) {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  /* ─── Auto-scroll active pill into center ─── */
+  /* ─── Auto-scroll active pill into center only on click ─── */
   useEffect(() => {
-    if (!activePillRef.current || !scrollRef.current) return;
-    
-    const container = scrollRef.current;
     const pill = activePillRef.current;
-    const cr = container.getBoundingClientRect();
-    const pr = pill.getBoundingClientRect();
+    const container = scrollRef.current;
     
-    // Skip scroll if already visible by at least 30% on either side
-    const pillVisibleLeft = pr.left - cr.left >= -pr.width * 0.3;
-    const pillVisibleRight = pr.right <= cr.right + pr.width * 0.3;
-    if (pillVisibleLeft && pillVisibleRight) return;
+    if (!pill || !container) return;
     
-    const scrollLeft = pr.left - cr.left - cr.width / 2 + pr.width / 2;
-    container.scrollBy({ left: scrollLeft, behavior: "smooth" });
+    // Only scroll if pill was clicked (has focus)
+    if (document.activeElement === pill) {
+      const cr = container.getBoundingClientRect();
+      const pr = pill.getBoundingClientRect();
+      const scrollLeft = pr.left - cr.left - cr.width / 2 + pr.width / 2;
+      container.scrollBy({ left: scrollLeft, behavior: "smooth" });
+    }
   }, [activeCategory]);
 
   /* ─── Detect scrollable edges for fade hints (ref-based, no re-renders) ─── */
