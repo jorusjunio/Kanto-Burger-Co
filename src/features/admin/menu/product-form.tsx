@@ -94,7 +94,7 @@ export function ProductForm({
             name="description"
             defaultValue={product?.description}
             required
-            className="min-h-24 bg-white"
+            className="max-h-[152px] bg-white"
           />
         </div>
 
@@ -179,7 +179,7 @@ export function ProductForm({
             name="addOns"
             defaultValue={addOnsToText(product)}
             placeholder="Extra Cheese | 20.00 | available"
-            className="min-h-36 bg-white font-mono text-sm"
+            className="max-h-[228px] bg-white font-mono text-sm"
           />
           <p className="text-xs leading-5 text-zinc-500">
             One add-on per line: name | price | available/unavailable.

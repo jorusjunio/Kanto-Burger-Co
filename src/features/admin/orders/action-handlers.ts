@@ -42,7 +42,7 @@ type ProductUpdateInput = {
   };
 };
 
-type OrderTransactionClient = {
+export type OrderTransactionClient = {
   order: {
     findUnique: (args: unknown) => Promise<{
       status: OrderStatus;

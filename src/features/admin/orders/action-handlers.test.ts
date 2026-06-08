@@ -7,7 +7,10 @@ import {
   PaymentStatus,
 } from "@/generated/prisma/enums";
 
-import type { AdminOrderActionDeps } from "./action-handlers";
+import type {
+  AdminOrderActionDeps,
+  OrderTransactionClient,
+} from "./action-handlers";
 import {
   updateOrderStatusWithDeps,
   updatePaymentStatusWithDeps,
@@ -43,10 +46,12 @@ test("admin order status updates require an authenticated session before databas
       throw new Error("Unauthorized");
     },
     prisma: {
-      $transaction: async () => {
+      $transaction: (async <T>(
+        _cb: (tx: OrderTransactionClient) => Promise<T>,
+      ): Promise<T> => {
         didStartTransaction = true;
-        return orderPayload();
-      },
+        return orderPayload() as T;
+      }) as AdminOrderActionDeps['prisma']['$transaction'],
       order: {
         findUnique: async () => ({ paymentMethod: PaymentMethod.GCASH }),
         update: async () => orderPayload(),
@@ -73,7 +78,9 @@ test("cancelling an active order restores tracked product stock once per tracked
   const deps: AdminOrderActionDeps = {
     requireAdminSession: async () => ({ user: { id: "admin-1" } }),
     prisma: {
-      $transaction: async (callback) =>
+      $transaction: (<T>(
+        callback: (tx: OrderTransactionClient) => Promise<T>,
+      ): Promise<T> =>
         callback({
           order: {
             findUnique: async () => ({
@@ -102,12 +109,12 @@ test("cancelling an active order restores tracked product stock once per tracked
               }),
           },
           product: {
-            update: async (args) => {
+            update: async (args: { where: { id: string }; data: { stockQuantity: { increment: number } } }) => {
               productUpdates.push(args);
               return {};
             },
           },
-        }),
+        })) as AdminOrderActionDeps['prisma']['$transaction'],
       order: {
         findUnique: async () => ({ paymentMethod: PaymentMethod.GCASH }),
         update: async () => orderPayload(),
@@ -154,7 +161,9 @@ test("payment status updates validate input and refresh order views", async () =
   const deps: AdminOrderActionDeps = {
     requireAdminSession: async () => ({ user: { id: "staff-1" } }),
     prisma: {
-      $transaction: async () => orderPayload(),
+      $transaction: (async <T>(
+        _cb: (tx: OrderTransactionClient) => Promise<T>,
+      ): Promise<T> => orderPayload() as T) as AdminOrderActionDeps['prisma']['$transaction'],
       order: {
         findUnique: async () => ({ paymentMethod: PaymentMethod.GCASH }),
         update: async (args) => {
@@ -207,7 +216,9 @@ test("payment status updates reject pending verification for non-GCash orders", 
   const deps: AdminOrderActionDeps = {
     requireAdminSession: async () => ({ user: { id: "staff-1" } }),
     prisma: {
-      $transaction: async () => orderPayload(),
+      $transaction: (async <T>(
+        _cb: (tx: OrderTransactionClient) => Promise<T>,
+      ): Promise<T> => orderPayload() as T) as AdminOrderActionDeps['prisma']['$transaction'],
       order: {
         findUnique: async () => ({ paymentMethod: PaymentMethod.CASH }),
         update: async () => {

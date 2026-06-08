@@ -1,7 +1,16 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import {
+  Beef,
+  ChefHat,
+  CupSoda,
+  Drumstick,
+  Pizza,
+  Sparkles,
+  type LucideIcon,
+} from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import type { MenuCategory } from "./types";
@@ -10,37 +19,49 @@ type CategoryNavProps = {
   categories: MenuCategory[];
 };
 
+/* ─── Category icon map ─── */
+const categoryIcons: Record<string, LucideIcon> = {
+  burgers: Beef,
+  "chicken-and-more": Drumstick,
+  sides: Pizza,
+  drinks: CupSoda,
+  combos: Sparkles,
+};
+
+function getCategoryIcon(slug: string) {
+  return categoryIcons[slug] ?? ChefHat;
+}
+
 export function CategoryNav({ categories }: CategoryNavProps) {
   const [activeCategory, setActiveCategory] = useState<string>("all");
-  const [isFloated, setIsFloated] = useState(false);
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const activePillRef = useRef<HTMLAnchorElement>(null);
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(false);
 
+  /* ─── IntersectionObserver: detect active section ─── */
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
-        entries.forEach((entry) => {
+        for (const entry of entries) {
           if (entry.isIntersecting) {
             setActiveCategory(entry.target.id);
           }
-        });
+        }
       },
-      {
-        rootMargin: "-25% 0px -65% 0px",
-        threshold: 0,
-      }
+      { rootMargin: "-25% 0px -65% 0px", threshold: 0 },
     );
 
-    categories.forEach((category) => {
+    for (const category of categories) {
       const el = document.getElementById(category.slug);
       if (el) observer.observe(el);
-    });
-
+    }
     return () => observer.disconnect();
   }, [categories]);
 
+  /* ─── Scroll: reset to "all" at top ─── */
   useEffect(() => {
     const handleScroll = () => {
-      setIsFloated(window.scrollY > 350);
-
       if (window.scrollY < 200) {
         setActiveCategory("all");
       }
@@ -49,80 +70,187 @@ export function CategoryNav({ categories }: CategoryNavProps) {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  return (
-    <>
-      {/* Standard Inline Nav (Top) */}
-      <div className="border-b border-orange-900/10 bg-[#fff7df]/92 shadow-sm backdrop-blur">
-        <div className="mx-auto flex max-w-6xl gap-3 overflow-x-auto px-4 py-3 sm:px-6 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-          <Link
-            href="/menu"
-            onClick={() => setActiveCategory("all")}
-            className={cn(
-              "shrink-0 rounded-full px-5 py-2 text-sm font-black transition-all",
-              activeCategory === "all"
-                ? "bg-red-700 text-white shadow-md shadow-red-700/20"
-                : "border border-orange-900/15 bg-white/80 text-orange-950 shadow-sm hover:border-red-700 hover:text-red-700"
-            )}
-          >
-            All Items
-          </Link>
-          {categories.map((category) => (
-            <Link
-              key={category.id}
-              href={`/menu#${category.slug}`}
-              onClick={() => setActiveCategory(category.slug)}
-              className={cn(
-                "shrink-0 rounded-full px-5 py-2 text-sm font-black transition-all",
-                activeCategory === category.slug
-                  ? "bg-red-700 text-white shadow-md shadow-red-700/20"
-                  : "border border-orange-900/15 bg-white/80 text-orange-950 shadow-sm hover:border-red-700 hover:text-red-700"
-              )}
-            >
-              {category.name}
-            </Link>
-          ))}
-        </div>
-      </div>
+  /* ─── Auto-scroll active pill into center ─── */
+  useEffect(() => {
+    if (activePillRef.current && scrollRef.current) {
+      const container = scrollRef.current;
+      const pill = activePillRef.current;
+      const cr = container.getBoundingClientRect();
+      const pr = pill.getBoundingClientRect();
+      const scrollLeft =
+        pr.left - cr.left - cr.width / 2 + pr.width / 2;
+      container.scrollBy({ left: scrollLeft, behavior: "smooth" });
+    }
+  }, [activeCategory]);
 
-      {/* Advanced Floating Pill Nav (Bottom Center) */}
-      <div
-        className={cn(
-          "fixed bottom-6 left-1/2 z-50 flex -translate-x-1/2 items-center gap-2 overflow-hidden rounded-full border border-white/20 bg-black/80 px-2 py-2 shadow-2xl backdrop-blur-xl transition-all duration-500 ease-out",
-          isFloated
-            ? "translate-y-0 opacity-100"
-            : "pointer-events-none translate-y-16 opacity-0"
-        )}
-      >
-        <div className="flex max-w-[90vw] gap-1 overflow-x-auto px-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:max-w-xl">
-          <Link
-            href="/menu"
-            onClick={() => setActiveCategory("all")}
-            className={cn(
-              "shrink-0 rounded-full px-4 py-1.5 text-[13px] font-black transition-colors",
-              activeCategory === "all"
-                ? "bg-amber-400 text-red-950 shadow-md"
-                : "text-white/70 hover:bg-white/10 hover:text-white"
-            )}
-          >
-            All
-          </Link>
-          {categories.map((category) => (
-            <Link
-              key={category.id}
-              href={`/menu#${category.slug}`}
-              onClick={() => setActiveCategory(category.slug)}
+  /* ─── Detect scrollable edges for fade hints (ref-based, no re-renders) ─── */
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+
+    const checkScroll = () => {
+      const left = el!.scrollLeft > 4;
+      const right = el!.scrollLeft + el!.clientWidth < el!.scrollWidth - 4;
+      // Only set state when values actually change to avoid re-renders
+      setCanScrollLeft((prev) => (prev !== left ? left : prev));
+      setCanScrollRight((prev) => (prev !== right ? right : prev));
+    };
+
+    checkScroll();
+    el.addEventListener("scroll", checkScroll, { passive: true });
+    window.addEventListener("resize", checkScroll);
+    return () => {
+      el.removeEventListener("scroll", checkScroll);
+      window.removeEventListener("resize", checkScroll);
+    };
+  }, [categories]);
+
+  const totalItems = categories.reduce(
+    (sum, cat) => sum + cat.products.length,
+    0,
+  );
+
+  function getActiveCount() {
+    if (activeCategory === "all") return totalItems;
+    return (
+      categories.find((c) => c.slug === activeCategory)?.products.length ?? 0
+    );
+  }
+
+  function isActive(slug: string) {
+    return activeCategory === slug;
+  }
+
+  return (
+    <div className="sticky top-0 z-40 border-b border-orange-900/8 bg-[#fffbf2]/85 backdrop-blur-2xl">
+      <div className="mx-auto max-w-6xl px-4 sm:px-6">
+        <div className="flex items-center gap-3 py-2.5">
+          {/* ── Item count chip ── */}
+          <div className="hidden shrink-0 items-center gap-1.5 rounded-full bg-gradient-to-r from-red-700 to-red-600 px-3.5 py-1.5 text-[11px] font-black uppercase tracking-wider text-white shadow-lg shadow-red-700/25 sm:flex">
+            <span className="cat-count-value tabular-nums">
+              {getActiveCount()}
+            </span>
+            <span className="opacity-70">items</span>
+          </div>
+
+          {/* ── Scrollable pills with edge fade ── */}
+          <div className="relative flex-1 overflow-hidden">
+            {/* Left fade */}
+            <div
               className={cn(
-                "shrink-0 rounded-full px-4 py-1.5 text-[13px] font-black transition-colors",
-                activeCategory === category.slug
-                  ? "bg-amber-400 text-red-950 shadow-md"
-                  : "text-white/70 hover:bg-white/10 hover:text-white"
+                "cat-nav-fade pointer-events-none absolute inset-y-0 left-0 z-10 w-8 bg-gradient-to-r from-[#fffbf2]/85 to-transparent transition-opacity duration-300",
+                canScrollLeft ? "opacity-100" : "opacity-0",
               )}
+            />
+            {/* Right fade */}
+            <div
+              className={cn(
+                "cat-nav-fade pointer-events-none absolute inset-y-0 right-0 z-10 w-8 bg-gradient-to-l from-[#fffbf2]/85 to-transparent transition-opacity duration-300",
+                canScrollRight ? "opacity-100" : "opacity-0",
+              )}
+            />
+
+            <div
+              ref={scrollRef}
+              className="cat-scroll flex gap-2 overflow-x-auto [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
             >
-              {category.name}
-            </Link>
-          ))}
+              {/* "All" pill */}
+              <Link
+                href="/menu"
+                onClick={() => setActiveCategory("all")}
+                ref={isActive("all") ? activePillRef : undefined}
+                className={cn(
+                  "cat-pill group relative shrink-0 select-none rounded-xl px-4 py-2 text-sm font-bold transition-all duration-300",
+                  isActive("all")
+                    ? "cat-pill--active bg-gradient-to-b from-red-600 to-red-700 text-white shadow-lg shadow-red-700/30"
+                    : "border border-orange-900/10 bg-white/70 text-orange-950/60 shadow-sm hover:border-red-700/25 hover:bg-white hover:text-red-700 hover:shadow-md",
+                )}
+              >
+                <span className="relative z-10 flex items-center gap-2">
+                  <Sparkles
+                    className={cn(
+                      "size-4 transition-all duration-300",
+                      isActive("all")
+                        ? "text-amber-300"
+                        : "text-orange-950/30 group-hover:text-red-500",
+                    )}
+                    aria-hidden="true"
+                  />
+                  All
+                </span>
+                {/* Active shimmer */}
+                {isActive("all") ? (
+                  <span className="cat-pill-shimmer pointer-events-none absolute inset-0 rounded-xl" />
+                ) : null}
+              </Link>
+
+              {/* Category pills */}
+              {categories.map((category) => {
+                const Icon = getCategoryIcon(category.slug);
+                const active = isActive(category.slug);
+                return (
+                  <Link
+                    key={category.id}
+                    href={`/menu#${category.slug}`}
+                    onClick={() => setActiveCategory(category.slug)}
+                    ref={active ? activePillRef : undefined}
+                    className={cn(
+                      "cat-pill group relative shrink-0 select-none rounded-xl px-4 py-2 text-sm font-bold transition-all duration-300",
+                      active
+                        ? "cat-pill--active bg-gradient-to-b from-red-600 to-red-700 text-white shadow-lg shadow-red-700/30"
+                        : "border border-orange-900/10 bg-white/70 text-orange-950/60 shadow-sm hover:border-red-700/25 hover:bg-white hover:text-red-700 hover:shadow-md",
+                    )}
+                  >
+                    <span className="relative z-10 flex items-center gap-2">
+                      <Icon
+                        className={cn(
+                          "size-4 transition-all duration-300",
+                          active
+                            ? "text-amber-300"
+                            : "text-orange-950/30 group-hover:text-red-500",
+                        )}
+                        aria-hidden="true"
+                      />
+                      {category.name}
+                      <span
+                        className={cn(
+                          "inline-flex h-5 min-w-5 items-center justify-center rounded-md px-1 text-[11px] font-black tabular-nums transition-all duration-300",
+                          active
+                            ? "bg-white/20 text-white"
+                            : "bg-orange-900/8 text-orange-950/25 group-hover:bg-red-50 group-hover:text-red-600",
+                        )}
+                      >
+                        {category.products.length}
+                      </span>
+                    </span>
+                    {/* Active shimmer */}
+                    {active ? (
+                      <span className="cat-pill-shimmer pointer-events-none absolute inset-0 rounded-xl" />
+                    ) : null}
+                    {/* Inactive hover glow */}
+                    {!active ? (
+                      <span className="cat-pill-glow pointer-events-none absolute inset-0 rounded-xl opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+                    ) : null}
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* ── Active filter label (desktop) ── */}
+          <div className="hidden shrink-0 text-right lg:block">
+            <p className="text-[10px] font-bold uppercase tracking-wider text-orange-950/30">
+              Filtering
+            </p>
+            <p className="text-xs font-black text-[#25130b]">
+              {activeCategory === "all"
+                ? "All items"
+                : categories.find((c) => c.slug === activeCategory)?.name ??
+                  "All items"}
+            </p>
+          </div>
         </div>
       </div>
-    </>
+    </div>
   );
 }

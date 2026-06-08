@@ -5,26 +5,17 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import {
-  ChevronRight,
   Home,
-  Menu,
   ShoppingBag,
   Sparkles,
   Utensils,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import {
-  Sheet,
-  SheetClose,
-  SheetContent,
-  SheetFooter,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
 import { useCartStore } from "@/features/cart/cart-store";
 import { cn } from "@/lib/utils";
+
+import { MobileNav } from "./mobile-nav";
 
 const navItems = [
   { label: "Home", href: "/", icon: Home },
@@ -52,20 +43,15 @@ function useHeroNavPastHero(enabled: boolean) {
       );
 
       if (element) {
-        const style = window.getComputedStyle(element);
-        const bgImage = style.backgroundImage || "";
-
-        // Keep text white if the hero overlay gradient is present behind the navbar
-        if (bgImage.includes("rgba(251,191,36,0.34)") && bgImage.includes("circle_at_74%_36%")) {
-          setIsPastHero(false);
-          return;
-        }
-
-        const bgColor = style.backgroundColor;
+        const bgColor = window.getComputedStyle(element).backgroundColor;
+        
+        // Parse RGB values
         const rgbMatch = bgColor.match(/\d+/g);
         if (rgbMatch && rgbMatch.length >= 3) {
           const [r, g, b] = rgbMatch.map(Number);
+          // Calculate luminance to determine if background is light
           const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+          // Only switch to dark text when background is VERY light (> 0.85)
           setIsPastHero(luminance > 0.85);
         }
       }
@@ -226,71 +212,10 @@ export function CustomerTopBar({ variant = "light" }: CustomerTopBarProps) {
               <Link href="/menu">Order</Link>
             </Button>
 
-            {/* MOBILE MENU BUTTON */}
-            <Sheet>
-              <SheetTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className={cn(
-                    "inline-flex h-8 w-8 items-center justify-center rounded-full border outline-none transition-all duration-300 lg:hidden",
-                    isPastHero
-                      ? "border-black/10 bg-black/5 text-stone-700 hover:bg-black/10 hover:border-black/20"
-                      : "border-white/10 bg-white/5 text-white hover:bg-white/15 hover:border-white/20"
-                  )}
-                  aria-label="Open navigation"
-                >
-                  <Menu className="size-3.5" aria-hidden="true" />
-                </Button>
-              </SheetTrigger>
-              <SheetContent className="border-orange-900/10 bg-[#fff8ea] p-0">
-                <SheetHeader className="border-b border-orange-900/10 p-5">
-                  <SheetTitle className="text-left text-base font-extrabold uppercase text-[#25130b]">
-                    Kanto Burger Co.
-                  </SheetTitle>
-                </SheetHeader>
-                <div className="grid gap-2 p-4">
-                  {navItems.map((item) => {
-                    const Icon = item.icon;
-                    return (
-                      <SheetClose key={item.href} asChild>
-                        <Link
-                          href={item.href}
-                          className="flex h-12 items-center justify-between rounded-lg border border-orange-900/10 bg-white px-3 font-bold text-orange-950 shadow-sm"
-                        >
-                          <span className="flex items-center gap-3">
-                            <Icon className="size-4 text-red-700" aria-hidden="true" />
-                            {item.label}
-                          </span>
-                          <ChevronRight className="size-4 text-orange-950/40" aria-hidden="true" />
-                        </Link>
-                      </SheetClose>
-                    );
-                  })}
-                  <SheetClose asChild>
-                    <Link
-                      href="/cart"
-                      className="flex h-12 items-center justify-between rounded-lg border border-orange-900/10 bg-white px-3 font-bold text-orange-950 shadow-sm"
-                    >
-                      <span className="flex items-center gap-3">
-                        <ShoppingBag className="size-4 text-red-700" aria-hidden="true" />
-                        Cart
-                      </span>
-                      <span className="rounded-full bg-amber-300 px-2 py-1 text-xs font-extrabold text-red-950">
-                        {itemCount}
-                      </span>
-                    </Link>
-                  </SheetClose>
-                </div>
-                <SheetFooter>
-                  <SheetClose asChild>
-                    <Button className="kanto-button h-11 w-full font-extrabold" asChild>
-                      <Link href="/menu">Start order</Link>
-                    </Button>
-                  </SheetClose>
-                </SheetFooter>
-              </SheetContent>
-            </Sheet>
+            {/* MOBILE MENU BUTTON — Hero variant */}
+            <div className="inline-flex lg:hidden">
+              <MobileNav />
+            </div>
           </div>
         </div>
       </div>
@@ -359,70 +284,7 @@ export function CustomerTopBar({ variant = "light" }: CustomerTopBarProps) {
         </Link>
       </Button>
 
-      <Sheet>
-        <SheetTrigger asChild>
-          <Button
-            variant="ghost"
-            size="icon"
-            className={cn(
-              "relative size-10 rounded-full",
-              isHeroOnDark
-                ? "text-white hover:bg-white/15 hover:text-amber-300"
-                : "text-orange-950 hover:bg-orange-100 hover:text-red-700",
-            )}
-            aria-label="Open navigation"
-          >
-            <Menu className="size-5" aria-hidden="true" />
-          </Button>
-        </SheetTrigger>
-        <SheetContent className="border-orange-900/10 bg-[#fff8ea] p-0">
-          <SheetHeader className="border-b border-orange-900/10 p-5">
-            <SheetTitle className="text-left text-base font-extrabold uppercase text-[#25130b]">
-              Kanto Burger Co.
-            </SheetTitle>
-          </SheetHeader>
-          <div className="grid gap-2 p-4">
-            {navItems.map((item) => {
-              const Icon = item.icon;
-              return (
-                <SheetClose key={item.href} asChild>
-                  <Link
-                    href={item.href}
-                    className="flex h-12 items-center justify-between rounded-lg border border-orange-900/10 bg-white px-3 font-bold text-orange-950 shadow-sm"
-                  >
-                    <span className="flex items-center gap-3">
-                      <Icon className="size-4 text-red-700" aria-hidden="true" />
-                      {item.label}
-                    </span>
-                    <ChevronRight className="size-4 text-orange-950/40" aria-hidden="true" />
-                  </Link>
-                </SheetClose>
-              );
-            })}
-            <SheetClose asChild>
-              <Link
-                href="/cart"
-                className="flex h-12 items-center justify-between rounded-lg border border-orange-900/10 bg-white px-3 font-bold text-orange-950 shadow-sm"
-              >
-                <span className="flex items-center gap-3">
-                  <ShoppingBag className="size-4 text-red-700" aria-hidden="true" />
-                  Cart
-                </span>
-                <span className="rounded-full bg-amber-300 px-2 py-1 text-xs font-extrabold text-red-950">
-                  {itemCount}
-                </span>
-              </Link>
-            </SheetClose>
-          </div>
-          <SheetFooter>
-            <SheetClose asChild>
-              <Button className="kanto-button h-11 w-full font-extrabold" asChild>
-                <Link href="/menu">Start order</Link>
-              </Button>
-            </SheetClose>
-          </SheetFooter>
-        </SheetContent>
-      </Sheet>
+      <MobileNav />
     </div>
   );
 }

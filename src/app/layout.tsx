@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { Toaster } from "sonner";
+
 import { PageLoader } from "@/components/customer/page-loader";
 import { SiteHeader } from "@/components/customer/site-header";
 import { SmoothScroll } from "@/components/customer/smooth-scroll";
@@ -36,6 +38,15 @@ export default function RootLayout({
         <PageLoader />
         <SiteHeader />
         {children}
+        <Toaster
+          position="top-right"
+          gap={8}
+          offset={80}
+          toastOptions={{
+            className: "kanto-toast",
+            duration: 4000,
+          }}
+        />
       </body>
     </html>
   );
