@@ -122,7 +122,7 @@ export function CategoryNav({ categories }: CategoryNavProps) {
   }
 
   return (
-    <div className="sticky top-0 z-40 border-b border-orange-900/8 bg-[#fffbf2]/85 backdrop-blur-2xl">
+    <div className="sticky top-0 z-50 border-b border-orange-900/8 bg-[#fffbf2] backdrop-blur-2xl">
       <div className="mx-auto max-w-6xl px-4 sm:px-6">
         <div className="flex items-center gap-3 py-2.5">
           {/* ── Item count chip ── */}
