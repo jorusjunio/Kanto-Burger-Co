@@ -167,7 +167,7 @@ export function CategoryNav({ categories }: CategoryNavProps) {
                 onClick={() => setActiveCategory("all")}
                 ref={isActive("all") ? activePillRef : undefined}
                 className={cn(
-                  "shrink-0 rounded-xl px-4 py-2 text-sm font-bold transition-colors duration-200",
+                  "shrink-0 rounded-xl px-4 py-2 text-sm font-bold transition-colors duration-200 antialiased subpixel-antialiased transform-gpu will-change-transform",
                   isActive("all")
                     ? "bg-red-600 text-white"
                     : "border border-orange-900/10 bg-white/70 text-orange-950/60 hover:bg-white hover:text-red-700",
@@ -202,7 +202,7 @@ export function CategoryNav({ categories }: CategoryNavProps) {
                     onClick={() => setActiveCategory(category.slug)}
                     ref={active ? activePillRef : undefined}
                     className={cn(
-                      "shrink-0 rounded-xl px-4 py-2 text-sm font-bold transition-colors duration-200",
+                      "shrink-0 rounded-xl px-4 py-2 text-sm font-bold transition-colors duration-200 antialiased subpixel-antialiased transform-gpu will-change-transform",
                       active
                         ? "bg-red-600 text-white"
                         : "border border-orange-900/10 bg-white/70 text-orange-950/60 hover:bg-white hover:text-red-700",
@@ -221,7 +221,7 @@ export function CategoryNav({ categories }: CategoryNavProps) {
                       {category.name}
                       <span
                         className={cn(
-                          "inline-flex h-5 min-w-5 items-center justify-center rounded-md px-1 text-[11px] font-black tabular-nums transition-all duration-300",
+                          "inline-flex h-5 w-5 items-center justify-center rounded-md text-[11px] font-black tabular-nums transition-all duration-300 will-change-transform",
                           active
                             ? "bg-white/20 text-white"
                             : "bg-orange-900/8 text-orange-950/25 group-hover:bg-red-50 group-hover:text-red-600",
