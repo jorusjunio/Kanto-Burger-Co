@@ -99,7 +99,7 @@ export function ProductCard({ product }: ProductCardProps) {
   return (
     <Card className="menu-card group h-full gap-0 overflow-hidden rounded-2xl border-0 p-0 shadow-[0_2px_16px_rgba(120,53,15,0.06)] transition-all duration-300 hover:shadow-[0_16px_48px_rgba(120,53,15,0.12)] hover:-translate-y-1">
       {/* ── Image Area ── */}
-      <div className="menu-card__image relative aspect-[4/3] overflow-hidden bg-gradient-to-br from-orange-50 to-amber-50">
+      <div className="menu-card__image relative aspect-[4/3] overflow-hidden bg-white -mb-[1px]">
         {product.imageUrl ? (
           <>
             <Image
