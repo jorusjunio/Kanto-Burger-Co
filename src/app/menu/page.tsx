@@ -15,8 +15,8 @@ export default async function MenuPage() {
   );
 
   return (
-    <main className="storefront-bg min-h-screen overflow-visible">
-      <section className="relative border-b border-orange-900/10">
+    <main className="storefront-bg min-h-screen">
+      <section className="relative">
         <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(90deg,rgba(120,53,15,0.06)_1px,transparent_1px),linear-gradient(180deg,rgba(120,53,15,0.04)_1px,transparent_1px)] bg-[size:54px_54px]" />
         <div className="mx-auto grid max-w-6xl gap-6 px-4 py-6 sm:px-6 lg:grid-cols-[1fr_0.85fr] lg:items-center lg:py-8">
           <div className="space-y-4">
@@ -108,7 +108,7 @@ export default async function MenuPage() {
         </div>
       </section>
 
-      <div className="cat-nav-entrance relative z-50">
+      <div className="cat-nav-entrance sticky top-0 z-50">
         <CategoryNav categories={categories} />
       </div>
 
