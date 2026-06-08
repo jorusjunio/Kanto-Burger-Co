@@ -131,9 +131,9 @@ export function CategoryNav({ categories }: CategoryNavProps) {
       <div 
         className="sticky z-50 border-b border-orange-900/8 bg-[#fffbf2] backdrop-blur-2xl"
         style={{ top: '0px', position: 'sticky' }}
-          >
+      >
       <div className="mx-auto max-w-6xl px-4 sm:px-6">
-        <div className="flex items-center gap-3 py-2.5">
+        <div className="flex items-center gap-3 py-2.5 pb-3">
           {/* ── Item count chip ── */}
           <div className="hidden shrink-0 items-center gap-1.5 rounded-full bg-gradient-to-r from-red-700 to-red-600 px-3.5 py-1.5 text-[11px] font-black uppercase tracking-wider text-white shadow-lg shadow-red-700/25 sm:flex">
             <span className="cat-count-value tabular-nums">
@@ -171,7 +171,7 @@ export function CategoryNav({ categories }: CategoryNavProps) {
                 className={cn(
                   "cat-pill group relative shrink-0 select-none rounded-xl px-4 py-2 text-sm font-bold transition-all duration-300 overflow-hidden",
                   isActive("all")
-                    ? "cat-pill--active bg-gradient-to-b from-red-600 to-red-700 text-white shadow-lg shadow-red-500/25 ring-1 ring-red-700/10"
+                    ? "cat-pill--active bg-gradient-to-b from-red-600 to-red-700 text-white shadow-lg shadow-red-500/10 ring-1 ring-red-700/5"
                     : "border border-orange-900/10 bg-white/70 text-orange-950/60 shadow-sm hover:border-red-700/25 hover:bg-white hover:text-red-700 hover:shadow-md",
                 )}
               >
@@ -206,7 +206,7 @@ export function CategoryNav({ categories }: CategoryNavProps) {
                     className={cn(
                       "cat-pill group relative shrink-0 select-none rounded-xl px-4 py-2 text-sm font-bold transition-all duration-300 overflow-hidden",
                       active
-                        ? "cat-pill--active bg-gradient-to-b from-red-600 to-red-700 text-white shadow-lg shadow-red-500/25 ring-1 ring-red-700/10"
+                        ? "cat-pill--active bg-gradient-to-b from-red-600 to-red-700 text-white shadow-lg shadow-red-500/10 ring-1 ring-red-700/5"
                         : "border border-orange-900/10 bg-white/70 text-orange-950/60 shadow-sm hover:border-red-700/25 hover:bg-white hover:text-red-700 hover:shadow-md",
                     )}
                   >
