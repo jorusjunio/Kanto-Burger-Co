@@ -519,27 +519,34 @@
 
   .menu-card:hover {
     border-color: rgb(220 38 38 / 0.12);
+    backface-visibility: hidden;
+    transform: translateZ(0);
   }
 
   .menu-card__wash {
     position: absolute;
     inset: 0;
     background:
-      linear-gradient(180deg, transparent 50%, rgb(255 255 255 / 0.9) 100%),
+      linear-gradient(180deg, transparent 48%, rgb(255 255 255 / 0.9) 100%),
       linear-gradient(135deg, rgb(251 191 36 / 0.06), transparent 50%);
     pointer-events: none;
     transition: background 400ms ease;
+    backface-visibility: hidden;
+    margin-bottom: -1px;
   }
 
   .menu-card:hover .menu-card__wash {
     background:
-      linear-gradient(180deg, transparent 40%, rgb(255 255 255 / 0.95) 100%),
+      linear-gradient(180deg, transparent 38%, rgb(255 255 255 / 0.96) 100%),
       linear-gradient(135deg, rgb(251 191 36 / 0.1), transparent 50%);
+    margin-bottom: 0;
   }
 
   .menu-card__image img:not([aria-hidden="true"]) {
     filter: saturate(1.05) contrast(1.02);
     transition: filter 400ms ease;
+    backface-visibility: hidden;
+    transform: translateZ(0);
   }
 
   .menu-card:hover .menu-card__image img:not([aria-hidden="true"]) {
@@ -1110,6 +1117,11 @@
   .product-dialog {
     max-height: 90vh;
     overflow-y: auto;
+    backface-visibility: hidden;
+  }
+  
+  .product-dialog-banner {
+    margin-bottom: -1px;
   }
 
   /* Banner image entrance */
