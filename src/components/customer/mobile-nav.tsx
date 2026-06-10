@@ -11,6 +11,7 @@ import {
   Sparkles,
   Utensils,
 } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -31,6 +32,58 @@ const navItems = [
   { label: "Menu", href: "/menu", icon: Utensils },
   { label: "Combos", href: "/menu#combos", icon: Sparkles },
 ];
+
+/* ─── Active Order Tracker ─── */
+function ActiveOrderTracker() {
+  const [activeOrder, setActiveOrder] = useState<{ orderNumber: string; token: string } | null>(null);
+  const router = useRouter();
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const stored = localStorage.getItem('activeOrder');
+      if (stored) {
+        try {
+          setActiveOrder(JSON.parse(stored));
+        } catch (e) {
+          console.error('Failed to parse active order from localStorage', e);
+        }
+      }
+    }
+  }, []);
+
+  if (!activeOrder) return null;
+
+  const handleTrack = () => {
+    router.push(`/order/${activeOrder.orderNumber}?token=${activeOrder.token}`);
+  };
+
+  return (
+    <div className="rounded-xl border-2 border-red-600/20 bg-gradient-to-br from-red-50 to-orange-50/50 px-4 py-3 shadow-sm shadow-red-600/10">
+      <div className="flex items-center gap-3">
+        <div className="flex size-9 items-center justify-center rounded-lg bg-gradient-to-br from-red-600 to-red-700 shadow-sm">
+          <span className="text-lg">🍔</span>
+        </div>
+        <div className="flex-1">
+          <p className="text-[10px] font-black uppercase tracking-widest text-red-700/70">
+            Track Active Order
+          </p>
+          <p className="mt-0.5 text-xs font-black text-[#25130b]">
+            {activeOrder.orderNumber}
+          </p>
+        </div>
+        <SheetClose asChild>
+          <button
+            type="button"
+            onClick={handleTrack}
+            className="flex h-8 items-center justify-center rounded-lg bg-gradient-to-br from-red-600 to-red-700 px-3 text-[10px] font-black text-white shadow-sm transition-all duration-300 hover:scale-105 active:scale-95"
+          >
+            Track
+          </button>
+        </SheetClose>
+      </div>
+    </div>
+  );
+}
 
 /* ─── Cart preview inside the sheet ─── */
 function CartPreview() {
@@ -274,6 +327,11 @@ export function MobileNav() {
                   <NavLink item={item} index={index} />
                 </div>
               ))}
+            </div>
+
+            {/* ── Active Order Section ── */}
+            <div className="mt-5">
+              <ActiveOrderTracker />
             </div>
 
             {/* ── Cart Section ── */}

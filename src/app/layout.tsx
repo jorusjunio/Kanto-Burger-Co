@@ -5,6 +5,7 @@ import { Toaster } from "sonner";
 import { PageLoader } from "@/components/customer/page-loader";
 import { SiteHeader } from "@/components/customer/site-header";
 import { SmoothScroll } from "@/components/customer/smooth-scroll";
+import { ActiveOrderWidget } from "@/components/customer/active-order-widget";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -40,8 +41,9 @@ export default function RootLayout({
         <main className="flex-1">
           {children}
         </main>
+        <ActiveOrderWidget />
         <Toaster
-          position="top-right"
+          position="top-left"
           gap={8}
           offset={80}
           toastOptions={{

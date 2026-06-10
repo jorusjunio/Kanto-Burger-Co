@@ -1,10 +1,12 @@
 import Link from "next/link";
-import { CheckCircle2 } from "lucide-react";
+import { CheckCircle2, Clock, Package, Truck, Wallet, Smartphone } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { getOrderByNumber } from "@/features/orders/queries";
 import { RealtimeOrderListener } from "@/features/orders/realtime-order-listener";
 import { formatPeso } from "@/lib/format";
+import { cn } from "@/lib/utils";
+import { OrderReceiptClient } from "@/features/orders/components/order-receipt-client";
 
 type OrderPageProps = {
   params: Promise<{
@@ -14,6 +16,66 @@ type OrderPageProps = {
     token?: string;
   }>;
 };
+
+function getStatusBadge(status: string) {
+  const statusConfig: Record<string, { color: string; bgColor: string; icon: any }> = {
+    PENDING: {
+      color: "text-amber-700",
+      bgColor: "bg-amber-100",
+      icon: Clock,
+    },
+    PREPARING: {
+      color: "text-blue-700",
+      bgColor: "bg-blue-100",
+      icon: Package,
+    },
+    READY: {
+      color: "text-emerald-700",
+      bgColor: "bg-emerald-100",
+      icon: CheckCircle2,
+    },
+    OUT_FOR_DELIVERY: {
+      color: "text-purple-700",
+      bgColor: "bg-purple-100",
+      icon: Truck,
+    },
+    COMPLETED: {
+      color: "text-green-700",
+      bgColor: "bg-green-100",
+      icon: CheckCircle2,
+    },
+    CANCELLED: {
+      color: "text-red-700",
+      bgColor: "bg-red-100",
+      icon: Clock,
+    },
+  };
+
+  const config = statusConfig[status] || statusConfig.PENDING;
+  const Icon = config.icon;
+
+  return (
+    <div className="inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-black uppercase tracking-wide">
+      <div className={cn("relative flex size-2 items-center justify-center", config.bgColor)}>
+        <div className={cn("absolute size-2 rounded-full", config.bgColor, "animate-pulse")} />
+        <Icon className={cn("relative size-2", config.color)} />
+      </div>
+      <span className={config.color}>{status}</span>
+    </div>
+  );
+}
+
+function getPaymentIcon(method: string) {
+  switch (method) {
+    case "GCASH":
+      return Smartphone;
+    case "COD":
+    case "CASH":
+      return Wallet;
+    default:
+      return Wallet;
+  }
+}
 
 export default async function OrderPage({ params, searchParams }: OrderPageProps) {
   const { orderNumber } = await params;
@@ -27,103 +89,120 @@ export default async function OrderPage({ params, searchParams }: OrderPageProps
         events={["order-updated"]}
       />
       <div className="mx-auto max-w-3xl px-4 py-10 sm:px-6">
-        <div className="kanto-card rounded-lg p-6">
-          <div className="flex items-start gap-4">
-            <div className="flex size-12 shrink-0 items-center justify-center rounded-lg bg-emerald-50 text-emerald-700 ring-1 ring-emerald-100">
-              <CheckCircle2 aria-hidden="true" />
-            </div>
-            <div>
-              <p className="text-sm font-black uppercase tracking-wide text-red-700">
-                Order received
-              </p>
-              <h1 className="food-heading mt-2 text-4xl leading-none">
-                {order.orderNumber}
-              </h1>
-              <p className="mt-2 font-medium text-orange-950/65">
-                We received your order. Save this number for pickup, delivery,
-                or GCash verification.
-              </p>
-            </div>
-          </div>
-
-          <div className="mt-6 grid gap-3 rounded-lg border border-orange-900/10 bg-orange-50 p-4 text-sm sm:grid-cols-2">
-            <div>
-              <p className="text-zinc-500">Customer</p>
-              <p className="font-bold text-[#25130b]">{order.customerName}</p>
-            </div>
-            <div>
-              <p className="text-zinc-500">Status</p>
-              <p className="font-bold text-[#25130b]">{order.status}</p>
-            </div>
-            <div>
-              <p className="text-zinc-500">Order type</p>
-              <p className="font-bold text-[#25130b]">{order.orderType}</p>
-            </div>
-            <div>
-              <p className="text-zinc-500">Payment</p>
-              <p className="font-bold text-[#25130b]">
-                {order.paymentMethod} / {order.paymentStatus}
-              </p>
-            </div>
-          </div>
-
-          <div className="mt-6 space-y-3">
-            {order.items.map((item) => (
-              <div
-                key={item.id}
-                    className="flex justify-between gap-4 border-b border-orange-900/10 pb-3 text-sm"
-              >
-                <div>
-                  <p className="font-black text-[#25130b]">
-                    {item.quantity}x {item.productName}
+        <div className="relative overflow-hidden rounded-2xl border border-orange-900/10 bg-white/95 shadow-2xl backdrop-blur-xl">
+          {/* Receipt Header */}
+          <div className="border-b-2 border-dashed border-orange-900/10 bg-gradient-to-br from-orange-50/50 to-white p-3 sm:p-4">
+            <div className="flex items-start gap-3">
+              <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-red-600 to-red-700 shadow-lg shadow-red-600/30">
+                <CheckCircle2 className="size-4 text-white" aria-hidden="true" />
+              </div>
+              <div className="flex-1">
+                <div className="flex items-center gap-2">
+                  <p className="text-[9px] font-black uppercase tracking-widest text-red-700">
+                    Order received
                   </p>
-                  {Array.isArray(item.selectedAddOns) &&
-                  item.selectedAddOns.length > 0 ? (
-                    <p className="mt-1 text-zinc-500">
-                      Add-ons selected
-                    </p>
-                  ) : null}
-                  {item.notes ? (
-                    <p className="mt-1 text-zinc-500">Note: {item.notes}</p>
-                  ) : null}
+                  {getStatusBadge(order.status)}
                 </div>
-                <p className="font-black text-red-700">
-                  {formatPeso(Number(item.totalPrice))}
+                <h1 className="food-heading mt-1 text-xl leading-none sm:text-2xl">
+                  {order.orderNumber}
+                </h1>
+                <p className="mt-1 text-[11px] font-medium text-orange-950/65 sm:text-xs">
+                  Save this number for pickup, delivery, or GCash verification.
                 </p>
               </div>
-            ))}
-          </div>
-
-          <div className="mt-6 space-y-2 text-sm">
-            <div className="flex justify-between">
-              <span className="text-zinc-500">Subtotal</span>
-              <span className="font-bold">{formatPeso(Number(order.subtotal))}</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-zinc-500">Delivery fee</span>
-              <span className="font-bold">
-                {formatPeso(Number(order.deliveryFee))}
-              </span>
-            </div>
-            <div className="flex justify-between border-t border-zinc-200 pt-3 text-base">
-              <span className="font-black text-[#25130b]">Total</span>
-              <span className="font-black text-red-700">
-                {formatPeso(Number(order.total))}
-              </span>
             </div>
           </div>
 
-          <div className="mt-6 flex flex-col gap-3 sm:flex-row">
-            <Button className="kanto-button font-black" asChild>
-              <Link href="/menu">Order More</Link>
-            </Button>
-            <Button
-              variant="outline"
-              className="border-orange-900/20 bg-white/80 font-black text-orange-950 hover:text-red-700"
-              asChild
-            >
-              <Link href="/">Back Home</Link>
-            </Button>
+          {/* Order Details Grid */}
+          <div className="grid gap-2 p-3 sm:grid-cols-2 sm:p-4">
+            <div className="rounded-lg border border-orange-900/8 bg-orange-50/40 p-2.5">
+              <p className="text-[9px] font-bold uppercase tracking-wide text-orange-950/40">Customer</p>
+              <p className="mt-0.5 text-xs font-black text-[#25130b]">{order.customerName}</p>
+            </div>
+            <div className="rounded-lg border border-orange-900/8 bg-orange-50/40 p-2.5">
+              <p className="text-[9px] font-bold uppercase tracking-wide text-orange-950/40">Order Type</p>
+              <div className="mt-0.5 flex items-center gap-1.5">
+                {order.orderType === "DELIVERY" ? (
+                  <Truck className="size-3 text-red-700" />
+                ) : (
+                  <Package className="size-3 text-red-700" />
+                )}
+                <p className="text-xs font-black text-[#25130b]">{order.orderType}</p>
+              </div>
+            </div>
+            <div className="rounded-lg border border-orange-900/8 bg-orange-50/40 p-2.5">
+              <p className="text-[9px] font-bold uppercase tracking-wide text-orange-950/40">Payment Method</p>
+              <div className="mt-0.5 flex items-center gap-1.5">
+                {(() => {
+                  const Icon = getPaymentIcon(order.paymentMethod);
+                  return <Icon className="size-3 text-red-700" />;
+                })()}
+                <p className="text-xs font-black text-[#25130b]">{order.paymentMethod}</p>
+              </div>
+            </div>
+            <div className="rounded-lg border border-orange-900/8 bg-orange-50/40 p-2.5">
+              <p className="text-[9px] font-bold uppercase tracking-wide text-orange-950/40">Payment Status</p>
+              <p className="mt-0.5 text-xs font-black text-[#25130b]">{order.paymentStatus}</p>
+            </div>
+          </div>
+
+          {/* Items List */}
+          <div className="border-y-2 border-dashed border-orange-900/10 px-3 py-3 sm:px-4 sm:py-4">
+            <h2 className="text-[10px] font-black uppercase tracking-wide text-[#25130b]">Order Items</h2>
+            <div className="mt-2 space-y-2">
+              {order.items.map((item) => (
+                <div
+                  key={item.id}
+                  className="flex justify-between gap-3 border-b border-orange-900/8 pb-2 last:border-0"
+                >
+                  <div className="flex-1">
+                    <div className="flex items-start gap-2">
+                      <span className="flex size-4 shrink-0 items-center justify-center rounded-full bg-red-100 text-[8px] font-black text-red-700">
+                        {item.quantity}
+                      </span>
+                      <div>
+                        <p className="text-xs font-black text-[#25130b]">{item.productName}</p>
+                        {Array.isArray(item.selectedAddOns) && item.selectedAddOns.length > 0 && (
+                          <p className="mt-0.5 text-[9px] text-orange-950/50">
+                            Add-ons: {item.selectedAddOns.map((a: any) => a.name).join(", ")}
+                          </p>
+                        )}
+                        {item.notes && (
+                          <p className="mt-0.5 text-[9px] text-orange-950/50">Note: {item.notes}</p>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                  <p className="shrink-0 text-xs font-black text-red-700 tabular-nums">
+                    {formatPeso(Number(item.totalPrice))}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Total Section */}
+          <div className="space-y-2 px-3 py-3 sm:px-4 sm:py-4">
+            <div className="flex justify-between text-xs">
+              <span className="font-medium text-orange-950/50">Subtotal</span>
+              <span className="font-bold text-[#25130b] tabular-nums">{formatPeso(Number(order.subtotal))}</span>
+            </div>
+            <div className="flex justify-between text-xs">
+              <span className="font-medium text-orange-950/50">Delivery fee</span>
+              <span className="font-bold text-[#25130b] tabular-nums">{formatPeso(Number(order.deliveryFee))}</span>
+            </div>
+            <div className="relative flex justify-between border-t-2 border-dashed border-orange-900/10 pt-2 text-sm">
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="h-px w-6 bg-orange-900/10" />
+              </div>
+              <span className="relative text-[10px] font-black text-[#25130b]">Total</span>
+              <span className="relative text-sm font-black text-red-700 tabular-nums">{formatPeso(Number(order.total))}</span>
+            </div>
+          </div>
+
+          {/* Action Buttons */}
+          <div className="border-t border-orange-900/8 bg-gradient-to-br from-orange-50/30 to-white px-3 py-3 sm:px-4 sm:py-4">
+            <OrderReceiptClient orderNumber={order.orderNumber} token={token} />
           </div>
         </div>
       </div>

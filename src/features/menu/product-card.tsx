@@ -19,6 +19,7 @@ import {
   DialogClose,
   DialogContent,
   DialogFooter,
+  DialogTitle,
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { useCartStore } from "@/features/cart/cart-store";
@@ -208,6 +209,7 @@ export function ProductCard({ product }: ProductCardProps) {
           showCloseButton={false}
           className="max-h-[90vh] overflow-y-auto rounded-3xl border-0 p-0 shadow-2xl sm:max-w-lg md:rounded-[2rem]"
         >
+          <DialogTitle className="sr-only">{product.name}</DialogTitle>
           <div className="product-dialog flex flex-col">
             {/* ── Image Banner ── */}
             <div className="product-dialog-banner relative h-48 overflow-hidden sm:h-56">

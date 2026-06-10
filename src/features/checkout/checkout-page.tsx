@@ -24,6 +24,7 @@ import {
   DialogDescription,
   DialogFooter,
   DialogHeader,
+  DialogOverlay,
   DialogTitle,
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
@@ -266,37 +267,107 @@ export function CheckoutPage({ gcashNumber }: CheckoutPageProps) {
               </div>
             </div>
             <div className="checkout-section-body">
-              <Select
-                value={orderType}
-                onValueChange={(v) => handleOrderTypeChange(v as CheckoutOrderType)}
-              >
-                <SelectTrigger className="checkout-select checkout-select--trigger w-full">
-                  <span className="checkout-select-trigger-icon">
-                    <Truck className="size-3.5" aria-hidden="true" />
-                  </span>
-                  <SelectValue placeholder="Select order type" />
-                </SelectTrigger>
-                <SelectContent className="checkout-select-content">
-                  <SelectItem value="PICKUP" className="checkout-select-item h-auto py-2.5">
-                    <span className="checkout-select-item-icon">
-                      <Store className="size-3.5" aria-hidden="true" />
-                    </span>
-                    <span className="flex flex-col">
-                      <span className="font-bold text-[#25130b]">Pickup</span>
-                      <span className="text-[11px] font-medium text-orange-950/40">Ready in 15 min</span>
-                    </span>
-                  </SelectItem>
-                  <SelectItem value="DELIVERY" className="checkout-select-item h-auto py-2.5">
-                    <span className="checkout-select-item-icon checkout-select-item-icon--amber">
-                      <Truck className="size-3.5" aria-hidden="true" />
-                    </span>
-                    <span className="flex flex-col">
-                      <span className="font-bold text-[#25130b]">Delivery</span>
-                      <span className="text-[11px] font-medium text-orange-950/40">+{formatPeso(deliveryFee)} fee</span>
-                    </span>
-                  </SelectItem>
-                </SelectContent>
-              </Select>
+              <div className="grid gap-3 sm:grid-cols-2">
+                {/* Pickup Option */}
+                <button
+                  type="button"
+                  onClick={() => handleOrderTypeChange("PICKUP")}
+                  className={cn(
+                    "relative flex items-start gap-3 rounded-2xl border-2 p-4 text-left transition-all duration-300",
+                    orderType === "PICKUP"
+                      ? "border-red-600 bg-gradient-to-br from-red-50 to-orange-50 shadow-lg shadow-red-600/15"
+                      : "border-orange-900/10 bg-white hover:border-orange-900/20 hover:bg-orange-50/50"
+                  )}
+                >
+                  <div
+                    className={cn(
+                      "flex size-10 shrink-0 items-center justify-center rounded-xl transition-all duration-300",
+                      orderType === "PICKUP"
+                        ? "bg-red-600 text-white shadow-md"
+                        : "bg-orange-100 text-orange-700"
+                    )}
+                  >
+                    <Store className="size-5" aria-hidden="true" />
+                  </div>
+                  <div className="flex-1">
+                    <p
+                      className={cn(
+                        "text-sm font-black uppercase tracking-wide",
+                        orderType === "PICKUP" ? "text-red-700" : "text-[#25130b]"
+                      )}
+                    >
+                      Pickup
+                    </p>
+                    <p
+                      className={cn(
+                        "mt-1 text-xs font-medium",
+                        orderType === "PICKUP"
+                          ? "text-red-600/70"
+                          : "text-orange-950/40"
+                      )}
+                    >
+                      Ready in 15 min
+                    </p>
+                  </div>
+                  {orderType === "PICKUP" && (
+                    <div className="absolute right-3 top-3">
+                      <div className="flex size-5 items-center justify-center rounded-full bg-red-600">
+                        <CheckCircle2 className="size-3 text-white" aria-hidden="true" />
+                      </div>
+                    </div>
+                  )}
+                </button>
+
+                {/* Delivery Option */}
+                <button
+                  type="button"
+                  onClick={() => handleOrderTypeChange("DELIVERY")}
+                  className={cn(
+                    "relative flex items-start gap-3 rounded-2xl border-2 p-4 text-left transition-all duration-300",
+                    orderType === "DELIVERY"
+                      ? "border-red-600 bg-gradient-to-br from-red-50 to-orange-50 shadow-lg shadow-red-600/15"
+                      : "border-orange-900/10 bg-white hover:border-orange-900/20 hover:bg-orange-50/50"
+                  )}
+                >
+                  <div
+                    className={cn(
+                      "flex size-10 shrink-0 items-center justify-center rounded-xl transition-all duration-300",
+                      orderType === "DELIVERY"
+                        ? "bg-red-600 text-white shadow-md"
+                        : "bg-orange-100 text-orange-700"
+                    )}
+                  >
+                    <Truck className="size-5" aria-hidden="true" />
+                  </div>
+                  <div className="flex-1">
+                    <p
+                      className={cn(
+                        "text-sm font-black uppercase tracking-wide",
+                        orderType === "DELIVERY" ? "text-red-700" : "text-[#25130b]"
+                      )}
+                    >
+                      Delivery
+                    </p>
+                    <p
+                      className={cn(
+                        "mt-1 text-xs font-medium",
+                        orderType === "DELIVERY"
+                          ? "text-red-600/70"
+                          : "text-orange-950/40"
+                      )}
+                    >
+                      +{formatPeso(deliveryFee)} fee
+                    </p>
+                  </div>
+                  {orderType === "DELIVERY" && (
+                    <div className="absolute right-3 top-3">
+                      <div className="flex size-5 items-center justify-center rounded-full bg-red-600">
+                        <CheckCircle2 className="size-3 text-white" aria-hidden="true" />
+                      </div>
+                    </div>
+                  )}
+                </button>
+              </div>
             </div>
           </div>
 
@@ -351,45 +422,73 @@ export function CheckoutPage({ gcashNumber }: CheckoutPageProps) {
               </div>
             </div>
             <div className="checkout-section-body">
-              <Select
-                value={paymentMethod}
-                onValueChange={(v) => setPaymentMethod(v as CheckoutPaymentMethod)}
-              >
-                <SelectTrigger className="checkout-select checkout-select--trigger w-full">
-                  <span className="checkout-select-trigger-icon">
-                    <CreditCard className="size-3.5" aria-hidden="true" />
-                  </span>
-                  <SelectValue placeholder="Select payment method" />
-                </SelectTrigger>
-                <SelectContent className="checkout-select-content">
-                  {(orderType === "DELIVERY"
-                    ? [
-                        ["COD", "Cash on Delivery", "Pay when delivered", "Wallet"],
-                        ["GCASH", "GCash", "Manual transfer", "Smartphone"],
-                      ]
-                    : [
-                        ["CASH", "Cash at Pickup", "Pay when you arrive", "Wallet"],
-                        ["GCASH", "GCash", "Manual transfer", "Smartphone"],
-                      ]
-                  ).map(([value, label, desc, iconName]) => {
-                    const Icon = iconName === "Smartphone" ? Smartphone : Wallet;
-                    const iconClass = iconName === "Smartphone"
-                      ? "checkout-select-item-icon checkout-select-item-icon--blue"
-                      : "checkout-select-item-icon checkout-select-item-icon--emerald";
-                    return (
-                      <SelectItem key={value} value={value} className="checkout-select-item h-auto py-2.5">
-                        <span className={iconClass}>
-                          <Icon className="size-3.5" aria-hidden="true" />
-                        </span>
-                        <span className="flex flex-col">
-                          <span className="font-bold text-[#25130b]">{label}</span>
-                          <span className="text-[11px] font-medium text-orange-950/40">{desc}</span>
-                        </span>
-                      </SelectItem>
-                    );
-                  })}
-                </SelectContent>
-              </Select>
+              <div className="grid gap-3 sm:grid-cols-2">
+                {(orderType === "DELIVERY"
+                  ? [
+                      ["COD", "Cash on Delivery", "Pay when delivered", "Wallet"],
+                      ["GCASH", "GCash", "Manual transfer", "Smartphone"],
+                    ]
+                  : [
+                      ["CASH", "Cash at Pickup", "Pay when you arrive", "Wallet"],
+                      ["GCASH", "GCash", "Manual transfer", "Smartphone"],
+                    ]
+                ).map(([value, label, desc, iconName]) => {
+                  const Icon = iconName === "Smartphone" ? Smartphone : Wallet;
+                  return (
+                    <button
+                      key={value}
+                      type="button"
+                      onClick={() => setPaymentMethod(value as CheckoutPaymentMethod)}
+                      className={cn(
+                        "relative flex items-start gap-3 rounded-2xl border-2 p-4 text-left transition-all duration-300",
+                        paymentMethod === value
+                          ? "border-red-600 bg-gradient-to-br from-red-50 to-orange-50 shadow-lg shadow-red-600/15"
+                          : "border-orange-900/10 bg-white hover:border-orange-900/20 hover:bg-orange-50/50"
+                      )}
+                    >
+                      <div
+                        className={cn(
+                          "flex size-10 shrink-0 items-center justify-center rounded-xl transition-all duration-300",
+                          paymentMethod === value
+                            ? "bg-red-600 text-white shadow-md"
+                            : iconName === "Smartphone"
+                              ? "bg-sky-100 text-sky-700"
+                              : "bg-emerald-100 text-emerald-700"
+                        )}
+                      >
+                        <Icon className="size-5" aria-hidden="true" />
+                      </div>
+                      <div className="flex-1">
+                        <p
+                          className={cn(
+                            "text-sm font-black uppercase tracking-wide",
+                            paymentMethod === value ? "text-red-700" : "text-[#25130b]"
+                          )}
+                        >
+                          {label}
+                        </p>
+                        <p
+                          className={cn(
+                            "mt-1 text-xs font-medium",
+                            paymentMethod === value
+                              ? "text-red-600/70"
+                              : "text-orange-950/40"
+                          )}
+                        >
+                          {desc}
+                        </p>
+                      </div>
+                      {paymentMethod === value && (
+                        <div className="absolute right-3 top-3">
+                          <div className="flex size-5 items-center justify-center rounded-full bg-red-600">
+                            <CheckCircle2 className="size-3 text-white" aria-hidden="true" />
+                          </div>
+                        </div>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
             </div>
           </div>
 
@@ -623,93 +722,102 @@ export function CheckoutPage({ gcashNumber }: CheckoutPageProps) {
 
       {/* ── Confirmation Dialog ── */}
       <Dialog open={confirmOpen} onOpenChange={setConfirmOpen}>
-        <DialogContent className="checkout-confirm-dialog max-w-sm overflow-hidden sm:max-w-md">
-          <DialogHeader className="text-left">
-            <div className="flex items-center gap-3">
-              <div className="flex size-10 items-center justify-center rounded-xl bg-red-100 shadow-sm">
-                <ShoppingBag className="size-5 text-red-700" aria-hidden="true" />
+        <DialogOverlay className="bg-black/60 backdrop-blur-sm" />
+        <DialogContent className="max-h-[90vh] max-w-sm overflow-hidden rounded-2xl border border-orange-900/10 bg-white/95 shadow-2xl backdrop-blur-xl sm:max-w-md p-0 gap-0 flex flex-col">
+          <DialogHeader className="border-b border-orange-900/8 bg-gradient-to-br from-orange-50/50 to-white px-6 py-5 text-left shrink-0">
+              <div className="flex items-center gap-3">
+                <div className="flex size-10 items-center justify-center rounded-xl bg-red-100 shadow-sm">
+                  <ShoppingBag className="size-5 text-red-700" aria-hidden="true" />
+                </div>
+                <div>
+                  <DialogTitle className="text-lg font-black uppercase tracking-tight text-[#25130b]">
+                    Confirm Your Order
+                  </DialogTitle>
+                  <DialogDescription className="text-xs font-medium text-orange-950/40">
+                    Please review your order before placing
+                  </DialogDescription>
+                </div>
               </div>
-              <div>
-                <DialogTitle className="text-lg font-black uppercase tracking-tight text-[#25130b]">
-                  Confirm Your Order
-                </DialogTitle>
-                <DialogDescription className="text-xs font-medium text-orange-950/40">
-                  Please review your order before placing
-                </DialogDescription>
-              </div>
-            </div>
-          </DialogHeader>
+            </DialogHeader>
 
-          <div className="-mx-4 -mt-2 space-y-3 px-4 py-3">
-            {/* Contact */}
-            <div className="flex items-center gap-2.5 rounded-xl bg-orange-50/60 px-3 py-2.5">
-              <User className="size-4 shrink-0 text-red-700/60" aria-hidden="true" />
-              <div className="min-w-0">
-                <p className="text-[11px] font-bold uppercase tracking-wide text-orange-950/40">Contact</p>
-                <p className="truncate text-sm font-bold text-[#25130b]">{customerName} · {customerPhone}</p>
+            <div className="flex-1 overflow-y-auto px-6 py-6 space-y-4">
+              {/* Contact */}
+              <div className="flex items-center gap-3 rounded-2xl border border-orange-900/8 bg-gradient-to-br from-stone-50 to-amber-50/40 px-4 py-4 shadow-sm">
+                <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-red-100/80 text-red-700 shadow-sm">
+                  <User className="size-5" aria-hidden="true" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="text-[10px] font-black uppercase tracking-widest text-orange-950/40">Contact</p>
+                  <p className="mt-1 truncate text-sm font-bold text-[#25130b]">{customerName} · {customerPhone}</p>
+                </div>
               </div>
-            </div>
 
             {/* Order type */}
-            <div className="flex items-center gap-2.5 rounded-xl bg-orange-50/60 px-3 py-2.5">
-              <Truck className="size-4 shrink-0 text-red-700/60" aria-hidden="true" />
-              <div className="min-w-0">
-                <p className="text-[11px] font-bold uppercase tracking-wide text-orange-950/40">Order Type</p>
-                <p className="truncate text-sm font-bold text-[#25130b]">
+            <div className="flex items-center gap-3 rounded-2xl border border-orange-900/8 bg-gradient-to-br from-stone-50 to-amber-50/40 px-4 py-4 shadow-sm">
+              <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-red-100/80 text-red-700 shadow-sm">
+                <Truck className="size-5" aria-hidden="true" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="text-[10px] font-black uppercase tracking-widest text-orange-950/40">Order Type</p>
+                <p className="mt-1 truncate text-sm font-bold text-[#25130b]">
                   {orderType === "PICKUP" ? "Pickup" : "Delivery"}
                   {orderType === "DELIVERY" && deliveryAddress ? (
-                    <span className="font-medium text-orange-950/60"> — {deliveryAddress}</span>
+                    <span className="mt-1 block text-xs font-medium text-orange-950/60">{deliveryAddress}</span>
                   ) : null}
                 </p>
               </div>
             </div>
 
             {/* Payment */}
-            <div className="flex items-center gap-2.5 rounded-xl bg-orange-50/60 px-3 py-2.5">
-              <CreditCard className="size-4 shrink-0 text-red-700/60" aria-hidden="true" />
-              <div className="min-w-0">
-                <p className="text-[11px] font-bold uppercase tracking-wide text-orange-950/40">Payment</p>
-                <p className="truncate text-sm font-bold text-[#25130b]">
+            <div className="flex items-center gap-3 rounded-2xl border border-orange-900/8 bg-gradient-to-br from-stone-50 to-amber-50/40 px-4 py-4 shadow-sm">
+              <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-red-100/80 text-red-700 shadow-sm">
+                <CreditCard className="size-5" aria-hidden="true" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="text-[10px] font-black uppercase tracking-widest text-orange-950/40">Payment</p>
+                <p className="mt-1 truncate text-sm font-bold text-[#25130b]">
                   {paymentMethod === "CASH"
                     ? "Cash at Pickup"
                     : paymentMethod === "COD"
                       ? "Cash on Delivery"
                       : "GCash"}
                   {paymentMethod === "GCASH" && gcashReference ? (
-                    <span className="font-medium text-orange-950/60"> — Ref: {gcashReference}</span>
+                    <span className="mt-1 block text-xs font-medium text-orange-950/60">Ref: {gcashReference}</span>
                   ) : null}
                 </p>
               </div>
             </div>
 
-            {/* Items count + total */}
-            <div className="flex items-center gap-2.5 rounded-xl bg-red-50/60 px-3 py-2.5">
-              <span className="flex size-5 shrink-0 items-center justify-center rounded-md bg-red-100 text-[10px] font-black text-red-700">
-                {itemCount}
-              </span>
-              <div className="flex w-full items-center justify-between">
-                <p className="text-sm font-bold text-[#25130b]">
-                  {itemCount} item{itemCount !== 1 ? "s" : ""}
-                </p>
-                <p className="text-lg font-black text-red-700 tabular-nums">
-                  {formatPeso(total)}
-                </p>
+            {/* Items count + total - Prominent section */}
+            <div className="relative overflow-hidden rounded-2xl border-2 border-red-600/20 bg-gradient-to-br from-red-50 to-orange-50/50 px-5 py-5 shadow-lg shadow-red-600/10">
+              <div className="flex items-center gap-4">
+                <div className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-red-600 to-red-700 text-white shadow-lg shadow-red-600/30">
+                  <span className="text-lg font-black">{itemCount}</span>
+                </div>
+                <div className="flex-1">
+                  <p className="text-xs font-bold uppercase tracking-wide text-red-700/70">
+                    {itemCount} item{itemCount !== 1 ? "s" : ""}
+                  </p>
+                  <p className="mt-1 text-2xl font-black text-red-700 tabular-nums">
+                    {formatPeso(total)}
+                  </p>
+                </div>
               </div>
             </div>
           </div>
 
-          <DialogFooter className="sm:justify-between">
+          <DialogFooter className="border-t border-orange-900/8 bg-gradient-to-br from-white to-orange-50/50 px-6 py-6 sm:justify-between shrink-0">
             <button
               type="button"
               onClick={() => setConfirmOpen(false)}
-              className="flex h-11 w-full items-center justify-center rounded-xl border border-orange-900/10 bg-white font-black text-sm text-[#25130b] shadow-sm transition-all duration-200 hover:bg-orange-50/80 hover:border-orange-900/20 active:scale-[0.98] sm:w-auto sm:px-6"
+              className="flex h-12 w-full items-center justify-center gap-2 rounded-xl border-2 border-orange-900/10 bg-white px-6 font-black text-sm text-[#25130b] shadow-md transition-all duration-300 hover:border-orange-900/20 hover:bg-orange-50/80 hover:shadow-lg active:scale-[0.97] sm:w-auto"
             >
               Cancel
             </button>
             <button
               type="button"
               onClick={handleConfirmOrder}
-              className="checkout-cta flex h-11 w-full items-center justify-center gap-2 rounded-xl font-black text-sm shadow-lg transition-all duration-200 hover:-translate-y-0.5 active:scale-[0.98] sm:w-auto sm:px-6"
+              className="checkout-cta flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-br from-red-600 to-red-700 px-6 font-black text-sm text-white shadow-lg shadow-red-600/30 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-red-600/40 active:scale-[0.97] sm:w-auto"
             >
               <CheckCircle2 className="size-4" aria-hidden="true" />
               Confirm Order
