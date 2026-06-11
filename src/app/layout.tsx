@@ -3,9 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import { Toaster } from "sonner";
 
 import { PageLoader } from "@/components/customer/page-loader";
-import { SiteHeader } from "@/components/customer/site-header";
 import { SmoothScroll } from "@/components/customer/smooth-scroll";
-import { ActiveOrderWidget } from "@/components/customer/active-order-widget";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -37,11 +35,7 @@ export default function RootLayout({
       <body className="relative flex min-h-screen flex-col">
         <SmoothScroll />
         <PageLoader />
-        <SiteHeader />
-        <main className="flex-1">
-          {children}
-        </main>
-        <ActiveOrderWidget />
+        {children}
         <Toaster
           position="top-center"
           gap={8}

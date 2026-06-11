@@ -312,8 +312,8 @@
 - **Customer Side Status:** 100% solid, optimized, and production-ready
 
 ### June 11, 2026 - Admin Side UI/UX Modernization - Phase 1
-- **Status:** In Progress
-- **Changes Made:** Modernized admin layout with sidebar navigation and dashboard metrics
+- **Status:** Completed
+- **Changes Made:** Modernized admin layout with sidebar navigation and dashboard metrics, removed customer navigation elements
 - **Files Modified:**
   - `src/components/admin/admin-sidebar.tsx` - Created new modern sidebar component with responsive design
   - `src/app/admin/(protected)/layout.tsx` - Updated to use new sidebar, removed old top navigation
@@ -327,6 +327,36 @@
   - **Role-Based Access:** Preserved NextAuth logic, displays "Admin Dashboard" for ADMIN role, "Staff Workspace" for STAFF role
   - **Design Consistency:** Matches customer side aesthetic with rounded cards, gradients, shadows, and color scheme
   - **TODO:** Replace mock data with actual database queries for real metrics
+
+### June 12, 2026 - Route Group Restructuring for Layout Separation
+- **Status:** Completed
+- **Changes Made:** Restructured app folder using Next.js Route Groups to separate customer and admin layouts
+- **Files Modified:**
+  - `src/app/(customer)/layout.tsx` - Created customer layout with SiteHeader and ActiveOrderWidget
+  - `src/app/(customer)/` - Moved all customer routes (menu, checkout, cart, order, page.tsx) into route group
+  - `src/app/layout.tsx` - Made root layout minimalist (only html, body, global providers)
+  - `src/app/admin/layout.tsx` - Deleted (no longer needed)
+- **Notes:**
+  - **Route Group Structure:** Created (customer) route group to isolate customer navigation from admin routes
+  - **Customer Layout:** SiteHeader and ActiveOrderWidget now only apply to customer routes via (customer)/layout.tsx
+  - **Root Layout:** Minimalist global entry with only SmoothScroll, PageLoader, and Toaster - no customer navigation
+  - **Admin Isolation:** Admin routes at /admin now completely isolated from customer navigation elements
+  - **Clean Separation:** Customer Nav (avatar, cart, hamburger menu) no longer appears in admin zone
+  - **Layout Hierarchy:** Root layout → (customer) layout → customer pages OR Root layout → admin/(protected) layout → admin pages
+  - **No Overlap:** Customer and admin layouts are now completely separate with no nesting conflicts
+
+### June 12, 2026 - Admin Layout Content Alignment Fix
+- **Status:** Completed
+- **Changes Made:** Fixed admin layout content alignment issue where content was shifted to one side
+- **Files Modified:**
+  - `src/app/admin/(protected)/layout.tsx` - Wrapped AdminSidebar in div with `hidden lg:block` to completely hide on mobile
+  - `src/components/admin/admin-sidebar.tsx` - Removed conditional hiding classes from sidebar element
+- **Notes:**
+  - **Mobile Layout:** Sidebar completely hidden on mobile via wrapper div, no longer takes up space in flex container
+  - **Desktop Layout:** Sidebar visible as static element in flex layout on desktop
+  - **Mobile Navigation:** Mobile menu button and overlay still rendered for mobile navigation
+  - **Content Alignment:** Main content now properly fills available width without being shifted
+  - **Flex Container:** Sidebar only participates in flex layout on desktop, not on mobile
 
 ---
 

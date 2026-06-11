@@ -45,11 +45,11 @@ export function AdminSidebar() {
         />
       )}
 
-      {/* Sidebar */}
+      {/* Sidebar - Desktop: static in flex, Mobile: fixed overlay */}
       <aside
         className={cn(
-          "fixed left-0 top-0 z-50 h-screen w-72 border-r border-orange-900/10 bg-white/95 shadow-2xl backdrop-blur-xl transition-transform duration-300 lg:translate-x-0 lg:static lg:shadow-none",
-          isOpen ? "translate-x-0" : "-translate-x-full"
+          "fixed left-0 top-0 z-50 h-screen w-72 border-r border-orange-900/10 bg-white/95 shadow-2xl backdrop-blur-xl transition-transform duration-300 lg:translate-x-0 lg:static lg:shadow-none lg:block lg:w-72",
+          isOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
         )}
       >
         <div className="flex h-full flex-col">
