@@ -43,7 +43,7 @@ export default function RootLayout({
         </main>
         <ActiveOrderWidget />
         <Toaster
-          position="top-left"
+          position="top-center"
           gap={8}
           offset={80}
           toastOptions={{

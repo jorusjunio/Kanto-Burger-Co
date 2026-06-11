@@ -1,6 +1,8 @@
 "use client";
 
 import Link from "next/link";
+import { useEffect, useRef } from "react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 
 interface OrderReceiptClientProps {
@@ -9,6 +11,17 @@ interface OrderReceiptClientProps {
 }
 
 export function OrderReceiptClient({ orderNumber, token }: OrderReceiptClientProps) {
+  const hasToasted = useRef(false);
+
+  useEffect(() => {
+    if (!hasToasted.current) {
+      toast.success("Order placed successfully!", {
+        duration: 3000,
+      });
+      hasToasted.current = true;
+    }
+  }, []);
+
   const handleSaveToLocalStorage = () => {
     if (typeof window !== 'undefined') {
       localStorage.setItem('activeOrder', JSON.stringify({ orderNumber, token }));

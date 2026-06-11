@@ -241,6 +241,51 @@
   - Toast Position: Changed Toaster position from "top-right" to "top-left" to avoid covering layout
   - All changes improve UX by reducing clutter, improving accessibility, and preventing UI overlap
 
+### June 11, 2026 - Order Receipt Page Final Polish
+- **Status:** Completed
+- **Changes Made:** Centered receipt card in viewport and added detailed customer/delivery information
+- **Files Modified:**
+  - `src/app/order/[orderNumber]/page.tsx` - Added Flexbox centering to main wrapper, added phone number to Customer block, added delivery address to Order Type block
+- **Notes:**
+  - Centering: Updated main wrapper from `min-h-screen` to `min-h-screen flex items-center justify-center px-4 py-10` to center receipt card in viewport
+  - Customer Details: Added `order.customerPhone` display under customer name in Customer block with `text-[10px] font-medium text-orange-950/60`
+  - Delivery Details: Added conditional rendering of `order.deliveryAddress` under Order Type when orderType is "DELIVERY" with same styling as phone number
+  - Receipt now displays perfectly centered in viewport with complete customer and delivery information
+
+### June 11, 2026 - Toast Notification Position Adjustment
+- **Status:** Completed
+- **Changes Made:** Changed toast notification position from top-left to top-center for better visibility
+- **Files Modified:**
+  - `src/app/layout.tsx` - Updated Toaster position from "top-left" to "top-center"
+- **Notes:**
+  - Position Change: Changed Toaster position prop from "top-left" to "top-center"
+  - User Experience: Toast notifications now appear at the top-center of the screen, making them more visible and in the user's focal point
+  - Affects all toast notifications including "Order placed successfully!" and other app alerts
+
+### June 11, 2026 - Toast Notification Timing Fix
+- **Status:** Completed
+- **Changes Made:** Moved "Order placed successfully!" toast from Checkout page to Receipt page for proper timing
+- **Files Modified:**
+  - `src/features/checkout/checkout-page.tsx` - Removed toast.success from order submit function
+  - `src/features/orders/components/order-receipt-client.tsx` - Added useEffect with toast.success on component mount
+- **Notes:**
+  - Issue: Toast was appearing on Checkout page during loading, so by the time user reached Receipt page, notification was no longer visible
+  - Fix: Removed toast.success from checkout submit function in checkout-page.tsx
+  - Added useEffect in OrderReceiptClient component that runs once on initial mount
+  - Toast now appears exactly when Receipt page loads, ensuring customer sees the success notification while viewing their receipt
+  - Duration set to 3000ms for optimal visibility
+
+### June 11, 2026 - Duplicate Toast Notification Fix
+- **Status:** Completed
+- **Changes Made:** Fixed duplicate toast notifications caused by React Strict Mode in development
+- **Files Modified:**
+  - `src/features/orders/components/order-receipt-client.tsx` - Added useRef safety flag to prevent duplicate toasts
+- **Notes:**
+  - Issue: React Strict Mode in development causes useEffect to run twice on mount, triggering toast twice
+  - Fix: Added `hasToasted` ref initialized to false, wrapped toast.success in conditional check
+  - Toast only shows once regardless of how many times useEffect runs in development
+  - Production unaffected (already runs once), but this ensures consistency across environments
+
 ---
 
 ## Next Steps

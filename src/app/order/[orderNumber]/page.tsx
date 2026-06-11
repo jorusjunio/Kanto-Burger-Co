@@ -83,12 +83,12 @@ export default async function OrderPage({ params, searchParams }: OrderPageProps
   const order = await getOrderByNumber(orderNumber, token);
 
   return (
-    <main className="storefront-bg min-h-screen">
+    <main className="storefront-bg min-h-screen flex items-center justify-center px-4 py-10">
       <RealtimeOrderListener
         channelName={`order-${order.trackingToken}`}
         events={["order-updated"]}
       />
-      <div className="mx-auto max-w-3xl px-4 py-10 sm:px-6">
+      <div className="mx-auto w-full max-w-3xl sm:px-6">
         <div className="relative overflow-hidden rounded-2xl border border-orange-900/10 bg-white/95 shadow-2xl backdrop-blur-xl">
           {/* Receipt Header */}
           <div className="border-b-2 border-dashed border-orange-900/10 bg-gradient-to-br from-orange-50/50 to-white p-3 sm:p-4">
@@ -118,6 +118,7 @@ export default async function OrderPage({ params, searchParams }: OrderPageProps
             <div className="rounded-lg border border-orange-900/8 bg-orange-50/40 p-2.5">
               <p className="text-[9px] font-bold uppercase tracking-wide text-orange-950/40">Customer</p>
               <p className="mt-0.5 text-xs font-black text-[#25130b]">{order.customerName}</p>
+              <p className="mt-0.5 text-[10px] font-medium text-orange-950/60">{order.customerPhone}</p>
             </div>
             <div className="rounded-lg border border-orange-900/8 bg-orange-50/40 p-2.5">
               <p className="text-[9px] font-bold uppercase tracking-wide text-orange-950/40">Order Type</p>
@@ -129,6 +130,9 @@ export default async function OrderPage({ params, searchParams }: OrderPageProps
                 )}
                 <p className="text-xs font-black text-[#25130b]">{order.orderType}</p>
               </div>
+              {order.orderType === "DELIVERY" && order.deliveryAddress && (
+                <p className="mt-0.5 text-[10px] font-medium text-orange-950/60">{order.deliveryAddress}</p>
+              )}
             </div>
             <div className="rounded-lg border border-orange-900/8 bg-orange-50/40 p-2.5">
               <p className="text-[9px] font-bold uppercase tracking-wide text-orange-950/40">Payment Method</p>

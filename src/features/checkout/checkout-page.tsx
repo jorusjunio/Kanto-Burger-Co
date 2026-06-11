@@ -122,9 +122,6 @@ export function CheckoutPage({ gcashNumber }: CheckoutPageProps) {
         return;
       }
 
-      toast.success("Order placed successfully!", {
-        duration: 3000,
-      });
       clearCart();
       router.push(`/order/${result.orderNumber}?token=${result.trackingToken}`);
     });
