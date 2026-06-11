@@ -1,10 +1,9 @@
-﻿import Link from "next/link";
-import { redirect } from "next/navigation";
+﻿import { redirect } from "next/navigation";
 
 import { UserRole } from "@/generated/prisma/enums";
-import { SignOutButton } from "@/features/admin/auth/sign-out-button";
 import { RealtimeOrderListener } from "@/features/orders/realtime-order-listener";
 import { getCurrentSession } from "@/server/auth/session";
+import { AdminSidebar } from "@/components/admin/admin-sidebar";
 
 export default async function ProtectedAdminLayout({
   children,
@@ -21,60 +20,29 @@ export default async function ProtectedAdminLayout({
 
   return (
     <>
-      <div className="border-b border-zinc-200 bg-white shadow-sm">
-        <div className="mx-auto flex max-w-7xl flex-col justify-between gap-4 px-4 py-3 text-sm sm:flex-row sm:items-center sm:px-6">
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-6">
-            <div>
-              <p className="text-base font-black text-zinc-950">
-                Admin Workspace
-              </p>
-              <p className="text-xs font-medium text-zinc-500">
-                {session.user.email} - {session.user.role ?? "STAFF"}
-              </p>
-            </div>
-            <nav className="flex flex-wrap gap-2">
-              {isAdmin ? (
-                <Link
-                  href="/admin/reports"
-                  className="rounded-lg border border-transparent px-3 py-2 font-bold text-zinc-700 hover:border-zinc-200 hover:bg-zinc-50 hover:text-zinc-950"
-                >
-                  Reports
-                </Link>
-              ) : null}
-              <Link
-                href="/admin/orders"
-                className="rounded-lg border border-transparent px-3 py-2 font-bold text-zinc-700 hover:border-zinc-200 hover:bg-zinc-50 hover:text-zinc-950"
-              >
-                Orders
-              </Link>
-              {isAdmin ? (
-                <>
-                  <Link
-                    href="/admin/menu"
-                    className="rounded-lg border border-transparent px-3 py-2 font-bold text-zinc-700 hover:border-zinc-200 hover:bg-zinc-50 hover:text-zinc-950"
-                  >
-                    Menu
-                  </Link>
-                  <Link
-                    href="/admin/categories"
-                    className="rounded-lg border border-transparent px-3 py-2 font-bold text-zinc-700 hover:border-zinc-200 hover:bg-zinc-50 hover:text-zinc-950"
-                  >
-                    Categories
-                  </Link>
-                </>
-              ) : null}
-            </nav>
-          </div>
-          <div className="self-start sm:self-auto">
-            <SignOutButton />
-          </div>
-        </div>
-      </div>
       <RealtimeOrderListener
         channelName="admin-orders"
         events={["order-created", "order-updated"]}
       />
-      {children}
+      <div className="min-h-screen bg-gradient-to-br from-orange-50/30 to-white lg:flex">
+        <AdminSidebar />
+        <main className="flex-1 lg:pl-72">
+          <div className="mx-auto max-w-7xl px-4 py-6 lg:px-8 lg:py-8">
+            {/* Header */}
+            <div className="mb-8 flex flex-col gap-2 lg:flex-row lg:items-center lg:justify-between">
+              <div>
+                <h1 className="text-2xl font-black uppercase tracking-tight text-[#25130b] lg:text-3xl">
+                  {isAdmin ? "Admin Dashboard" : "Staff Workspace"}
+                </h1>
+                <p className="text-sm font-medium text-orange-950/40">
+                  {session.user.email} · {session.user.role ?? "STAFF"}
+                </p>
+              </div>
+            </div>
+            {children}
+          </div>
+        </main>
+      </div>
     </>
   );
 }
