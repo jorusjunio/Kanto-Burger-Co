@@ -1071,6 +1071,41 @@
     animation-delay: calc(var(--nav-index, 0) * 60ms + 100ms);
   }
 
+  /* ─────────────────────────────────────────────
+     LIQUID WAVE ANIMATION — Subtle wave effect for metrics
+  ───────────────────────────────────────────── */
+  @keyframes wave-1 {
+    0% {
+      transform: translateX(0) rotate(0deg);
+    }
+    50% {
+      transform: translateX(-25%) rotate(1deg);
+    }
+    100% {
+      transform: translateX(-50%) rotate(0deg);
+    }
+  }
+
+  @keyframes wave-2 {
+    0% {
+      transform: translateX(-50%) rotate(0deg);
+    }
+    50% {
+      transform: translateX(-25%) rotate(-1deg);
+    }
+    100% {
+      transform: translateX(0) rotate(0deg);
+    }
+  }
+
+  .animate-wave-1 {
+    animation: wave-1 linear infinite;
+  }
+
+  .animate-wave-2 {
+    animation: wave-2 linear infinite;
+  }
+
   @keyframes mobile-nav-item-enter {
     0% {
       opacity: 0;

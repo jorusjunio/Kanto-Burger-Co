@@ -358,6 +358,47 @@
   - **Content Alignment:** Main content now properly fills available width without being shifted
   - **Flex Container:** Sidebar only participates in flex layout on desktop, not on mobile
 
+### June 12, 2026 - Admin Dashboard Layout Structure Restructure
+- **Status:** Completed
+- **Changes Made:** Restructured admin layout to use fixed sidebar with proper main content wrapper
+- **Files Modified:**
+  - `src/app/admin/(protected)/layout.tsx` - Restructured layout with fixed sidebar (w-72) and flex-1 main body wrapper with pl-72
+  - `src/components/admin/admin-sidebar.tsx` - Updated to be hidden on desktop (lg:hidden) since layout handles desktop sidebar
+- **Notes:**
+  - **Fixed Sidebar:** Sidebar now uses fixed positioning (w-72 fixed inset-y-0 left-0) in layout
+  - **Main Body Wrapper:** Flex-1 container with pl-72 to account for fixed sidebar, min-w-0 to prevent overflow
+  - **Content Container:** Main element with max-w-7xl and mx-auto to center all dashboard elements
+  - **Mobile Sidebar:** AdminSidebar component now only renders as fixed overlay on mobile (lg:hidden)
+  - **Desktop Sidebar:** Layout handles desktop sidebar rendering in fixed position
+  - **Content Centering:** All dashboard elements (Dashboard, Orders, Menu list) now centered in layout container
+
+### June 12, 2026 - Admin Sidebar Visibility Fix
+- **Status:** Completed
+- **Changes Made:** Fixed admin sidebar visibility by removing duplicate visibility classes and simplifying structure
+- **Files Modified:**
+  - `src/components/admin/admin-sidebar.tsx` - Removed duplicate nested div wrapper in desktop sidebar content
+- **Notes:**
+  - **Issue:** Desktop sidebar had nested div wrapper causing visibility conflicts
+  - **Fix:** Removed extra `<div className="flex h-full flex-col">` wrapper, made desktop sidebar content direct with `flex h-full flex-col` classes
+  - **Layout Handles Visibility:** Layout's aside wrapper already has `hidden lg:block`, so AdminSidebar component doesn't need visibility classes for desktop content
+  - **Mobile Sidebar:** Still uses lg:hidden for mobile overlay, working correctly
+  - **Clean Structure:** Desktop sidebar content now renders directly without extra nesting
+
+### June 12, 2026 - Pending Orders Card Liquid Wave Animation
+- **Status:** Completed
+- **Changes Made:** Added subtle interactive liquid wave animation to Pending Orders metric card in Admin Dashboard
+- **Files Modified:**
+  - `src/app/admin/(protected)/page.tsx` - Added liquid wave background with dynamic height based on pending orders count
+  - `src/app/globals.css` - Added custom CSS keyframes for wave animations (wave-1 and wave-2)
+- **Notes:**
+  - **Dynamic Liquid Level:** Wave height calculated as percentage based on pending orders (12 orders = 40% height, max 30 orders = 100%)
+  - **Two Overlapping Waves:** SVG paths with different opacity (rgba(220, 38, 38, 0.1) and rgba(185, 28, 28, 0.15)) for depth
+  - **Wave Animation:** Infinite @keyframes with translateX() and subtle rotation for smooth, subtle wave effect
+  - **Animation Timing:** Wave 1: 8s duration, Wave 2: 12s duration for natural, non-repetitive motion
+  - **Content Overlay:** Text labels and numbers have relative z-10 to ensure visibility above wave background
+  - **Performance:** GPU-friendly transforms (translateX, rotate) for smooth 60fps animation
+  - **Theme Matching:** Uses red-500 and red-600 colors to match Kanto Burger theme
+
 ---
 
 ## Next Steps
