@@ -418,6 +418,73 @@
   - **Mock Data:** Currently using mock data for demonstration (6AM to 6PM sales progression)
   - **TODO:** Replace mock data with actual database queries for real-time sales analytics
 
+### June 12, 2026 - Admin Sidebar Navigation Cleanup
+- **Status:** Completed
+- **Changes Made:** Removed Analytics/Reports link from Admin Sidebar and added Categories link for complete navigation
+- **Files Modified:**
+  - `src/components/admin/admin-sidebar.tsx` - Updated navItems array and imports
+- **Notes:**
+  - **Removed Analytics Link:** Deleted Analytics/Reports navigation item since dashboard is now all-in-one with metrics and charts
+  - **Added Categories Link:** Added Categories management link to navItems for complete admin navigation
+  - **Updated Imports:** Replaced BarChart3 icon import with Folder icon for Categories
+  - **Navigation Items:** Now includes Dashboard, Orders, Menu, Categories (4 main navigation items)
+  - **Even Spacing:** Navigation spacing remains consistent via existing space-y-1 and navItems.map loop
+  - **Logout Button:** Preserved at bottom of sidebar in styled container
+  - **Mobile Sidebar:** Changes apply to both mobile overlay and desktop sidebar content
+  - **Active State:** Active state highlighting works correctly for all remaining navigation items
+
+### June 12, 2026 - Admin Dashboard Enterprise Analytics Expansion
+- **Status:** Completed
+- **Changes Made:** Expanded Admin Dashboard with Recent Orders table and Order Methods & Payments breakdowns for enterprise-ready analytics
+- **Files Modified:**
+  - `src/features/admin/recent-orders-table.tsx` - Created new Recent Orders table component
+  - `src/features/admin/order-breakdowns.tsx` - Created new Order Breakdowns component
+  - `src/app/admin/(protected)/page.tsx` - Added bottom row with new analytics sections
+- **Notes:**
+  - **Recent Orders Table:** Glassmorphic card panel (bg-white/80 rounded-3xl p-6 shadow-sm border border-stone-100) under Sales Analytics chart
+  - **Table Columns:** Order No, Customer, Time, Amount, Status badge (PENDING, PREPARING, READY, COMPLETED)
+  - **Status Badges:** Color-coded badges (amber for PENDING, blue for PREPARING, green for READY, stone for COMPLETED)
+  - **Order Breakdowns:** Card panel under Top Selling Products with horizontal micro-progress bars
+  - **Order Types Breakdown:** Shows Pickup vs Delivery ratio with colored progress bars (red-500 for Pickup, amber-500 for Delivery)
+  - **Payment Methods Breakdown:** Shows Cash vs GCash ratio with colored progress bars (emerald-500 for Cash, blue-500 for GCash)
+  - **Responsive Layout:** Bottom row uses grid-cols-1 lg:grid-cols-3 gap-6, Recent Orders takes 2/3 space, Breakdowns takes 1/3 space
+  - **Clean Typography:** Consistent font weights and sizes (text-[10px] for headers, text-xs for content)
+  - **Mock Data:** Currently using mock data for demonstration (5 recent orders, 65% Pickup/35% Delivery, 45% Cash/55% GCash)
+  - **TODO:** Replace mock data with actual database queries for real-time analytics
+  - **Layout Structure:** Dashboard now has 3 rows - Metrics cards (top), Split layout (middle), Bottom row (new analytics)
+
+### June 12, 2026 - Admin Sidebar Advanced Visual Polish
+- **Status:** Completed
+- **Changes Made:** Enhanced Admin Sidebar with advanced hover animations, active state micro-indicators, and elegant sign-out card panel
+- **Files Modified:**
+  - `src/components/admin/admin-sidebar.tsx` - Updated navigation links and logout section with advanced styling
+  - `src/features/admin/auth/sign-out-button.tsx` - Added hover animation to logout icon
+- **Notes:**
+  - **Advanced Hover Animations:** Navigation links now use soft background pill (bg-stone-100/80) on hover with smooth transition-all duration-300
+  - **Active State Micro-Indicator:** Active links display a vertical micro-indicator bar (h-8 w-1 rounded-r-full bg-white/90) on the left side for clear page identification
+  - **Prominent Active State:** Active links maintain brand color gradient background (from-red-600 to-red-700) with shadow for visual prominence
+  - **Elegant Sign-Out Card Panel:** Bottom section redesigned as elegant card with account indicator and sign-out button
+  - **Account Indicator:** Added User avatar icon in gradient circle (from-red-600 to-red-700) with "Admin Account" and "Staff Workspace" text labels
+  - **Sign-Out Button Animation:** LogOut icon slides right slightly on hover (group-hover:translate-x-0.5 transition-transform) for intuitive interaction
+  - **Consistent Styling:** Changes applied to both mobile overlay and desktop sidebar content for unified experience
+  - **Enhanced Typography:** Account indicator uses text-xs font-black for name and text-[10px] font-medium for role
+  - **Rounded Container:** Sign-out card uses rounded-2xl with enhanced padding (px-5 py-4) for premium feel
+  - **Group Class:** Added group class to SignOutButton for icon hover animation targeting
+
+### June 13, 2026 - Admin Sidebar Active Routing Bug Fix
+- **Status:** Completed
+- **Changes Made:** Fixed active state logic in Admin Sidebar to prevent multiple buttons from being highlighted simultaneously
+- **Files Modified:**
+  - `src/components/admin/admin-sidebar.tsx` - Updated active state checking logic for navigation links
+- **Notes:**
+  - **Bug Description:** Dashboard and Menu buttons were both highlighted in red when on Menu page (/admin/menu) due to broad .startsWith() matching
+  - **Root Cause:** Previous logic used pathname === item.href || pathname.startsWith(item.href + "/") for all links, causing Dashboard to match any /admin sub-route
+  - **Fix Applied:** Implemented conditional active state logic - exact match (pathname === item.href) for Dashboard link, startsWith for other links
+  - **Dashboard Logic:** Dashboard now only active when pathname === "/admin" (exact match), preventing false positives on sub-routes
+  - **Other Links Logic:** Menu, Orders, and Categories retain startsWith behavior to remain active on inner dynamic paths (e.g., /admin/menu/edit)
+  - **Applied to Both:** Fix applied to both mobile overlay and desktop sidebar navigation for consistent behavior
+  - **Result:** Only one navigation button is highlighted in red at a time, accurately reflecting the current page
+
 ---
 
 ## Next Steps

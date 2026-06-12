@@ -2,6 +2,8 @@ import { Clock, ShoppingCart, TrendingUp, Utensils } from "lucide-react";
 
 import { formatPeso } from "@/lib/format";
 import { SalesAnalyticsChart } from "@/features/admin/sales-analytics-chart";
+import { RecentOrdersTable } from "@/features/admin/recent-orders-table";
+import { OrderBreakdowns } from "@/features/admin/order-breakdowns";
 
 export default async function AdminDashboardPage() {
   // TODO: Replace with actual data from database
@@ -164,6 +166,25 @@ export default async function AdminDashboardPage() {
               </div>
             ))}
           </div>
+        </div>
+      </div>
+
+      {/* Bottom Row: Recent Orders + Order Breakdowns */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Column 1: Recent Orders Table (2/3 space) */}
+        <div className="lg:col-span-2 bg-white/80 rounded-3xl p-6 shadow-sm border border-stone-100">
+          <h2 className="text-sm font-black uppercase tracking-wide text-[#25130b] mb-4">
+            Recent Orders
+          </h2>
+          <RecentOrdersTable />
+        </div>
+
+        {/* Column 2: Order Methods & Payments Breakdowns (1/3 space) */}
+        <div className="rounded-2xl border-2 border-orange-900/10 bg-gradient-to-br from-white to-orange-50/50 px-6 py-5 shadow-lg shadow-orange-900/5">
+          <h2 className="text-sm font-black uppercase tracking-wide text-[#25130b] mb-4">
+            Order Breakdowns
+          </h2>
+          <OrderBreakdowns />
         </div>
       </div>
     </div>

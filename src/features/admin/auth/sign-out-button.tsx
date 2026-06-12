@@ -12,8 +12,12 @@ export function SignOutButton() {
       variant="outline"
       size="sm"
       onClick={() => signOut({ callbackUrl: "/admin/login" })}
+      className="group"
     >
-      <LogOut aria-hidden="true" />
+      <LogOut 
+        aria-hidden="true" 
+        className="transition-transform duration-300 group-hover:translate-x-0.5" 
+      />
       Sign Out
     </Button>
   );

@@ -7,10 +7,11 @@ import {
   LayoutDashboard,
   ShoppingCart,
   Utensils,
-  BarChart3,
+  Folder,
   LogOut,
   Menu,
   X,
+  User,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { SignOutButton } from "@/features/admin/auth/sign-out-button";
@@ -19,7 +20,7 @@ const navItems = [
   { label: "Dashboard", href: "/admin", icon: LayoutDashboard },
   { label: "Orders", href: "/admin/orders", icon: ShoppingCart },
   { label: "Menu", href: "/admin/menu", icon: Utensils },
-  { label: "Analytics", href: "/admin/reports", icon: BarChart3 },
+  { label: "Categories", href: "/admin/categories", icon: Folder },
 ];
 
 export function AdminSidebar() {
@@ -77,7 +78,10 @@ export function AdminSidebar() {
           {/* Navigation */}
           <nav className="flex-1 space-y-1 px-4 py-6">
             {navItems.map((item) => {
-              const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
+              // Use exact match for Dashboard, startsWith for other links
+              const isActive = item.href === "/admin"
+                ? pathname === item.href
+                : pathname === item.href || pathname.startsWith(item.href + "/");
               const Icon = item.icon;
               return (
                 <Link
@@ -85,12 +89,16 @@ export function AdminSidebar() {
                   href={item.href}
                   onClick={() => setIsOpen(false)}
                   className={cn(
-                    "flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-black transition-all duration-200",
+                    "group relative flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-black transition-all duration-300",
                     isActive
                       ? "bg-gradient-to-br from-red-600 to-red-700 text-white shadow-lg shadow-red-600/30"
-                      : "text-orange-950/60 hover:bg-orange-50/80 hover:text-[#25130b]"
+                      : "text-orange-950/60 hover:bg-stone-100/80 hover:text-[#25130b]"
                   )}
                 >
+                  {/* Active micro-indicator bar */}
+                  {isActive && (
+                    <div className="absolute left-0 top-1/2 -translate-y-1/2 h-8 w-1 rounded-r-full bg-white/90 shadow-sm" />
+                  )}
                   <Icon className="size-4" />
                   {item.label}
                 </Link>
@@ -100,7 +108,18 @@ export function AdminSidebar() {
 
           {/* Logout */}
           <div className="border-t border-orange-900/10 px-4 py-6">
-            <div className="rounded-xl border-2 border-red-600/20 bg-gradient-to-br from-red-50 to-orange-50/50 px-4 py-3 shadow-sm shadow-red-600/10">
+            <div className="rounded-2xl border-2 border-red-600/20 bg-gradient-to-br from-red-50 to-orange-50/50 px-5 py-4 shadow-sm shadow-red-600/10">
+              {/* Account Indicator */}
+              <div className="flex items-center gap-3 mb-3">
+                <div className="flex size-10 items-center justify-center rounded-full bg-gradient-to-br from-red-600 to-red-700 shadow-md shadow-red-600/20">
+                  <User className="size-5 text-white" />
+                </div>
+                <div>
+                  <p className="text-xs font-black text-[#25130b]">Admin Account</p>
+                  <p className="text-[10px] font-medium text-orange-950/50">Staff Workspace</p>
+                </div>
+              </div>
+              {/* Sign Out Button */}
               <SignOutButton />
             </div>
           </div>
@@ -124,19 +143,26 @@ export function AdminSidebar() {
         {/* Navigation */}
         <nav className="flex-1 space-y-1 px-4 py-6">
           {navItems.map((item) => {
-            const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
+            // Use exact match for Dashboard, startsWith for other links
+            const isActive = item.href === "/admin"
+              ? pathname === item.href
+              : pathname === item.href || pathname.startsWith(item.href + "/");
             const Icon = item.icon;
             return (
               <Link
                 key={item.href}
                 href={item.href}
                 className={cn(
-                  "flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-black transition-all duration-200",
+                  "group relative flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-black transition-all duration-300",
                   isActive
                     ? "bg-gradient-to-br from-red-600 to-red-700 text-white shadow-lg shadow-red-600/30"
-                    : "text-orange-950/60 hover:bg-orange-50/80 hover:text-[#25130b]"
+                    : "text-orange-950/60 hover:bg-stone-100/80 hover:text-[#25130b]"
                 )}
               >
+                {/* Active micro-indicator bar */}
+                {isActive && (
+                  <div className="absolute left-0 top-1/2 -translate-y-1/2 h-8 w-1 rounded-r-full bg-white/90 shadow-sm" />
+                )}
                 <Icon className="size-4" />
                 {item.label}
               </Link>
@@ -146,7 +172,18 @@ export function AdminSidebar() {
 
         {/* Logout */}
         <div className="border-t border-orange-900/10 px-4 py-6">
-          <div className="rounded-xl border-2 border-red-600/20 bg-gradient-to-br from-red-50 to-orange-50/50 px-4 py-3 shadow-sm shadow-red-600/10">
+          <div className="rounded-2xl border-2 border-red-600/20 bg-gradient-to-br from-red-50 to-orange-50/50 px-5 py-4 shadow-sm shadow-red-600/10">
+            {/* Account Indicator */}
+            <div className="flex items-center gap-3 mb-3">
+              <div className="flex size-10 items-center justify-center rounded-full bg-gradient-to-br from-red-600 to-red-700 shadow-md shadow-red-600/20">
+                <User className="size-5 text-white" />
+              </div>
+              <div>
+                <p className="text-xs font-black text-[#25130b]">Admin Account</p>
+                <p className="text-[10px] font-medium text-orange-950/50">Staff Workspace</p>
+              </div>
+            </div>
+            {/* Sign Out Button */}
             <SignOutButton />
           </div>
         </div>
