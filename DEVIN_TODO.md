@@ -545,6 +545,45 @@
   - **Brand Theme Consistency:** Colors (red-600, red-700, red-800, orange-50, amber-50) match Kanto Burger brand theme
   - **Production-Ready Design:** Overall design creates highly advanced, visually stunning, and production-ready login experience
 
+### June 13, 2026 - Admin Orders Page Visual Overhaul
+- **Status:** Completed
+- **Changes Made:** Updated Admin Orders page to match new glassmorphic design system with premium styling
+- **Files Modified:**
+  - `src/app/admin/(protected)/orders/page.tsx` - Updated to glassmorphic cards and consistent styling
+- **Notes:**
+  - **Removed Width Restrictions:** Eliminated max-w-7xl and mx-auto wrapper to utilize full-width layout from admin layout
+  - **Consistent Background:** Removed local background (bg-zinc-50) to use layout's soft aesthetic base (bg-stone-50/70)
+  - **Glassmorphic Cards:** Updated empty state and table to glassmorphic floating cards (bg-white/90, shadow-md shadow-stone-100/50, border border-white)
+  - **Rounded Corners:** Changed from rounded-lg to rounded-2xl for consistency with dashboard design
+  - **Color Consistency:** Updated colors from zinc-950/zinc-600 to [#25130b]/stone-500 for brand consistency
+  - **Entrance Animation:** Added animate-fade-in class to empty state and table for smooth entrance
+  - **Header Layout:** Maintained responsive header with flex-col sm:flex-row for mobile/desktop
+  - **Table Styling:** Table now uses glassmorphic container with consistent shadow and border
+  - **Button Styling:** Maintained outline variant for View Storefront button for consistency
+  - **Badge Components:** OrderStatusBadge and PaymentStatusBadge components remain unchanged for status display
+  - **Full-Width Layout:** Orders page now spans full width of main display area like dashboard
+  - **Professional Design:** Overall design creates consistent, modern, and professional orders management experience
+
+### June 13, 2026 - Admin Menu Page Visual Overhaul
+- **Status:** Completed
+- **Changes Made:** Updated Admin Menu page to match new glassmorphic design system with premium styling
+- **Files Modified:**
+  - `src/app/admin/(protected)/menu/page.tsx` - Updated to glassmorphic cards and consistent styling
+- **Notes:**
+  - **Removed Width Restrictions:** Eliminated max-w-7xl and mx-auto wrapper to utilize full-width layout from admin layout
+  - **Consistent Background:** Removed local background (bg-zinc-50) to use layout's soft aesthetic base (bg-stone-50/70)
+  - **Glassmorphic Cards:** Updated empty state and table to glassmorphic floating cards (bg-white/90, shadow-md shadow-stone-100/50, border border-white)
+  - **Rounded Corners:** Changed from rounded-lg to rounded-2xl for consistency with dashboard design
+  - **Color Consistency:** Updated colors from zinc-950/zinc-600 to [#25130b]/stone-500 for brand consistency
+  - **Entrance Animation:** Added animate-fade-in class to empty state and table for smooth entrance
+  - **Header Layout:** Maintained responsive header with flex-col sm:flex-row for mobile/desktop
+  - **Premium Add Product Button:** Updated Add Product button to gradient styling (from-red-600 to-red-700) with hover states
+  - **Table Styling:** Table now uses glassmorphic container with consistent shadow and border
+  - **Badge Components:** Featured badge and availability badges remain unchanged for status display
+  - **Form Actions:** Toggle availability form and Edit button maintain outline variant for consistency
+  - **Full-Width Layout:** Menu page now spans full width of main display area like dashboard
+  - **Professional Design:** Overall design creates consistent, modern, and professional menu management experience
+
 ---
 
 ## Next Steps
