@@ -1,6 +1,7 @@
 import { Clock, ShoppingCart, TrendingUp, Utensils } from "lucide-react";
 
 import { formatPeso } from "@/lib/format";
+import { SalesAnalyticsChart } from "@/features/admin/sales-analytics-chart";
 
 export default async function AdminDashboardPage() {
   // TODO: Replace with actual data from database
@@ -130,28 +131,39 @@ export default async function AdminDashboardPage() {
         </div>
       </div>
 
-      {/* Top Selling Products List */}
-      <div className="rounded-2xl border-2 border-orange-900/10 bg-gradient-to-br from-white to-orange-50/50 px-6 py-5 shadow-lg shadow-orange-900/5">
-        <h2 className="text-sm font-black uppercase tracking-wide text-[#25130b]">
-          Top Selling Products Today
-        </h2>
-        <div className="mt-4 space-y-3">
-          {metrics.topSellingProducts.map((product, index) => (
-            <div
-              key={product.name}
-              className="flex items-center gap-4 rounded-xl border border-orange-900/8 bg-white/60 px-4 py-3 shadow-sm"
-            >
-              <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-red-600 to-red-700 text-xs font-black text-white shadow-sm">
-                {index + 1}
+      {/* Split Layout: Sales Analytics Chart + Top Products */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Column 1: Sales Analytics Chart (2/3 space) */}
+        <div className="lg:col-span-2 bg-white/80 rounded-3xl p-6 shadow-sm border border-stone-100">
+          <h2 className="text-sm font-black uppercase tracking-wide text-[#25130b] mb-4">
+            Sales Analytics Today
+          </h2>
+          <SalesAnalyticsChart />
+        </div>
+
+        {/* Column 2: Top Selling Products (1/3 space) */}
+        <div className="rounded-2xl border-2 border-orange-900/10 bg-gradient-to-br from-white to-orange-50/50 px-6 py-5 shadow-lg shadow-orange-900/5">
+          <h2 className="text-sm font-black uppercase tracking-wide text-[#25130b]">
+            Top Selling Products Today
+          </h2>
+          <div className="mt-4 space-y-3">
+            {metrics.topSellingProducts.map((product, index) => (
+              <div
+                key={product.name}
+                className="flex items-center gap-4 rounded-xl border border-orange-900/8 bg-white/60 px-4 py-3 shadow-sm"
+              >
+                <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-red-600 to-red-700 text-xs font-black text-white shadow-sm">
+                  {index + 1}
+                </div>
+                <div className="flex-1">
+                  <p className="text-xs font-black text-[#25130b]">{product.name}</p>
+                </div>
+                <p className="text-xs font-black text-red-700 tabular-nums">
+                  {product.quantity} sold
+                </p>
               </div>
-              <div className="flex-1">
-                <p className="text-xs font-black text-[#25130b]">{product.name}</p>
-              </div>
-              <p className="text-xs font-black text-red-700 tabular-nums">
-                {product.quantity} sold
-              </p>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       </div>
     </div>

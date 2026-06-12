@@ -399,6 +399,25 @@
   - **Performance:** GPU-friendly transforms (translateX, rotate) for smooth 60fps animation
   - **Theme Matching:** Uses red-500 and red-600 colors to match Kanto Burger theme
 
+### June 12, 2026 - Admin Dashboard Executive View Consolidation
+- **Status:** Completed
+- **Changes Made:** Restructured Admin Dashboard to combine Sales Analytics into all-in-one Executive View with split layout
+- **Files Modified:**
+  - `src/features/admin/sales-analytics-chart.tsx` - Created new Sales Analytics chart component using Recharts
+  - `src/app/admin/(protected)/page.tsx` - Implemented 2-column responsive grid layout under metrics cards
+- **Notes:**
+  - **Split Layout Structure:** Created 2-column responsive grid (grid-cols-1 lg:grid-cols-3 gap-6) under metrics cards
+  - **Column 1 (2/3 space):** Sales Analytics Chart with smooth curves and soft gradient fills using Recharts AreaChart
+  - **Column 2 (1/3 space):** Top Selling Products Today list as side panel
+  - **Glassmorphic Card Design:** Chart section wrapped in bg-white/80 rounded-3xl p-6 shadow-sm border border-stone-100
+  - **Chart Styling:** Uses monotone curve type for smooth lines, gradient fill (red-600 with 0.3 to 0 opacity), clean typography with font-weight 500
+  - **Responsive Design:** ResponsiveContainer ensures chart adapts to screen size, grid collapses to single column on mobile
+  - **Tooltip Design:** Custom tooltip with glassmorphic styling, formatted currency values (₱)
+  - **Axis Styling:** Clean axis lines (no axisLine/tickLine), subtle grid lines (vertical={false}), formatted Y-axis labels (₱1.2k format)
+  - **Brand Colors:** Uses red-600 (#dc2626) for chart stroke and gradient to match Kanto Burger theme
+  - **Mock Data:** Currently using mock data for demonstration (6AM to 6PM sales progression)
+  - **TODO:** Replace mock data with actual database queries for real-time sales analytics
+
 ---
 
 ## Next Steps
