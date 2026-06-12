@@ -485,6 +485,21 @@
   - **Applied to Both:** Fix applied to both mobile overlay and desktop sidebar navigation for consistent behavior
   - **Result:** Only one navigation button is highlighted in red at a time, accurately reflecting the current page
 
+### June 13, 2026 - Admin Layout Full-Width Fluid Grid Overhaul
+- **Status:** Completed
+- **Changes Made:** Removed width restrictions from admin layout to create fully fluid/full-width display space
+- **Files Modified:**
+  - `src/app/admin/(protected)/layout.tsx` - Removed max-w-7xl and mx-auto classes from main content wrapper
+- **Notes:**
+  - **Width Restrictions Removed:** Eliminated max-w-7xl and mx-auto classes from main content container to allow full-width layout
+  - **Full-Width Layout:** Main content now uses w-full class to occupy 100% of available canvas space
+  - **Flexible Paddings:** Maintained responsive horizontal padding (px-4 py-6 lg:px-8 lg:py-8) for clean spacing without touching browser edges
+  - **Grid Expansion:** Split row grids (Sales Chart + Top Products, Recent Orders + Breakdowns) now automatically expand to fill the new wide space
+  - **Responsive Behavior:** Grid layouts using grid-cols-1 lg:grid-cols-3 gap-6 remain responsive and fill available width proportionally
+  - **No Edge Contact:** Flexible paddings ensure content doesn't touch browser edges while maximizing screen real estate
+  - **Consistent Across Pages:** Layout change applies to all admin pages (Dashboard, Orders, Menu, Categories) for unified experience
+  - **Improved Space Utilization:** Eliminates large blank spaces on sides, content now spans full width of main display area
+
 ---
 
 ## Next Steps

@@ -33,7 +33,7 @@ export default async function ProtectedAdminLayout({
         {/* 2. FLEX-1 MAIN BODY WRAPPER (Dito papasok ang pl-72 para hindi takpan ng fixed sidebar) */}
         <div className="flex-1 lg:pl-72 flex flex-col min-w-0">
           {/* MAIN VIEW CONTENT CONTAINER */}
-          <main className="flex-1 px-4 py-6 lg:px-8 lg:py-8 max-w-7xl w-full mx-auto">
+          <main className="flex-1 px-4 py-6 lg:px-8 lg:py-8 w-full">
             {/* Header */}
             <div className="mb-8 flex flex-col gap-2 lg:flex-row lg:items-center lg:justify-between">
               <div>
