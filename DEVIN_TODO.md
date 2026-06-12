@@ -606,6 +606,57 @@
   - **Full-Width Layout:** Categories page now spans full width of main display area like dashboard
   - **Professional Design:** Overall design creates consistent, modern, and professional category management experience
 
+### June 13, 2026 - Admin Reports Page Visual Overhaul
+- **Status:** Completed
+- **Changes Made:** Updated Admin Reports page to match new glassmorphic design system with premium styling
+- **Files Modified:**
+  - `src/app/admin/(protected)/reports/page.tsx` - Updated to glassmorphic cards and consistent styling
+- **Notes:**
+  - **Removed Width Restrictions:** Eliminated max-w-7xl and mx-auto wrapper to utilize full-width layout from admin layout
+  - **Consistent Background:** Removed local background (bg-zinc-50) to use layout's soft aesthetic base (bg-stone-50/70)
+  - **Glassmorphic Cards:** Updated all sections (summary metrics, daily sales, payment status, top products, low stock) to glassmorphic floating cards (bg-white/90, shadow-md shadow-stone-100/50, border border-white)
+  - **Rounded Corners:** Changed from rounded-lg to rounded-2xl for consistency with dashboard design
+  - **Color Consistency:** Updated colors from zinc-950/zinc-600/zinc-100 to [#25130b]/stone-500/stone-100 for brand consistency
+  - **Staggered Entrance Animations:** Added animate-fade-in class with staggered delays (0ms to 700ms) to all sections for smooth entrance
+  - **Header Layout:** Maintained simple header without flex-row for single-purpose page
+  - **Summary Metrics:** Four metric cards (Today sales, Today orders, 30-day sales, 30-day orders) with staggered animations
+  - **Daily Sales Chart:** Bar chart container updated with glassmorphic styling and stone-100 background for bars
+  - **Payment Status Section:** Payment status breakdown with glassmorphic card and stone-100 borders
+  - **Top Products Section:** Top products list with glassmorphic card and stone-100 borders
+  - **Low Stock Section:** Low stock alerts with glassmorphic card and stone-100 borders
+  - **Badge Components:** PaymentStatusBadge component remains unchanged for status display
+  - **Grid Layouts:** Maintained responsive grid layouts (md:grid-cols-4, lg:grid-cols-[1.4fr_1fr], lg:grid-cols-2)
+  - **Icon Styling:** Section icons (BarChart3, CreditCard, PackageSearch, AlertTriangle) maintain red-700 color
+  - **Link Styling:** Low stock product links maintain hover:text-red-700 for consistency
+  - **Full-Width Layout:** Reports page now spans full width of main display area like dashboard
+  - **Professional Design:** Overall design creates consistent, modern, and professional reports experience
+
+### June 13, 2026 - Admin Order Details Page Visual Overhaul
+- **Status:** Completed
+- **Changes Made:** Updated Admin Order Details page to match new glassmorphic design system with premium styling
+- **Files Modified:**
+  - `src/app/admin/(protected)/orders/[orderId]/page.tsx` - Updated to glassmorphic cards and consistent styling
+- **Notes:**
+  - **Removed Scroll Issue:** Eliminated min-h-screen to allow natural height without forcing full viewport, removing unnecessary scroll for typical orders
+  - **Removed Width Restrictions:** Eliminated max-w-5xl and mx-auto wrapper to utilize full-width layout from admin layout
+  - **Removed Local Padding:** Removed px-4 py-8 sm:px-6 as layout now handles padding
+  - **Consistent Background:** Removed local background (bg-zinc-50) to use layout's soft aesthetic base (bg-stone-50/70)
+  - **Glassmorphic Cards:** Updated main card, item cards, customer card, and payment card to glassmorphic floating cards (bg-white/90, shadow-md shadow-stone-100/50, border border-white)
+  - **Rounded Corners:** Changed from rounded-lg to rounded-2xl for consistency with dashboard design
+  - **Color Consistency:** Updated colors from zinc-950/zinc-600/zinc-200 to [#25130b]/stone-500/stone-200 for brand consistency
+  - **Entrance Animation:** Added animate-fade-in class to main card for smooth entrance
+  - **Header Layout:** Maintained responsive header with flex-col sm:flex-row for mobile/desktop
+  - **Back Button:** Maintained ghost variant for Back to Orders button with -ml-2 for proper alignment
+  - **Badge Components:** OrderStatusBadge and PaymentStatusBadge components remain unchanged for status display
+  - **Order Status Form:** OrderStatusForm component remains unchanged for status updates
+  - **Item Cards:** Updated item cards to use bg-white with border-stone-200 and rounded-2xl
+  - **Customer Card:** Updated customer info card to use bg-white with border-stone-200 and rounded-2xl
+  - **Payment Card:** Updated payment summary card to use bg-white with border-stone-200 and rounded-2xl
+  - **Grid Layout:** Maintained responsive grid layout (lg:grid-cols-[1fr_360px]) for two-column layout
+  - **Natural Height:** Content now uses natural height, only scrolling if content exceeds viewport (e.g., orders with many items)
+  - **Full-Width Layout:** Order details page now spans full width of main display area like dashboard
+  - **Professional Design:** Overall design creates consistent, modern, and professional order details experience
+
 ---
 
 ## Next Steps
