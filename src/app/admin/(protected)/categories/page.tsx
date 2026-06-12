@@ -31,144 +31,145 @@ export default async function AdminCategoriesPage() {
   const categories = await getAdminMenuCategoriesWithProductCounts();
 
   return (
-    <main className="min-h-screen bg-zinc-50">
-      <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
-        <div className="mb-6">
-          <p className="text-sm font-black uppercase tracking-wide text-red-700">
-            Admin
-          </p>
-          <h1 className="mt-2 text-3xl font-black text-zinc-950">
-            Categories
-          </h1>
-          <p className="mt-2 text-zinc-600">
-            Manage menu groups and their storefront ordering.
+    <div className="space-y-6">
+      {/* Header */}
+      <div>
+        <p className="text-sm font-black uppercase tracking-wide text-red-700">
+          Admin
+        </p>
+        <h1 className="mt-2 text-3xl font-black text-[#25130b]">
+          Categories
+        </h1>
+        <p className="mt-2 text-stone-500">
+          Manage menu groups and their storefront ordering.
+        </p>
+      </div>
+
+      {/* Add Category Form */}
+      <form
+        action={createCategory}
+        className="grid gap-4 rounded-2xl border border-white bg-white/90 p-5 shadow-md shadow-stone-100/50 md:grid-cols-[1fr_1fr_160px_auto] md:items-end animate-fade-in"
+      >
+        <div className="space-y-2">
+          <Label htmlFor="new-name">Name</Label>
+          <Input
+            id="new-name"
+            name="name"
+            placeholder="Burgers"
+            required
+            className="bg-white"
+          />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="new-slug">Slug</Label>
+          <Input
+            id="new-slug"
+            name="slug"
+            placeholder="auto-generated"
+            className="bg-white"
+          />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="new-sortOrder">Sort order</Label>
+          <Input
+            id="new-sortOrder"
+            name="sortOrder"
+            type="number"
+            min="0"
+            defaultValue={0}
+            required
+            className="bg-white"
+          />
+        </div>
+        <Button type="submit" className="bg-gradient-to-r from-red-600 to-red-700 text-white hover:from-red-700 hover:to-red-800 font-black">
+          <Plus aria-hidden="true" />
+          Add
+        </Button>
+      </form>
+
+      {categories.length === 0 ? (
+        <div className="flex min-h-[320px] flex-col items-center justify-center rounded-2xl border border-white bg-white/90 p-8 text-center shadow-md shadow-stone-100/50 animate-fade-in">
+          <div className="mb-4 flex size-12 items-center justify-center rounded-lg bg-zinc-950 text-amber-300">
+            <Tags aria-hidden="true" />
+          </div>
+          <h2 className="text-xl font-black text-[#25130b]">
+            No categories yet
+          </h2>
+          <p className="mt-2 max-w-md text-stone-500">
+            Add categories before creating products.
           </p>
         </div>
-
-        <form
-          action={createCategory}
-          className="mb-6 grid gap-4 rounded-lg border border-zinc-200 bg-white p-5 md:grid-cols-[1fr_1fr_160px_auto] md:items-end"
-        >
-          <div className="space-y-2">
-            <Label htmlFor="new-name">Name</Label>
-            <Input
-              id="new-name"
-              name="name"
-              placeholder="Burgers"
-              required
-              className="bg-white"
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="new-slug">Slug</Label>
-            <Input
-              id="new-slug"
-              name="slug"
-              placeholder="auto-generated"
-              className="bg-white"
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="new-sortOrder">Sort order</Label>
-            <Input
-              id="new-sortOrder"
-              name="sortOrder"
-              type="number"
-              min="0"
-              defaultValue={0}
-              required
-              className="bg-white"
-            />
-          </div>
-          <Button type="submit" className="bg-zinc-950 text-white hover:bg-zinc-800">
-            <Plus aria-hidden="true" />
-            Add
-          </Button>
-        </form>
-
-        {categories.length === 0 ? (
-          <div className="flex min-h-[320px] flex-col items-center justify-center rounded-lg border border-zinc-200 bg-white p-8 text-center">
-            <div className="mb-4 flex size-12 items-center justify-center rounded-lg bg-zinc-950 text-amber-300">
-              <Tags aria-hidden="true" />
-            </div>
-            <h2 className="text-xl font-black text-zinc-950">
-              No categories yet
-            </h2>
-            <p className="mt-2 max-w-md text-zinc-600">
-              Add categories before creating products.
-            </p>
-          </div>
-        ) : (
-          <div className="overflow-hidden rounded-lg border border-zinc-200 bg-white">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Name</TableHead>
-                  <TableHead>Slug</TableHead>
-                  <TableHead>Sort</TableHead>
-                  <TableHead>Products</TableHead>
-                  <TableHead className="text-right">Action</TableHead>
+      ) : (
+        <div className="overflow-hidden rounded-2xl border border-white bg-white/90 shadow-md shadow-stone-100/50 animate-fade-in">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Name</TableHead>
+                <TableHead>Slug</TableHead>
+                <TableHead>Sort</TableHead>
+                <TableHead>Products</TableHead>
+                <TableHead className="text-right">Action</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {categories.map((category) => (
+                <TableRow key={category.id}>
+                  <TableCell>
+                    <form
+                      id={`category-${category.id}`}
+                      action={updateCategory.bind(null, category.id)}
+                      className="min-w-44"
+                    >
+                      <Input
+                        name="name"
+                        defaultValue={category.name}
+                        required
+                        className="bg-white font-bold"
+                      />
+                    </form>
+                  </TableCell>
+                  <TableCell>
+                    <Input
+                      form={`category-${category.id}`}
+                      name="slug"
+                      defaultValue={category.slug}
+                      required
+                      className="min-w-44 bg-white"
+                    />
+                  </TableCell>
+                  <TableCell>
+                    <Input
+                      form={`category-${category.id}`}
+                      name="sortOrder"
+                      type="number"
+                      min="0"
+                      defaultValue={category.sortOrder}
+                      required
+                      className="w-24 bg-white"
+                    />
+                  </TableCell>
+                  <TableCell>
+                    <Badge variant="outline">
+                      {category._count.products} products
+                    </Badge>
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <Button
+                      form={`category-${category.id}`}
+                      type="submit"
+                      size="sm"
+                      className="bg-gradient-to-r from-red-600 to-red-700 text-white hover:from-red-700 hover:to-red-800"
+                    >
+                      <Save aria-hidden="true" />
+                      Save
+                    </Button>
+                  </TableCell>
                 </TableRow>
-              </TableHeader>
-              <TableBody>
-                {categories.map((category) => (
-                  <TableRow key={category.id}>
-                    <TableCell>
-                      <form
-                        id={`category-${category.id}`}
-                        action={updateCategory.bind(null, category.id)}
-                        className="min-w-44"
-                      >
-                        <Input
-                          name="name"
-                          defaultValue={category.name}
-                          required
-                          className="bg-white font-bold"
-                        />
-                      </form>
-                    </TableCell>
-                    <TableCell>
-                      <Input
-                        form={`category-${category.id}`}
-                        name="slug"
-                        defaultValue={category.slug}
-                        required
-                        className="min-w-44 bg-white"
-                      />
-                    </TableCell>
-                    <TableCell>
-                      <Input
-                        form={`category-${category.id}`}
-                        name="sortOrder"
-                        type="number"
-                        min="0"
-                        defaultValue={category.sortOrder}
-                        required
-                        className="w-24 bg-white"
-                      />
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant="outline">
-                        {category._count.products} products
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <Button
-                        form={`category-${category.id}`}
-                        type="submit"
-                        size="sm"
-                      >
-                        <Save aria-hidden="true" />
-                        Save
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
-        )}
-      </div>
-    </main>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
+      )}
+    </div>
   );
 }

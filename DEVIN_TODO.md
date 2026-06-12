@@ -584,6 +584,28 @@
   - **Full-Width Layout:** Menu page now spans full width of main display area like dashboard
   - **Professional Design:** Overall design creates consistent, modern, and professional menu management experience
 
+### June 13, 2026 - Admin Categories Page Visual Overhaul
+- **Status:** Completed
+- **Changes Made:** Updated Admin Categories page to match new glassmorphic design system with premium styling
+- **Files Modified:**
+  - `src/app/admin/(protected)/categories/page.tsx` - Updated to glassmorphic cards and consistent styling
+- **Notes:**
+  - **Removed Width Restrictions:** Eliminated max-w-7xl and mx-auto wrapper to utilize full-width layout from admin layout
+  - **Consistent Background:** Removed local background (bg-zinc-50) to use layout's soft aesthetic base (bg-stone-50/70)
+  - **Glassmorphic Cards:** Updated add category form, empty state, and table to glassmorphic floating cards (bg-white/90, shadow-md shadow-stone-100/50, border border-white)
+  - **Rounded Corners:** Changed from rounded-lg to rounded-2xl for consistency with dashboard design
+  - **Color Consistency:** Updated colors from zinc-950/zinc-600 to [#25130b]/stone-500 for brand consistency
+  - **Entrance Animation:** Added animate-fade-in class to add category form, empty state, and table for smooth entrance
+  - **Header Layout:** Maintained simple header without flex-row for single-purpose page
+  - **Premium Add Button:** Updated Add category button to gradient styling (from-red-600 to-red-700) with hover states
+  - **Premium Save Button:** Updated Save button in table to gradient styling (from-red-600 to-red-700) with hover states
+  - **Table Styling:** Table now uses glassmorphic container with consistent shadow and border
+  - **Inline Editing:** Maintained inline editing functionality for category name, slug, and sort order
+  - **Badge Components:** Product count badge remains unchanged for display
+  - **Form Layout:** Add category form maintains responsive grid layout (md:grid-cols-[1fr_1fr_160px_auto])
+  - **Full-Width Layout:** Categories page now spans full width of main display area like dashboard
+  - **Professional Design:** Overall design creates consistent, modern, and professional category management experience
+
 ---
 
 ## Next Steps
