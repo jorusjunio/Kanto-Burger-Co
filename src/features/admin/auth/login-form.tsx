@@ -3,7 +3,7 @@
 import { useSearchParams } from "next/navigation";
 import { signIn } from "next-auth/react";
 import { FormEvent, useState, useTransition } from "react";
-import { AlertCircle, LogIn } from "lucide-react";
+import { AlertCircle, ArrowRight } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -43,7 +43,7 @@ export function LoginForm() {
   return (
     <form
       onSubmit={handleSubmit}
-      className="w-full max-w-md rounded-lg border border-zinc-200 bg-white p-5 shadow-sm"
+      className="w-full max-w-md rounded-3xl border border-white/20 bg-white/80 backdrop-blur-md p-8 shadow-2xl"
     >
       <div>
         <p className="text-sm font-black uppercase tracking-wide text-red-700">
@@ -74,6 +74,7 @@ export function LoginForm() {
             onChange={(event) => setEmail(event.target.value)}
             autoComplete="email"
             required
+            className="transition-all duration-300 focus:border-red-500/50 focus:ring-4 focus:ring-red-500/10"
           />
         </div>
         <div className="space-y-2">
@@ -85,6 +86,7 @@ export function LoginForm() {
             onChange={(event) => setPassword(event.target.value)}
             autoComplete="current-password"
             required
+            className="transition-all duration-300 focus:border-red-500/50 focus:ring-4 focus:ring-red-500/10"
           />
         </div>
       </div>
@@ -92,10 +94,14 @@ export function LoginForm() {
       <Button
         type="submit"
         disabled={isPending}
-        className="mt-6 h-10 w-full bg-zinc-950 text-white hover:bg-zinc-800"
+        className="mt-6 h-12 w-full bg-gradient-to-r from-red-600 to-red-700 text-white hover:from-red-700 hover:to-red-800 font-black text-base group"
       >
-        <LogIn aria-hidden="true" />
-        {isPending ? "Signing in..." : "Sign In"}
+        {isPending ? "Signing in..." : (
+          <>
+            Sign In
+            <ArrowRight aria-hidden="true" className="ml-2 transition-transform group-hover:translate-x-1" />
+          </>
+        )}
       </Button>
     </form>
   );

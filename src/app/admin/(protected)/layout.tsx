@@ -24,9 +24,9 @@ export default async function ProtectedAdminLayout({
         channelName="admin-orders"
         events={["order-created", "order-updated"]}
       />
-      <div className="flex min-h-screen bg-gradient-to-br from-orange-50/30 to-white">
+      <div className="flex min-h-screen bg-stone-50/70">
         {/* 1. FIXED WIDTH SIDEBAR */}
-        <aside className="w-72 fixed inset-y-0 left-0 z-20 hidden lg:block bg-white border-r border-orange-900/10">
+        <aside className="w-72 fixed inset-y-0 left-0 z-20 hidden lg:block bg-zinc-950 border-r border-white/10">
           <AdminSidebar />
         </aside>
 

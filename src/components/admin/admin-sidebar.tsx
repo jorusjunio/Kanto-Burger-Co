@@ -49,26 +49,26 @@ export function AdminSidebar() {
       {/* Mobile Sidebar - fixed overlay */}
       <aside
         className={cn(
-          "fixed left-0 top-0 z-50 h-screen w-72 border-r border-orange-900/10 bg-white/95 shadow-2xl backdrop-blur-xl transition-transform duration-300 lg:hidden",
+          "fixed left-0 top-0 z-50 h-screen w-72 border-r border-white/10 bg-zinc-950 shadow-2xl backdrop-blur-xl transition-transform duration-300 lg:hidden",
           isOpen ? "translate-x-0" : "-translate-x-full"
         )}
       >
         <div className="flex h-full flex-col">
           {/* Header */}
-          <div className="border-b border-orange-900/10 bg-gradient-to-br from-orange-50/50 to-white px-6 py-5">
+          <div className="border-b border-white/10 bg-gradient-to-br from-zinc-900 to-zinc-950 px-6 py-5">
             <div className="flex items-center justify-between">
               <div>
-                <h1 className="text-lg font-black uppercase tracking-tight text-[#25130b]">
+                <h1 className="text-lg font-black uppercase tracking-tight text-white">
                   Admin
                 </h1>
-                <p className="text-xs font-medium text-orange-950/40">
+                <p className="text-xs font-medium text-zinc-400">
                   Workspace
                 </p>
               </div>
               <button
                 type="button"
                 onClick={() => setIsOpen(false)}
-                className="lg:hidden flex size-8 items-center justify-center rounded-lg bg-orange-100 text-orange-700"
+                className="lg:hidden flex size-8 items-center justify-center rounded-lg bg-white/10 text-white hover:bg-white/20 transition-colors"
               >
                 <X className="size-4" />
               </button>
@@ -91,13 +91,17 @@ export function AdminSidebar() {
                   className={cn(
                     "group relative flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-black transition-all duration-300",
                     isActive
-                      ? "bg-gradient-to-br from-red-600 to-red-700 text-white shadow-lg shadow-red-600/30"
-                      : "text-orange-950/60 hover:bg-stone-100/80 hover:text-[#25130b]"
+                      ? "bg-gradient-to-r from-red-600 to-amber-500 text-white shadow-lg shadow-red-600/30"
+                      : "text-zinc-400 hover:bg-white/10 hover:text-white hover:shadow-lg hover:shadow-white/5"
                   )}
                 >
                   {/* Active micro-indicator bar */}
                   {isActive && (
                     <div className="absolute left-0 top-1/2 -translate-y-1/2 h-8 w-1 rounded-r-full bg-white/90 shadow-sm" />
+                  )}
+                  {/* Pulsing micro-dot for active state */}
+                  {isActive && (
+                    <div className="absolute right-2 top-1/2 -translate-y-1/2 size-2 rounded-full bg-white/80 animate-pulse" />
                   )}
                   <Icon className="size-4" />
                   {item.label}
@@ -107,16 +111,16 @@ export function AdminSidebar() {
           </nav>
 
           {/* Logout */}
-          <div className="border-t border-orange-900/10 px-4 py-6">
-            <div className="rounded-2xl border-2 border-red-600/20 bg-gradient-to-br from-red-50 to-orange-50/50 px-5 py-4 shadow-sm shadow-red-600/10">
+          <div className="border-t border-white/10 px-4 py-6">
+            <div className="rounded-2xl border border-white/10 bg-white/5 px-5 py-4 shadow-lg shadow-black/20 backdrop-blur-sm">
               {/* Account Indicator */}
               <div className="flex items-center gap-3 mb-3">
-                <div className="flex size-10 items-center justify-center rounded-full bg-gradient-to-br from-red-600 to-red-700 shadow-md shadow-red-600/20">
+                <div className="flex size-10 items-center justify-center rounded-full bg-gradient-to-br from-red-600 to-amber-500 shadow-lg shadow-red-600/30">
                   <User className="size-5 text-white" />
                 </div>
                 <div>
-                  <p className="text-xs font-black text-[#25130b]">Admin Account</p>
-                  <p className="text-[10px] font-medium text-orange-950/50">Staff Workspace</p>
+                  <p className="text-xs font-black text-white">Admin Account</p>
+                  <p className="text-[10px] font-medium text-zinc-400">Staff Workspace</p>
                 </div>
               </div>
               {/* Sign Out Button */}
@@ -129,12 +133,12 @@ export function AdminSidebar() {
       {/* Desktop Sidebar - content only (positioning handled by layout) */}
       <div className="flex h-full flex-col">
         {/* Header */}
-        <div className="border-b border-orange-900/10 bg-gradient-to-br from-orange-50/50 to-white px-6 py-5">
+        <div className="border-b border-white/10 bg-gradient-to-br from-zinc-900 to-zinc-950 px-6 py-5">
           <div>
-            <h1 className="text-lg font-black uppercase tracking-tight text-[#25130b]">
+            <h1 className="text-lg font-black uppercase tracking-tight text-white">
               Admin
             </h1>
-            <p className="text-xs font-medium text-orange-950/40">
+            <p className="text-xs font-medium text-zinc-400">
               Workspace
             </p>
           </div>
@@ -155,13 +159,17 @@ export function AdminSidebar() {
                 className={cn(
                   "group relative flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-black transition-all duration-300",
                   isActive
-                    ? "bg-gradient-to-br from-red-600 to-red-700 text-white shadow-lg shadow-red-600/30"
-                    : "text-orange-950/60 hover:bg-stone-100/80 hover:text-[#25130b]"
+                    ? "bg-gradient-to-r from-red-600 to-amber-500 text-white shadow-lg shadow-red-600/30"
+                    : "text-zinc-400 hover:bg-white/10 hover:text-white hover:shadow-lg hover:shadow-white/5"
                 )}
               >
                 {/* Active micro-indicator bar */}
                 {isActive && (
                   <div className="absolute left-0 top-1/2 -translate-y-1/2 h-8 w-1 rounded-r-full bg-white/90 shadow-sm" />
+                )}
+                {/* Pulsing micro-dot for active state */}
+                {isActive && (
+                  <div className="absolute right-2 top-1/2 -translate-y-1/2 size-2 rounded-full bg-white/80 animate-pulse" />
                 )}
                 <Icon className="size-4" />
                 {item.label}
@@ -171,16 +179,16 @@ export function AdminSidebar() {
         </nav>
 
         {/* Logout */}
-        <div className="border-t border-orange-900/10 px-4 py-6">
-          <div className="rounded-2xl border-2 border-red-600/20 bg-gradient-to-br from-red-50 to-orange-50/50 px-5 py-4 shadow-sm shadow-red-600/10">
+        <div className="border-t border-white/10 px-4 py-6">
+          <div className="rounded-2xl border border-white/10 bg-white/5 px-5 py-4 shadow-lg shadow-black/20 backdrop-blur-sm">
             {/* Account Indicator */}
             <div className="flex items-center gap-3 mb-3">
-              <div className="flex size-10 items-center justify-center rounded-full bg-gradient-to-br from-red-600 to-red-700 shadow-md shadow-red-600/20">
+              <div className="flex size-10 items-center justify-center rounded-full bg-gradient-to-br from-red-600 to-amber-500 shadow-lg shadow-red-600/30">
                 <User className="size-5 text-white" />
               </div>
               <div>
-                <p className="text-xs font-black text-[#25130b]">Admin Account</p>
-                <p className="text-[10px] font-medium text-orange-950/50">Staff Workspace</p>
+                <p className="text-xs font-black text-white">Admin Account</p>
+                <p className="text-[10px] font-medium text-zinc-400">Staff Workspace</p>
               </div>
             </div>
             {/* Sign Out Button */}

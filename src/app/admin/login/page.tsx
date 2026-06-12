@@ -14,8 +14,14 @@ export default async function AdminLoginPage() {
   }
 
   return (
-    <main className="min-h-screen bg-zinc-50">
-      <div className="mx-auto flex min-h-[70vh] max-w-6xl items-center justify-center px-4 py-10 sm:px-6">
+    <main className="fixed inset-0 min-h-screen bg-gradient-to-br from-stone-50 via-orange-50/30 to-amber-50/50 animate-gradient-xy overflow-hidden">
+      {/* Ambient Glow Blobs */}
+      <div className="absolute top-1/4 left-1/4 size-96 rounded-full bg-red-500/10 blur-3xl animate-pulse" style={{ animationDuration: '8s' }} />
+      <div className="absolute bottom-1/4 right-1/4 size-96 rounded-full bg-amber-500/10 blur-3xl animate-pulse" style={{ animationDuration: '12s' }} />
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 size-80 rounded-full bg-orange-500/5 blur-3xl animate-pulse" style={{ animationDuration: '10s' }} />
+
+      {/* Centered Login Card */}
+      <div className="relative z-10 flex items-center justify-center min-h-screen px-4">
         <LoginForm />
       </div>
     </main>
