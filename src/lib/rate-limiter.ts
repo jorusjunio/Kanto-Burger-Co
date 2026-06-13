@@ -15,6 +15,7 @@ class RateLimiter {
     this.cleanupInterval = setInterval(() => {
       this.cleanup();
     }, 60 * 1000);
+    this.cleanupInterval.unref?.();
   }
 
   private cleanup() {

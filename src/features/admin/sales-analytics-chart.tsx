@@ -18,7 +18,6 @@ interface SalesAnalyticsChartProps {
 }
 
 export function SalesAnalyticsChart({ data }: SalesAnalyticsChartProps) {
-  // Mock data for now - will be replaced with actual data
   const chartData = data || [
     { time: "6AM", sales: 1200 },
     { time: "8AM", sales: 2800 },
@@ -60,7 +59,10 @@ export function SalesAnalyticsChart({ data }: SalesAnalyticsChartProps) {
               boxShadow: "0 4px 12px rgba(0, 0, 0, 0.08)",
             }}
             itemStyle={{ fontWeight: 600, color: "#292524" }}
-            formatter={(value: any) => [`₱${Number(value).toLocaleString()}`, "Sales"]}
+            formatter={(value: number | string) => [
+              `₱${Number(value).toLocaleString()}`,
+              "Sales",
+            ]}
           />
           <Area
             type="monotone"

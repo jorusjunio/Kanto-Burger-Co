@@ -1,22 +1,175 @@
 import { Clock, ShoppingCart, TrendingUp, Utensils } from "lucide-react";
 
 import { formatPeso } from "@/lib/format";
+import { prisma } from "@/server/db/prisma";
 import { SalesAnalyticsChart } from "@/features/admin/sales-analytics-chart";
 import { RecentOrdersTable } from "@/features/admin/recent-orders-table";
 import { OrderBreakdowns } from "@/features/admin/order-breakdowns";
 
-export default async function AdminDashboardPage() {
-  // TODO: Replace with actual data from database
-  const metrics = {
-    totalSalesToday: 15420,
-    pendingOrders: 12,
-    completedOrdersToday: 28,
-    topSellingProducts: [
-      { name: "Kanto Burger Special", quantity: 45 },
-      { name: "Cheese Burger", quantity: 32 },
-      { name: "Bacon Burger", quantity: 28 },
+const DAY_MS = 24 * 60 * 60 * 1000;
+
+function startOfDay(value: Date) {
+  const date = new Date(value);
+  date.setHours(0, 0, 0, 0);
+  return date;
+}
+
+function moneyValue(value: unknown) {
+  return Number(value);
+}
+
+function percentage(value: number, total: number) {
+  return total > 0 ? Math.round((value / total) * 100) : 0;
+}
+
+async function getDashboardData() {
+  const now = new Date();
+  const todayStart = startOfDay(now);
+  const thirtyDayStart = new Date(todayStart.getTime() - 29 * DAY_MS);
+
+  const orders = await prisma.order.findMany({
+    where: {
+      createdAt: {
+        gte: thirtyDayStart,
+      },
+    },
+    include: {
+      items: true,
+    },
+    orderBy: {
+      createdAt: "desc",
+    },
+  });
+
+  const activeOrders = orders.filter((order) => order.status !== "CANCELLED");
+  const todayOrders = activeOrders.filter(
+    (order) => order.createdAt >= todayStart,
+  );
+  const pendingOrders = activeOrders.filter((order) =>
+    ["PENDING", "PREPARING", "READY", "OUT_FOR_DELIVERY"].includes(
+      order.status,
+    ),
+  );
+  const completedOrdersToday = todayOrders.filter(
+    (order) => order.status === "COMPLETED",
+  );
+
+  const topSellingProducts = Object.values(
+    todayOrders.reduce<
+      Record<string, { name: string; quantity: number; revenue: number }>
+    >((totals, order) => {
+      for (const item of order.items) {
+        const key = item.productId ?? item.productName;
+        const current = totals[key] ?? {
+          name: item.productName,
+          quantity: 0,
+          revenue: 0,
+        };
+
+        current.quantity += item.quantity;
+        current.revenue += moneyValue(item.totalPrice);
+        totals[key] = current;
+      }
+
+      return totals;
+    }, {}),
+  )
+    .sort((a, b) => b.quantity - a.quantity || b.revenue - a.revenue)
+    .slice(0, 3);
+
+  const salesByHour = Array.from({ length: 7 }, (_, index) => {
+    const hour = 6 + index * 2;
+    const bucketStart = new Date(todayStart);
+    bucketStart.setHours(hour, 0, 0, 0);
+    const bucketEnd = new Date(todayStart);
+    bucketEnd.setHours(hour + 2, 0, 0, 0);
+
+    return {
+      time: new Intl.DateTimeFormat("en-PH", {
+        hour: "numeric",
+        hour12: true,
+      }).format(bucketStart),
+      sales: todayOrders
+        .filter(
+          (order) =>
+            order.createdAt >= bucketStart && order.createdAt < bucketEnd,
+        )
+        .reduce((total, order) => total + moneyValue(order.total), 0),
+    };
+  });
+
+  const orderTypeCounts = activeOrders.reduce<Record<string, number>>(
+    (totals, order) => {
+      totals[order.orderType] = (totals[order.orderType] ?? 0) + 1;
+      return totals;
+    },
+    {},
+  );
+  const paymentCounts = activeOrders.reduce<Record<string, number>>(
+    (totals, order) => {
+      totals[order.paymentMethod] = (totals[order.paymentMethod] ?? 0) + 1;
+      return totals;
+    },
+    {},
+  );
+
+  return {
+    totalSalesToday: todayOrders.reduce(
+      (total, order) => total + moneyValue(order.total),
+      0,
+    ),
+    pendingOrders: pendingOrders.length,
+    completedOrdersToday: completedOrdersToday.length,
+    topSellingProducts:
+      topSellingProducts.length > 0
+        ? topSellingProducts
+        : [{ name: "No sales yet", quantity: 0 }],
+    salesByHour,
+    recentOrders: orders.slice(0, 5).map((order) => ({
+      orderNo: order.orderNumber,
+      customer: order.customerName,
+      time: new Intl.DateTimeFormat("en-PH", {
+        hour: "numeric",
+        minute: "2-digit",
+        hour12: true,
+      }).format(order.createdAt),
+      amount: moneyValue(order.total),
+      status: order.status,
+    })),
+    orderTypes: [
+      {
+        label: "Pickup",
+        value: percentage(orderTypeCounts.PICKUP ?? 0, activeOrders.length),
+        color: "bg-red-500",
+      },
+      {
+        label: "Delivery",
+        value: percentage(orderTypeCounts.DELIVERY ?? 0, activeOrders.length),
+        color: "bg-amber-500",
+      },
+    ],
+    paymentMethods: [
+      {
+        label: "Cash",
+        value: percentage(paymentCounts.CASH ?? 0, activeOrders.length),
+        color: "bg-emerald-500",
+      },
+      {
+        label: "COD",
+        value: percentage(paymentCounts.COD ?? 0, activeOrders.length),
+        color: "bg-orange-500",
+      },
+      {
+        label: "GCash",
+        value: percentage(paymentCounts.GCASH ?? 0, activeOrders.length),
+        color: "bg-blue-500",
+      },
     ],
   };
+}
+
+export default async function AdminDashboardPage() {
+  const metrics = await getDashboardData();
 
   return (
     <div className="space-y-6">
@@ -140,7 +293,7 @@ export default async function AdminDashboardPage() {
           <h2 className="text-sm font-black uppercase tracking-wide text-[#25130b] mb-4">
             Sales Analytics Today
           </h2>
-          <SalesAnalyticsChart />
+          <SalesAnalyticsChart data={metrics.salesByHour} />
         </div>
 
         {/* Column 2: Top Selling Products (1/3 space) */}
@@ -176,7 +329,7 @@ export default async function AdminDashboardPage() {
           <h2 className="text-sm font-black uppercase tracking-wide text-[#25130b] mb-4">
             Recent Orders
           </h2>
-          <RecentOrdersTable />
+          <RecentOrdersTable data={metrics.recentOrders} />
         </div>
 
         {/* Column 2: Order Methods & Payments Breakdowns (1/3 space) */}
@@ -184,7 +337,10 @@ export default async function AdminDashboardPage() {
           <h2 className="text-sm font-black uppercase tracking-wide text-[#25130b] mb-4">
             Order Breakdowns
           </h2>
-          <OrderBreakdowns />
+          <OrderBreakdowns
+            orderTypes={metrics.orderTypes}
+            paymentMethods={metrics.paymentMethods}
+          />
         </div>
       </div>
     </div>

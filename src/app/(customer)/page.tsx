@@ -23,6 +23,7 @@ import { CustomerTopBar } from "@/components/customer/customer-top-bar";
 import { HeroBurgerShowcase } from "@/components/customer/hero-burger-showcase";
 import { getMenuCategories } from "@/features/menu/queries";
 import { formatPeso } from "@/lib/format";
+import { shouldUnoptimizeImage } from "@/lib/image";
 
 export const revalidate = 60;
 
@@ -317,6 +318,7 @@ export default async function Home() {
                       alt={product.name}
                       fill
                       sizes="(min-width: 1280px) 300px, (min-width: 1024px) 280px, (min-width: 640px) 50vw, 100vw"
+                      unoptimized={shouldUnoptimizeImage(image)}
                       className={`object-cover transition duration-700 group-hover:scale-110 ${accent.imageClass}`}
                     />
                   ) : null}

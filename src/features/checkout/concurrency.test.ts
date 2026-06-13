@@ -4,16 +4,29 @@ import assert from "node:assert";
 import { PrismaNeon } from "@prisma/adapter-neon";
 import { PrismaClient } from "@/generated/prisma/client";
 
-import { createOrder } from "./actions";
+import type { createOrder as createOrderType } from "./actions";
 
-const adapter = new PrismaNeon({
-  connectionString: process.env.DATABASE_URL,
-});
+const testDatabaseUrl = process.env.TEST_DATABASE_URL;
+const describeWithTestDatabase = testDatabaseUrl ? describe : describe.skip;
 
-const prisma = new PrismaClient({ adapter });
+let prisma: PrismaClient;
+let createOrder: typeof createOrderType;
 
-describe("Checkout Concurrency Tests", () => {
+describeWithTestDatabase("Checkout Concurrency Tests", () => {
   before(async () => {
+    if (!testDatabaseUrl) {
+      throw new Error("TEST_DATABASE_URL is required for checkout concurrency tests.");
+    }
+
+    process.env.DATABASE_URL = testDatabaseUrl;
+
+    const adapter = new PrismaNeon({
+      connectionString: testDatabaseUrl,
+    });
+
+    prisma = new PrismaClient({ adapter });
+    ({ createOrder } = await import("./actions"));
+
     // Clean up test data
     await prisma.orderItem.deleteMany();
     await prisma.order.deleteMany();

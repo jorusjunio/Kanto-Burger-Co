@@ -2,7 +2,9 @@ import bcrypt from "bcryptjs";
 import type { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 
+import { authRateLimiter } from "@/lib/rate-limiter";
 import { prisma } from "@/server/db/prisma";
+import { getRequiredEnv } from "@/server/env";
 
 export const authOptions: NextAuthOptions = {
   session: {
@@ -26,6 +28,11 @@ export const authOptions: NextAuthOptions = {
           return null;
         }
 
+        const rateLimit = authRateLimiter.check(email);
+        if (!rateLimit.allowed) {
+          return null;
+        }
+
         const user = await prisma.user.findUnique({
           where: { email },
         });
@@ -42,6 +49,8 @@ export const authOptions: NextAuthOptions = {
         if (!isValidPassword) {
           return null;
         }
+
+        authRateLimiter.reset(email);
 
         return {
           id: user.id,
@@ -69,5 +78,5 @@ export const authOptions: NextAuthOptions = {
       return session;
     },
   },
-  secret: process.env.AUTH_SECRET,
+  secret: getRequiredEnv("AUTH_SECRET"),
 };

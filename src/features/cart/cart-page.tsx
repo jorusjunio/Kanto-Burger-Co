@@ -16,6 +16,7 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { useCartStore, type CartItem } from "@/features/cart/cart-store";
 import { formatPeso } from "@/lib/format";
+import { shouldUnoptimizeImage } from "@/lib/image";
 
 /* ───── Empty State ───── */
 function EmptyCart() {
@@ -55,6 +56,9 @@ function CartItemCard({ item, index }: { item: CartItem; index: number }) {
   const addOnsTotal = item.addOns.reduce((sum, addOn) => sum + addOn.price, 0);
   const itemUnitPrice = item.price + addOnsTotal;
   const itemTotal = itemUnitPrice * item.quantity;
+  const shouldUnoptimizeCartImage = item.imageUrl
+    ? shouldUnoptimizeImage(item.imageUrl)
+    : false;
 
   const prefersReducedMotion =
     typeof window !== "undefined"
@@ -92,6 +96,7 @@ function CartItemCard({ item, index }: { item: CartItem; index: number }) {
                 alt=""
                 fill
                 sizes="112px"
+                unoptimized={shouldUnoptimizeCartImage}
                 className="scale-110 object-cover opacity-20 blur-sm transition-all duration-700 group-hover:scale-125 group-hover:opacity-30"
                 aria-hidden="true"
               />
@@ -100,6 +105,7 @@ function CartItemCard({ item, index }: { item: CartItem; index: number }) {
                 alt={item.name}
                 fill
                 sizes="112px"
+                unoptimized={shouldUnoptimizeCartImage}
                 className="object-cover transition-all duration-500 group-hover:scale-105"
               />
             </>

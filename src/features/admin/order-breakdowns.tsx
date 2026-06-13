@@ -12,7 +12,6 @@ interface OrderBreakdownsProps {
 }
 
 export function OrderBreakdowns({ orderTypes, paymentMethods }: OrderBreakdownsProps) {
-  // Mock data for now - will be replaced with actual data
   const orderTypesData = orderTypes || [
     { label: "Pickup", value: 65, color: "bg-red-500" },
     { label: "Delivery", value: 35, color: "bg-amber-500" },

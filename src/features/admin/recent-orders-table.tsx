@@ -5,7 +5,13 @@ interface RecentOrder {
   customer: string;
   time: string;
   amount: number;
-  status: "PENDING" | "PREPARING" | "READY" | "COMPLETED";
+  status:
+    | "PENDING"
+    | "PREPARING"
+    | "READY"
+    | "OUT_FOR_DELIVERY"
+    | "COMPLETED"
+    | "CANCELLED";
 }
 
 interface RecentOrdersTableProps {
@@ -13,7 +19,6 @@ interface RecentOrdersTableProps {
 }
 
 export function RecentOrdersTable({ data }: RecentOrdersTableProps) {
-  // Mock data for now - will be replaced with actual data
   const orders = data || [
     { orderNo: "#ORD-001", customer: "Juan Dela Cruz", time: "2:30 PM", amount: 450, status: "PENDING" },
     { orderNo: "#ORD-002", customer: "Maria Santos", time: "2:15 PM", amount: 680, status: "PREPARING" },
@@ -30,8 +35,12 @@ export function RecentOrdersTable({ data }: RecentOrdersTableProps) {
         return "bg-blue-100 text-blue-700 border-blue-200";
       case "READY":
         return "bg-green-100 text-green-700 border-green-200";
+      case "OUT_FOR_DELIVERY":
+        return "bg-purple-100 text-purple-700 border-purple-200";
       case "COMPLETED":
         return "bg-stone-100 text-stone-700 border-stone-200";
+      case "CANCELLED":
+        return "bg-red-100 text-red-700 border-red-200";
       default:
         return "bg-stone-100 text-stone-700 border-stone-200";
     }

@@ -24,6 +24,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { useCartStore } from "@/features/cart/cart-store";
 import { formatPeso } from "@/lib/format";
+import { shouldUnoptimizeImage } from "@/lib/image";
 import { cn } from "@/lib/utils";
 
 import type { MenuProduct } from "./types";
@@ -62,6 +63,9 @@ export function ProductCard({ product }: ProductCardProps) {
   );
   const maxQuantity = product.trackStock ? product.stockQuantity : undefined;
   const itemTotal = (product.price + addOnsTotal) * quantity;
+  const shouldUnoptimizeProductImage = product.imageUrl
+    ? shouldUnoptimizeImage(product.imageUrl)
+    : false;
 
   function toggleAddOn(addOnId: string) {
     setSelectedAddOnIds((current) =>
@@ -108,6 +112,7 @@ export function ProductCard({ product }: ProductCardProps) {
               alt=""
               fill
               sizes="(min-width: 1024px) 400px, (min-width: 640px) 50vw, 100vw"
+              unoptimized={shouldUnoptimizeProductImage}
               className="scale-[1.15] object-cover opacity-30 blur-sm transition-all duration-700 group-hover:scale-[1.25] group-hover:opacity-40"
               aria-hidden="true"
             />
@@ -116,6 +121,7 @@ export function ProductCard({ product }: ProductCardProps) {
               alt={product.name}
               fill
               sizes="(min-width: 1024px) 400px, (min-width: 640px) 50vw, 100vw"
+              unoptimized={shouldUnoptimizeProductImage}
               className="object-cover transition-all duration-500 group-hover:scale-105"
             />
           </>
@@ -220,6 +226,7 @@ export function ProductCard({ product }: ProductCardProps) {
                     alt=""
                     fill
                     sizes="(min-width: 640px) 512px, 100vw"
+                    unoptimized={shouldUnoptimizeProductImage}
                     className="scale-105 object-cover blur-sm opacity-40"
                     aria-hidden="true"
                   />
@@ -228,6 +235,7 @@ export function ProductCard({ product }: ProductCardProps) {
                     alt={product.name}
                     fill
                     sizes="(min-width: 640px) 512px, 100vw"
+                    unoptimized={shouldUnoptimizeProductImage}
                     className="product-dialog-banner-img object-cover object-center"
                   />
                 </>
