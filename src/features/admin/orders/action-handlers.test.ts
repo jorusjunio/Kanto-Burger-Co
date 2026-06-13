@@ -49,6 +49,7 @@ test("admin order status updates require an authenticated session before databas
       $transaction: (async <T>(
         _cb: (tx: OrderTransactionClient) => Promise<T>,
       ): Promise<T> => {
+        void _cb;
         didStartTransaction = true;
         return orderPayload() as T;
       }) as AdminOrderActionDeps['prisma']['$transaction'],
@@ -111,7 +112,7 @@ test("cancelling an active order restores tracked product stock once per tracked
           product: {
             update: async (args: { where: { id: string }; data: { stockQuantity: { increment: number } } }) => {
               productUpdates.push(args);
-              return {};
+              return { count: 1 };
             },
           },
         })) as AdminOrderActionDeps['prisma']['$transaction'],
@@ -163,7 +164,10 @@ test("payment status updates validate input and refresh order views", async () =
     prisma: {
       $transaction: (async <T>(
         _cb: (tx: OrderTransactionClient) => Promise<T>,
-      ): Promise<T> => orderPayload() as T) as AdminOrderActionDeps['prisma']['$transaction'],
+      ): Promise<T> => {
+        void _cb;
+        return orderPayload() as T;
+      }) as AdminOrderActionDeps['prisma']['$transaction'],
       order: {
         findUnique: async () => ({ paymentMethod: PaymentMethod.GCASH }),
         update: async (args) => {
@@ -218,7 +222,10 @@ test("payment status updates reject pending verification for non-GCash orders", 
     prisma: {
       $transaction: (async <T>(
         _cb: (tx: OrderTransactionClient) => Promise<T>,
-      ): Promise<T> => orderPayload() as T) as AdminOrderActionDeps['prisma']['$transaction'],
+      ): Promise<T> => {
+        void _cb;
+        return orderPayload() as T;
+      }) as AdminOrderActionDeps['prisma']['$transaction'],
       order: {
         findUnique: async () => ({ paymentMethod: PaymentMethod.CASH }),
         update: async () => {

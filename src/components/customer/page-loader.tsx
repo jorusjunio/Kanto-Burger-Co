@@ -109,13 +109,14 @@ export function PageLoader() {
   }, [clearTimers, timer, animateProgress]);
 
   // Initial page load
+  /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
     if (LOADING_ROUTES.has(pathname)) {
       runLoader(pathname === "/menu");
     }
     return clearTimers;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [pathname, runLoader, clearTimers]);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   // Route changes
   useEffect(() => {

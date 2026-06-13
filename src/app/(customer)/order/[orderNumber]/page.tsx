@@ -1,7 +1,4 @@
-import Link from "next/link";
 import { CheckCircle2, Clock, Package, Truck, Wallet, Smartphone } from "lucide-react";
-
-import { Button } from "@/components/ui/button";
 import { getOrderByNumber } from "@/features/orders/queries";
 import { RealtimeOrderListener } from "@/features/orders/realtime-order-listener";
 import { formatPeso } from "@/lib/format";
@@ -18,7 +15,7 @@ type OrderPageProps = {
 };
 
 function getStatusBadge(status: string) {
-  const statusConfig: Record<string, { color: string; bgColor: string; icon: any }> = {
+  const statusConfig: Record<string, { color: string; bgColor: string; icon: React.ComponentType<{ className?: string }> }> = {
     PENDING: {
       color: "text-amber-700",
       bgColor: "bg-amber-100",
@@ -65,17 +62,6 @@ function getStatusBadge(status: string) {
   );
 }
 
-function getPaymentIcon(method: string) {
-  switch (method) {
-    case "GCASH":
-      return Smartphone;
-    case "COD":
-    case "CASH":
-      return Wallet;
-    default:
-      return Wallet;
-  }
-}
 
 export default async function OrderPage({ params, searchParams }: OrderPageProps) {
   const { orderNumber } = await params;
@@ -137,10 +123,11 @@ export default async function OrderPage({ params, searchParams }: OrderPageProps
             <div className="rounded-lg border border-orange-900/8 bg-orange-50/40 p-2.5">
               <p className="text-[9px] font-bold uppercase tracking-wide text-orange-950/40">Payment Method</p>
               <div className="mt-0.5 flex items-center gap-1.5">
-                {(() => {
-                  const Icon = getPaymentIcon(order.paymentMethod);
-                  return <Icon className="size-3 text-red-700" />;
-                })()}
+                {order.paymentMethod === "GCASH" ? (
+                  <Smartphone className="size-3 text-red-700" />
+                ) : (
+                  <Wallet className="size-3 text-red-700" />
+                )}
                 <p className="text-xs font-black text-[#25130b]">{order.paymentMethod}</p>
               </div>
             </div>
@@ -168,7 +155,7 @@ export default async function OrderPage({ params, searchParams }: OrderPageProps
                         <p className="text-xs font-black text-[#25130b]">{item.productName}</p>
                         {Array.isArray(item.selectedAddOns) && item.selectedAddOns.length > 0 && (
                           <p className="mt-0.5 text-[9px] text-orange-950/50">
-                            Add-ons: {item.selectedAddOns.map((a: any) => a.name).join(", ")}
+                            Add-ons: {item.selectedAddOns.map((a) => (a as { name: string }).name).join(", ")}
                           </p>
                         )}
                         {item.notes && (

@@ -38,6 +38,7 @@ function ActiveOrderTracker() {
   const [activeOrder, setActiveOrder] = useState<{ orderNumber: string; token: string } | null>(null);
   const router = useRouter();
 
+  /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const stored = localStorage.getItem('activeOrder');
@@ -50,6 +51,7 @@ function ActiveOrderTracker() {
       }
     }
   }, []);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   if (!activeOrder) return null;
 
@@ -226,18 +228,17 @@ function NavLink({
 
 /* ─── Mobile Navigation Sheet ─── */
 export function MobileNav() {
-  const itemCount = useCartStore((state) =>
-    state.items.reduce((total, item) => total + item.quantity, 0),
-  );
   const [open, setOpen] = useState(false);
 
   // Reset entrance animations when sheet opens
   const [animKey, setAnimKey] = useState(0);
+  /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
     if (open) {
       setAnimKey((k) => k + 1);
     }
   }, [open]);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>

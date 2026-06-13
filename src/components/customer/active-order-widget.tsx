@@ -4,8 +4,6 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { ShoppingBag, X } from "lucide-react";
 
-import { Button } from "@/components/ui/button";
-
 interface ActiveOrderData {
   orderNumber: string;
   token: string;
@@ -15,6 +13,7 @@ export function ActiveOrderWidget() {
   const [activeOrder, setActiveOrder] = useState<ActiveOrderData | null>(null);
   const [isVisible, setIsVisible] = useState(false);
 
+  /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
     // Check for active order on mount
     const stored = localStorage.getItem("activeOrder");
@@ -23,11 +22,12 @@ export function ActiveOrderWidget() {
         const data = JSON.parse(stored) as ActiveOrderData;
         setActiveOrder(data);
         setIsVisible(true);
-      } catch (error) {
+      } catch {
         localStorage.removeItem("activeOrder");
       }
     }
   }, []);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   const handleDismiss = () => {
     setIsVisible(false);

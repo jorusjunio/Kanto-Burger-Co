@@ -60,7 +60,7 @@ export function SalesAnalyticsChart({ data }: SalesAnalyticsChartProps) {
               boxShadow: "0 4px 12px rgba(0, 0, 0, 0.08)",
             }}
             itemStyle={{ fontWeight: 600, color: "#292524" }}
-            formatter={(value: number) => [`₱${value.toLocaleString()}`, "Sales"]}
+            formatter={(value: any) => [`₱${Number(value).toLocaleString()}`, "Sales"]}
           />
           <Area
             type="monotone"

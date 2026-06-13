@@ -2,7 +2,6 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import {
   Home,
@@ -71,7 +70,6 @@ function useHeroNavPastHero(enabled: boolean) {
 }
 
 export function CustomerTopBar({ variant = "light" }: CustomerTopBarProps) {
-  const pathname = usePathname();
   const itemCount = useCartStore((state) =>
     state.items.reduce((total, item) => total + item.quantity, 0),
   );

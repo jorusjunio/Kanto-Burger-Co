@@ -40,12 +40,14 @@ export function SiteHeader() {
     setTranslateYPx(window.innerHeight - HEADER_HEIGHT - MARGIN * 2);
   }, []);
 
+  /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
     hasMountedRef.current = true;
     calcTranslateY();
     window.addEventListener("resize", calcTranslateY);
     return () => window.removeEventListener("resize", calcTranslateY);
   }, [calcTranslateY]);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   /* ── Animate on scroll threshold change ── */
   useEffect(() => {

@@ -5,7 +5,6 @@ import { PrismaNeon } from "@prisma/adapter-neon";
 import { PrismaClient } from "@/generated/prisma/client";
 
 import { createOrder } from "./actions";
-import { createOrderSchema } from "./validation";
 
 const adapter = new PrismaNeon({
   connectionString: process.env.DATABASE_URL,

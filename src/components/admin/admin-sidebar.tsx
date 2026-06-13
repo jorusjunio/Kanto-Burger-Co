@@ -8,7 +8,6 @@ import {
   ShoppingCart,
   Utensils,
   Folder,
-  LogOut,
   Menu,
   X,
   User,
