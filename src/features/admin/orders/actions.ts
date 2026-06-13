@@ -13,10 +13,13 @@ import {
 } from "./action-handlers";
 
 const deps: AdminOrderActionDeps = {
-  requireAdminSession,
+  requireAdminSession: async () => {
+    const session = await requireAdminSession();
+    return { user: { id: session.user.id, role: session.user.role } };
+  },
   prisma: prisma as unknown as AdminOrderActionDeps["prisma"],
   revalidatePath,
-  triggerRealtimeEvent: triggerRealtimeEvent as AdminOrderActionDeps["triggerRealtimeEvent"],
+  triggerRealtimeEvent,
 };
 
 export async function updateOrderStatus(formData: FormData) {

@@ -31,6 +31,7 @@ type OrderUpdatePayload = {
   trackingToken: string;
   status: OrderStatus;
   paymentStatus: PaymentStatus;
+  timestamp?: number;
 };
 
 type ProductUpdateInput = {
@@ -42,9 +43,47 @@ type ProductUpdateInput = {
   };
 };
 
+type OrderFindUniqueArgs = {
+  where: { id: string };
+  include?: {
+    items?: {
+      include?: {
+        product?: {
+          select?: {
+            id: boolean;
+            trackStock: boolean;
+          };
+        };
+      };
+    };
+  };
+};
+
+type OrderUpdateArgs = {
+  where: { id: string };
+  data: {
+    status?: OrderStatus;
+    paymentStatus?: PaymentStatus;
+  };
+  select?: {
+    id: boolean;
+    orderNumber: boolean;
+    trackingToken: boolean;
+    status: boolean;
+    paymentStatus: boolean;
+  };
+};
+
+type OrderPaymentMethodArgs = {
+  where: { id: string };
+  select?: {
+    paymentMethod: boolean;
+  };
+};
+
 export type OrderTransactionClient = {
   order: {
-    findUnique: (args: unknown) => Promise<{
+    findUnique: (args: OrderFindUniqueArgs) => Promise<{
       status: OrderStatus;
       items: Array<{
         quantity: number;
@@ -55,10 +94,10 @@ export type OrderTransactionClient = {
         } | null;
       }>;
     } | null>;
-    update: (args: unknown) => Promise<OrderUpdatePayload>;
+    update: (args: OrderUpdateArgs) => Promise<OrderUpdatePayload>;
   };
   product: {
-    update: (args: ProductUpdateInput) => Promise<unknown>;
+    update: (args: ProductUpdateInput) => Promise<{ count: number }>;
   };
 };
 
@@ -67,22 +106,22 @@ type OrderPrismaClient = {
     callback: (tx: OrderTransactionClient) => Promise<T>,
   ) => Promise<T>;
   order: {
-    findUnique: (args: unknown) => Promise<{
+    findUnique: (args: OrderPaymentMethodArgs) => Promise<{
       paymentMethod: PaymentMethod;
     } | null>;
-    update: (args: unknown) => Promise<OrderUpdatePayload>;
+    update: (args: OrderUpdateArgs) => Promise<OrderUpdatePayload>;
   };
 };
 
 export type AdminOrderActionDeps = {
-  requireAdminSession: () => Promise<unknown>;
+  requireAdminSession: () => Promise<{ user: { id: string; role?: string } }>;
   prisma: OrderPrismaClient;
   revalidatePath: (path: string) => void;
   triggerRealtimeEvent: (
     channel: string,
     event: string,
     payload: OrderUpdatePayload,
-  ) => Promise<unknown>;
+  ) => Promise<void>;
 };
 
 function revalidateOrderViews(
@@ -98,8 +137,19 @@ async function triggerOrderUpdatedEvents(
   triggerRealtimeEvent: AdminOrderActionDeps["triggerRealtimeEvent"],
   order: OrderUpdatePayload,
 ) {
-  await triggerRealtimeEvent("admin-orders", "order-updated", order);
-  await triggerRealtimeEvent(`order-${order.trackingToken}`, "order-updated", order);
+  try {
+    await triggerRealtimeEvent("admin-orders", "order-updated", {
+      ...order,
+      timestamp: Date.now(),
+    });
+    await triggerRealtimeEvent(`order-${order.trackingToken}`, "order-updated", {
+      ...order,
+      timestamp: Date.now(),
+    });
+  } catch (error) {
+    console.error("Failed to trigger order update events:", error);
+    // Don't throw - event failure shouldn't break the main operation
+  }
 }
 
 export async function updateOrderStatusWithDeps(

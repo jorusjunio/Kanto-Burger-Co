@@ -14,8 +14,8 @@ type AdminOrderPageProps = {
 };
 
 type SelectedAddOn = {
-  name?: unknown;
-  price?: unknown;
+  name?: string;
+  price?: string | number;
 };
 
 function formatDate(value: Date) {

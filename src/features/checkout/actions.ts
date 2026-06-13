@@ -4,6 +4,8 @@ import { revalidatePath } from "next/cache";
 import { PaymentStatus } from "@/generated/prisma/enums";
 import { prisma } from "@/server/db/prisma";
 import { triggerRealtimeEvent } from "@/server/services/pusher";
+import { logger } from "@/lib/logger";
+import { checkoutRateLimiter } from "@/lib/rate-limiter";
 
 import type { CreateOrderResult } from "./types";
 import { createOrderSchema } from "./validation";
@@ -48,6 +50,17 @@ export async function createOrder(
   }
 
   const values = parsed.data;
+
+  // Rate limiting based on customer phone
+  const rateLimitResult = checkoutRateLimiter.check(values.customerPhone);
+  if (!rateLimitResult.allowed) {
+    logger.warn("Rate limit exceeded for checkout", { customerPhone: values.customerPhone });
+    return {
+      ok: false,
+      message: "Too many checkout attempts. Please try again later.",
+    };
+  }
+
   const productIds = [...new Set(values.items.map((item) => item.productId))];
   const deliveryFee = values.orderType === "DELIVERY" ? 49 : 0;
   const orderNumber = makeOrderNumber();
@@ -200,6 +213,7 @@ export async function createOrder(
       return order;
     });
   } catch (error) {
+    logger.error("Checkout failed", error, { orderNumber });
     return {
       ok: false,
       message:
@@ -215,6 +229,8 @@ export async function createOrder(
 
   await triggerRealtimeEvent("admin-orders", "order-created", {
     orderNumber,
+    trackingToken,
+    timestamp: Date.now(),
   });
 
   return {
