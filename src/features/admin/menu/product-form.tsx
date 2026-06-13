@@ -61,7 +61,7 @@ export function ProductForm({
   return (
     <form
       action={action}
-      className="grid gap-6 rounded-lg border border-zinc-200 bg-white p-5 lg:grid-cols-[1fr_320px]"
+      className="grid gap-6 rounded-2xl border border-white bg-white/90 p-5 shadow-md shadow-stone-100/50 lg:grid-cols-[1fr_320px] animate-fade-in"
     >
       <section className="space-y-5">
         <div className="grid gap-4 sm:grid-cols-2">
@@ -105,7 +105,7 @@ export function ProductForm({
               id="categoryId"
               name="categoryId"
               defaultValue={product?.categoryId ?? categories[0]?.id}
-              className="h-8 w-full rounded-lg border border-zinc-200 bg-white px-2.5 text-sm outline-none focus:border-zinc-950"
+              className="h-8 w-full rounded-lg border border-stone-200 bg-white px-2.5 text-sm outline-none focus:border-[#25130b]"
               required
             >
               {categories.map((category) => (
@@ -144,22 +144,22 @@ export function ProductForm({
 
         <div className="space-y-2">
           <Label htmlFor="imageFile">Upload image</Label>
-          <div className="flex items-center gap-3 rounded-lg border border-dashed border-zinc-300 bg-zinc-50 p-3">
-            <ImageUp className="size-5 text-zinc-500" aria-hidden="true" />
+          <div className="flex items-center gap-3 rounded-lg border border-dashed border-stone-300 bg-stone-50 p-3">
+            <ImageUp className="size-5 text-stone-500" aria-hidden="true" />
             <Input
               id="imageFile"
               name="imageFile"
               type="file"
               accept="image/*"
-              className="border-0 bg-transparent p-0 file:mr-3 file:rounded-md file:border-0 file:bg-zinc-950 file:px-3 file:py-1.5 file:text-sm file:font-bold file:text-white"
+              className="block w-full text-sm text-stone-500 border-0 bg-transparent p-0 file:mr-4 file:rounded-full file:border-0 file:bg-gradient-to-r file:from-red-600 file:to-red-700 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-white file:cursor-pointer hover:file:from-red-700 hover:file:to-red-800 cursor-pointer"
             />
           </div>
-          <p className="text-xs leading-5 text-zinc-500">
+          <p className="text-xs leading-5 text-stone-500">
             Optional. Uploading a file replaces the URL above after save. Max
             5MB.
           </p>
           {product?.imageUrl ? (
-            <div className="relative aspect-[4/3] w-full max-w-sm overflow-hidden rounded-lg border border-zinc-200">
+            <div className="relative aspect-[4/3] w-full max-w-sm overflow-hidden rounded-lg border border-stone-200">
               <Image
                 src={product.imageUrl}
                 alt={product.name}
@@ -181,22 +181,22 @@ export function ProductForm({
             placeholder="Extra Cheese | 20.00 | available"
             className="max-h-[228px] bg-white font-mono text-sm"
           />
-          <p className="text-xs leading-5 text-zinc-500">
+          <p className="text-xs leading-5 text-stone-500">
             One add-on per line: name | price | available/unavailable.
           </p>
         </div>
       </section>
 
       <aside className="space-y-5">
-        <div className="rounded-lg border border-zinc-200 p-4">
-          <h2 className="font-black text-zinc-950">Inventory</h2>
+        <div className="rounded-lg border border-stone-200 bg-white p-4">
+          <h2 className="font-black text-[#25130b]">Inventory</h2>
           <div className="mt-4 space-y-4">
-            <label className="flex items-center gap-3 text-sm font-bold text-zinc-950">
+            <label className="flex items-center gap-3 text-sm font-bold text-[#25130b]">
               <input
                 type="checkbox"
                 name="trackStock"
                 defaultChecked={product?.trackStock ?? true}
-                className="size-4 accent-zinc-950"
+                className="size-4 accent-[#25130b]"
               />
               Track stock
             </label>
@@ -227,24 +227,24 @@ export function ProductForm({
           </div>
         </div>
 
-        <div className="rounded-lg border border-zinc-200 p-4">
-          <h2 className="font-black text-zinc-950">Storefront</h2>
+        <div className="rounded-lg border border-stone-200 bg-white p-4">
+          <h2 className="font-black text-[#25130b]">Storefront</h2>
           <div className="mt-4 space-y-3">
-            <label className="flex items-center gap-3 text-sm font-bold text-zinc-950">
+            <label className="flex items-center gap-3 text-sm font-bold text-[#25130b]">
               <input
                 type="checkbox"
                 name="isAvailable"
                 defaultChecked={product?.isAvailable ?? true}
-                className="size-4 accent-zinc-950"
+                className="size-4 accent-[#25130b]"
               />
               Available to order
             </label>
-            <label className="flex items-center gap-3 text-sm font-bold text-zinc-950">
+            <label className="flex items-center gap-3 text-sm font-bold text-[#25130b]">
               <input
                 type="checkbox"
                 name="isFeatured"
                 defaultChecked={product?.isFeatured ?? false}
-                className="size-4 accent-zinc-950"
+                className="size-4 accent-[#25130b]"
               />
               Featured product
             </label>
@@ -254,7 +254,7 @@ export function ProductForm({
         <div className="flex flex-col gap-2">
           <Button
             type="submit"
-            className="h-10 bg-zinc-950 text-white hover:bg-zinc-800"
+            className="h-10 bg-gradient-to-r from-red-600 to-red-700 text-white hover:from-red-700 hover:to-red-800 font-black"
           >
             <Save aria-hidden="true" />
             {submitLabel}

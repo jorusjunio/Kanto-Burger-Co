@@ -35,32 +35,33 @@ export default async function EditProductPage({
   const updateProductWithId = updateProduct.bind(null, product.id);
 
   return (
-    <main className="min-h-screen bg-zinc-50">
-      <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
-        <Button variant="ghost" size="sm" asChild className="-ml-2 mb-4">
-          <Link href="/admin/menu">
-            <ArrowLeft aria-hidden="true" />
-            Back to Menu
-          </Link>
-        </Button>
+    <div className="space-y-6">
+      {/* Back Button */}
+      <Button variant="ghost" size="sm" asChild className="-ml-2">
+        <Link href="/admin/menu">
+          <ArrowLeft aria-hidden="true" />
+          Back to Menu
+        </Link>
+      </Button>
 
-        <div className="mb-6">
-          <p className="text-sm font-black uppercase tracking-wide text-red-700">
-            Admin
-          </p>
-          <h1 className="mt-2 text-3xl font-black text-zinc-950">
-            Edit Product
-          </h1>
-          <p className="mt-2 text-zinc-600">{product.name}</p>
-        </div>
-
-        <ProductForm
-          action={updateProductWithId}
-          categories={categories}
-          product={product}
-          submitLabel="Save Changes"
-        />
+      {/* Header */}
+      <div>
+        <p className="text-sm font-black uppercase tracking-wide text-red-700">
+          Admin
+        </p>
+        <h1 className="mt-2 text-3xl font-black text-[#25130b]">
+          Edit Product
+        </h1>
+        <p className="mt-2 text-stone-500">{product.name}</p>
       </div>
-    </main>
+
+      {/* Form */}
+      <ProductForm
+        action={updateProductWithId}
+        categories={categories}
+        product={product}
+        submitLabel="Save Changes"
+      />
+    </div>
   );
 }

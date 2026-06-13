@@ -657,6 +657,39 @@
   - **Full-Width Layout:** Order details page now spans full width of main display area like dashboard
   - **Professional Design:** Overall design creates consistent, modern, and professional order details experience
 
+### June 13, 2026 - Admin Add/Edit Product Page Visual Overhaul
+- **Status:** Completed
+- **Changes Made:** Updated Admin Add/Edit Product pages to match new glassmorphic design system with premium styling
+- **Files Modified:**
+  - `src/app/admin/(protected)/menu/new/page.tsx` - Updated to glassmorphic design and consistent styling
+  - `src/app/admin/(protected)/menu/[productId]/edit/page.tsx` - Updated to glassmorphic design and consistent styling
+  - `src/features/admin/menu/product-form.tsx` - Updated form component with glassmorphic cards and consistent styling
+- **Notes:**
+  - **Removed Scroll Issue:** Eliminated min-h-screen to allow natural height without forcing full viewport, removing unnecessary scroll for typical forms
+  - **Removed Width Restrictions:** Eliminated max-w-6xl and mx-auto wrapper to utilize full-width layout from admin layout
+  - **Removed Local Padding:** Removed px-4 py-8 sm:px-6 as layout now handles padding
+  - **Consistent Background:** Removed local background (bg-zinc-50) to use layout's soft aesthetic base (bg-stone-50/70)
+  - **Glassmorphic Cards:** Updated main form, inventory card, and storefront card to glassmorphic floating cards (bg-white/90, shadow-md shadow-stone-100/50, border border-white)
+  - **Rounded Corners:** Changed from rounded-lg to rounded-2xl for consistency with dashboard design
+  - **Color Consistency:** Updated colors from zinc-950/zinc-600/zinc-200/zinc-300/zinc-500 to [#25130b]/stone-500/stone-200/stone-300/stone-500 for brand consistency
+  - **Entrance Animation:** Added animate-fade-in class to main form for smooth entrance
+  - **Header Layout:** Maintained simple header without flex-row for single-purpose page
+  - **Back Button:** Maintained ghost variant for Back to Menu button with -ml-2 for proper alignment
+  - **Form Layout:** Maintained responsive grid layout (lg:grid-cols-[1fr_320px]) for two-column form layout
+  - **Select Styling:** Updated category select element to use border-stone-200 and focus:border-[#25130b]
+  - **Checkbox Styling:** Updated checkbox accent color from accent-zinc-950 to accent-[#25130b]
+  - **File Upload Styling:** Updated file upload container to use border-stone-300 and bg-stone-50, file button to use gradient styling with proper spacing
+  - **File Input Bug Fix:** Fixed visual bug where "No file chosen" text overlapped with "Choose File" button by adding proper file:mr-4 spacing and using modern Tailwind CSS file modifier utilities
+  - **File Button Styling:** Updated file button to use rounded-full, gradient background (from-red-600 to-red-700), proper padding (px-4 py-2), and hover states
+  - **Image Preview:** Updated image preview container to use border-stone-200
+  - **Inventory Card:** Updated inventory card to use bg-white with border-stone-200
+  - **Storefront Card:** Updated storefront card to use bg-white with border-stone-200
+  - **Submit Button:** Updated submit button to gradient styling (from-red-600 to-red-700) with hover states
+  - **Cancel Button:** Maintained outline variant for Cancel button for consistency
+  - **Natural Height:** Content now uses natural height, only scrolling if content exceeds viewport (e.g., on smaller screens)
+  - **Full-Width Layout:** Add/Edit Product pages now span full width of main display area like dashboard
+  - **Professional Design:** Overall design creates consistent, modern, and professional product management experience
+
 ---
 
 ## Next Steps

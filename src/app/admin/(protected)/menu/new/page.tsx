@@ -19,30 +19,31 @@ export default async function NewProductPage() {
   const categories = await getAdminMenuCategories();
 
   return (
-    <main className="min-h-screen bg-zinc-50">
-      <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
-        <Button variant="ghost" size="sm" asChild className="-ml-2 mb-4">
-          <Link href="/admin/menu">
-            <ArrowLeft aria-hidden="true" />
-            Back to Menu
-          </Link>
-        </Button>
+    <div className="space-y-6">
+      {/* Back Button */}
+      <Button variant="ghost" size="sm" asChild className="-ml-2">
+        <Link href="/admin/menu">
+          <ArrowLeft aria-hidden="true" />
+          Back to Menu
+        </Link>
+      </Button>
 
-        <div className="mb-6">
-          <p className="text-sm font-black uppercase tracking-wide text-red-700">
-            Admin
-          </p>
-          <h1 className="mt-2 text-3xl font-black text-zinc-950">
-            Add Product
-          </h1>
-        </div>
-
-        <ProductForm
-          action={createProduct}
-          categories={categories}
-          submitLabel="Create Product"
-        />
+      {/* Header */}
+      <div>
+        <p className="text-sm font-black uppercase tracking-wide text-red-700">
+          Admin
+        </p>
+        <h1 className="mt-2 text-3xl font-black text-[#25130b]">
+          Add Product
+        </h1>
       </div>
-    </main>
+
+      {/* Form */}
+      <ProductForm
+        action={createProduct}
+        categories={categories}
+        submitLabel="Create Product"
+      />
+    </div>
   );
 }
