@@ -151,7 +151,7 @@ export function ProductForm({
               name="imageFile"
               type="file"
               accept="image/*"
-              className="block w-full text-sm text-stone-500 border-0 bg-transparent p-0 file:mr-4 file:rounded-full file:border-0 file:bg-gradient-to-r file:from-red-600 file:to-red-700 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-white file:cursor-pointer hover:file:from-red-700 hover:file:to-red-800 cursor-pointer"
+              className="block h-12 w-full text-sm text-stone-500 border-0 bg-transparent p-0 file:mr-4 file:h-full file:min-w-[140px] file:rounded-full file:border-0 file:bg-gradient-to-r file:from-red-600 file:to-red-700 file:px-6 file:py-2 file:text-sm file:font-semibold file:text-white file:cursor-pointer hover:file:from-red-700 hover:file:to-red-800 cursor-pointer"
             />
           </div>
           <p className="text-xs leading-5 text-stone-500">
