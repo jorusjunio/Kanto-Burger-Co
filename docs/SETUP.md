@@ -63,7 +63,7 @@ Then set:
 
 ```env
 AUTH_SECRET=""
-AUTH_URL="http://localhost:3000"
+NEXTAUTH_URL="http://localhost:3000"
 NEXT_PUBLIC_APP_URL="http://localhost:3000"
 ```
 
@@ -105,3 +105,50 @@ Open:
 ```txt
 http://localhost:3000
 ```
+
+## 8. (Optional) Enable Google login for the admin
+
+Admins/staff can sign in with Google. The "Continue with Google" button on
+`/admin/login` appears only when both Google env vars are set, and a Google
+account is allowed in **only if its email is already a registered `User`**.
+
+### a. Create OAuth credentials (Google Cloud Console)
+
+1. console.cloud.google.com → create/select a project.
+2. **APIs & Services → OAuth consent screen** → External. Add app name + support
+   email. While the app is in **Testing**, add each Gmail under **Test users**
+   (or **Publish** the app for open access — sign-in is still gated by the DB).
+3. **APIs & Services → Credentials → Create Credentials → OAuth client ID →
+   Web application**.
+4. Add **Authorized redirect URIs** (one per environment):
+   - `http://localhost:3000/api/auth/callback/google`
+   - `https://YOUR-PROD-DOMAIN/api/auth/callback/google`
+5. Copy the **Client ID** and **Client secret**.
+
+### b. Environment variables
+
+```env
+NEXTAUTH_URL="http://localhost:3000"   # production: your https domain
+GOOGLE_CLIENT_ID="...apps.googleusercontent.com"
+GOOGLE_CLIENT_SECRET="..."
+```
+
+> NextAuth v4 reads `NEXTAUTH_URL` (not `AUTH_URL`) for OAuth callback URLs.
+
+### c. Register the Google email as admin
+
+The sign-in gate requires a matching `User` row. Add one without wiping data:
+
+```bash
+npm run db:add-admin -- you@gmail.com "Your Name"        # defaults to ADMIN
+npm run db:add-admin -- staff@gmail.com "Staff" STAFF
+```
+
+(Alternative: `npx prisma studio` → add a `User` with `role=ADMIN` and any
+`passwordHash`.) Do **not** use `npm run db:seed` for this — it deletes all data.
+
+### d. Verify
+
+1. `npm run dev` → `/admin/login` shows **Continue with Google**.
+2. Sign in with the registered Gmail → redirected in (role from the DB).
+3. An unregistered Gmail is bounced back with an "not authorized" message.

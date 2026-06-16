@@ -45,9 +45,17 @@ export default async function AdminOrderPage({ params }: AdminOrderPageProps) {
   return (
     <div className="space-y-6">
       {/* Back Button */}
-      <Button variant="ghost" size="sm" asChild className="-ml-2">
+      <Button
+        variant="ghost"
+        size="sm"
+        asChild
+        className="group -ml-2 transition-colors hover:text-red-700"
+      >
         <Link href="/admin/orders">
-          <ArrowLeft aria-hidden="true" />
+          <ArrowLeft
+            aria-hidden="true"
+            className="transition-transform duration-300 group-hover:-translate-x-0.5"
+          />
           Back to Orders
         </Link>
       </Button>
@@ -92,7 +100,7 @@ export default async function AdminOrderPage({ params }: AdminOrderPageProps) {
                   return (
                     <article
                       key={item.id}
-                      className="rounded-2xl border border-stone-200 bg-white p-4"
+                      className="admin-card rounded-2xl border border-stone-200 bg-white p-4"
                     >
                       <div className="flex justify-between gap-4">
                         <div>
@@ -125,7 +133,7 @@ export default async function AdminOrderPage({ params }: AdminOrderPageProps) {
           </section>
 
           <aside className="space-y-4">
-            <div className="rounded-2xl border border-stone-200 bg-white p-4">
+            <div className="admin-card rounded-2xl border border-stone-200 bg-white p-4">
               <h2 className="text-lg font-black text-[#25130b]">Customer</h2>
               <dl className="mt-4 space-y-3 text-sm">
                 <div>
@@ -163,7 +171,7 @@ export default async function AdminOrderPage({ params }: AdminOrderPageProps) {
               </dl>
             </div>
 
-            <div className="rounded-2xl border border-stone-200 bg-white p-4">
+            <div className="admin-card rounded-2xl border border-stone-200 bg-white p-4">
               <h2 className="text-lg font-black text-[#25130b]">Payment</h2>
               <dl className="mt-4 space-y-3 text-sm">
                 <div className="flex justify-between">

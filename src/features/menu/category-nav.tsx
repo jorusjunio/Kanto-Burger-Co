@@ -125,6 +125,22 @@ export function CategoryNav({ categories }: CategoryNavProps) {
     return activeCategory === slug;
   }
 
+  /* ─── "All" returns to the top (works even when already on /menu) ─── */
+  function handleAllClick(event: React.MouseEvent<HTMLAnchorElement>) {
+    event.preventDefault();
+    setActiveCategory("all");
+
+    const lenis = (window as Window & {
+      __lenis?: { scrollTo: (target: number, options?: { duration?: number }) => void };
+    }).__lenis;
+
+    if (lenis) {
+      lenis.scrollTo(0, { duration: 0.9 });
+    } else {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  }
+
   return (
       <div 
         className="sticky z-50 border-b border-orange-900/8 bg-[#fffbf2] backdrop-blur-2xl"
@@ -164,7 +180,7 @@ export function CategoryNav({ categories }: CategoryNavProps) {
               {/* "All" pill */}
               <Link
                 href="/menu"
-                onClick={() => setActiveCategory("all")}
+                onClick={handleAllClick}
                 ref={isActive("all") ? activePillRef : undefined}
                 className={cn(
                   "shrink-0 rounded-xl px-4 py-2 text-sm font-bold transition-colors duration-200 antialiased subpixel-antialiased transform-gpu will-change-transform",

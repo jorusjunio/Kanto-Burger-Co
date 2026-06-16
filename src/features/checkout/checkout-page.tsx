@@ -116,6 +116,8 @@ export function CheckoutPage({ gcashNumber }: CheckoutPageProps) {
       }
 
       clearCart();
+      // One-shot flag so the receipt page shows the success toast exactly once.
+      sessionStorage.setItem("kanto:justPlaced", result.orderNumber);
       router.push(`/order/${result.orderNumber}?token=${result.trackingToken}`);
     });
   }
@@ -730,71 +732,139 @@ export function CheckoutPage({ gcashNumber }: CheckoutPageProps) {
               </div>
             </DialogHeader>
 
-            <div className="flex-1 overflow-y-auto px-6 py-6 space-y-4">
-              {/* Contact */}
-              <div className="flex items-center gap-3 rounded-2xl border border-orange-900/8 bg-gradient-to-br from-stone-50 to-amber-50/40 px-4 py-4 shadow-sm">
-                <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-red-100/80 text-red-700 shadow-sm">
-                  <User className="size-5" aria-hidden="true" />
+            <div className="flex-1 space-y-4 overflow-y-auto px-5 py-5 sm:px-6">
+              {/* Compact details grid */}
+              <div className="grid grid-cols-2 gap-2.5">
+                <div className="rounded-2xl border border-orange-900/8 bg-gradient-to-br from-stone-50 to-amber-50/40 p-3.5 shadow-sm">
+                  <div className="flex items-center gap-1.5 text-red-700">
+                    <User className="size-3.5" aria-hidden="true" />
+                    <p className="text-[10px] font-black uppercase tracking-widest text-orange-950/40">
+                      Contact
+                    </p>
+                  </div>
+                  <p className="mt-1.5 truncate text-sm font-bold text-[#25130b]">
+                    {customerName || "—"}
+                  </p>
+                  <p className="truncate text-xs font-medium text-orange-950/55">
+                    {customerPhone || "—"}
+                  </p>
                 </div>
-                <div className="min-w-0 flex-1">
-                  <p className="text-[10px] font-black uppercase tracking-widest text-orange-950/40">Contact</p>
-                  <p className="mt-1 truncate text-sm font-bold text-[#25130b]">{customerName} · {customerPhone}</p>
+
+                <div className="rounded-2xl border border-orange-900/8 bg-gradient-to-br from-stone-50 to-amber-50/40 p-3.5 shadow-sm">
+                  <div className="flex items-center gap-1.5 text-red-700">
+                    <Truck className="size-3.5" aria-hidden="true" />
+                    <p className="text-[10px] font-black uppercase tracking-widest text-orange-950/40">
+                      Order Type
+                    </p>
+                  </div>
+                  <p className="mt-1.5 truncate text-sm font-bold text-[#25130b]">
+                    {orderType === "PICKUP" ? "Pickup" : "Delivery"}
+                  </p>
+                  <p className="truncate text-xs font-medium text-orange-950/55">
+                    {orderType === "PICKUP"
+                      ? "Ready in ~15 min"
+                      : deliveryAddress || "Address pending"}
+                  </p>
                 </div>
-              </div>
 
-            {/* Order type */}
-            <div className="flex items-center gap-3 rounded-2xl border border-orange-900/8 bg-gradient-to-br from-stone-50 to-amber-50/40 px-4 py-4 shadow-sm">
-              <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-red-100/80 text-red-700 shadow-sm">
-                <Truck className="size-5" aria-hidden="true" />
-              </div>
-              <div className="min-w-0 flex-1">
-                <p className="text-[10px] font-black uppercase tracking-widest text-orange-950/40">Order Type</p>
-                <p className="mt-1 truncate text-sm font-bold text-[#25130b]">
-                  {orderType === "PICKUP" ? "Pickup" : "Delivery"}
-                  {orderType === "DELIVERY" && deliveryAddress ? (
-                    <span className="mt-1 block text-xs font-medium text-orange-950/60">{deliveryAddress}</span>
-                  ) : null}
-                </p>
-              </div>
-            </div>
-
-            {/* Payment */}
-            <div className="flex items-center gap-3 rounded-2xl border border-orange-900/8 bg-gradient-to-br from-stone-50 to-amber-50/40 px-4 py-4 shadow-sm">
-              <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-red-100/80 text-red-700 shadow-sm">
-                <CreditCard className="size-5" aria-hidden="true" />
-              </div>
-              <div className="min-w-0 flex-1">
-                <p className="text-[10px] font-black uppercase tracking-widest text-orange-950/40">Payment</p>
-                <p className="mt-1 truncate text-sm font-bold text-[#25130b]">
-                  {paymentMethod === "CASH"
-                    ? "Cash at Pickup"
-                    : paymentMethod === "COD"
-                      ? "Cash on Delivery"
-                      : "GCash"}
-                  {paymentMethod === "GCASH" && gcashReference ? (
-                    <span className="mt-1 block text-xs font-medium text-orange-950/60">Ref: {gcashReference}</span>
-                  ) : null}
-                </p>
-              </div>
-            </div>
-
-            {/* Items count + total - Prominent section */}
-            <div className="relative overflow-hidden rounded-2xl border-2 border-red-600/20 bg-gradient-to-br from-red-50 to-orange-50/50 px-5 py-5 shadow-lg shadow-red-600/10">
-              <div className="flex items-center gap-4">
-                <div className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-red-600 to-red-700 text-white shadow-lg shadow-red-600/30">
-                  <span className="text-lg font-black">{itemCount}</span>
+                <div className="rounded-2xl border border-orange-900/8 bg-gradient-to-br from-stone-50 to-amber-50/40 p-3.5 shadow-sm">
+                  <div className="flex items-center gap-1.5 text-red-700">
+                    <CreditCard className="size-3.5" aria-hidden="true" />
+                    <p className="text-[10px] font-black uppercase tracking-widest text-orange-950/40">
+                      Payment
+                    </p>
+                  </div>
+                  <p className="mt-1.5 truncate text-sm font-bold text-[#25130b]">
+                    {paymentMethod === "CASH"
+                      ? "Cash at Pickup"
+                      : paymentMethod === "COD"
+                        ? "Cash on Delivery"
+                        : "GCash"}
+                  </p>
+                  <p className="truncate text-xs font-medium text-orange-950/55">
+                    {paymentMethod === "GCASH"
+                      ? gcashReference
+                        ? `Ref: ${gcashReference}`
+                        : "Manual transfer"
+                      : "Pay on arrival"}
+                  </p>
                 </div>
-                <div className="flex-1">
-                  <p className="text-xs font-bold uppercase tracking-wide text-red-700/70">
+
+                <div className="rounded-2xl border border-orange-900/8 bg-gradient-to-br from-stone-50 to-amber-50/40 p-3.5 shadow-sm">
+                  <div className="flex items-center gap-1.5 text-red-700">
+                    <ShoppingBag className="size-3.5" aria-hidden="true" />
+                    <p className="text-[10px] font-black uppercase tracking-widest text-orange-950/40">
+                      Items
+                    </p>
+                  </div>
+                  <p className="mt-1.5 truncate text-sm font-bold text-[#25130b]">
                     {itemCount} item{itemCount !== 1 ? "s" : ""}
                   </p>
-                  <p className="mt-1 text-2xl font-black text-red-700 tabular-nums">
-                    {formatPeso(total)}
+                  <p className="truncate text-xs font-medium text-orange-950/55">
+                    {items.length} product{items.length !== 1 ? "s" : ""}
                   </p>
                 </div>
               </div>
+
+              {/* Full item list */}
+              <div className="rounded-2xl border border-orange-900/8 bg-white/70 p-3 shadow-sm">
+                <p className="mb-2 px-1 text-[10px] font-black uppercase tracking-widest text-orange-950/40">
+                  Order details
+                </p>
+                <div className="space-y-1">
+                  {items.map((item) => {
+                    const addOnsTotal = item.addOns.reduce(
+                      (sum, addOn) => sum + addOn.price,
+                      0,
+                    );
+                    const lineTotal =
+                      (item.price + addOnsTotal) * item.quantity;
+                    return (
+                      <div
+                        key={item.cartKey}
+                        className="flex items-start justify-between gap-2 rounded-xl px-2 py-1.5"
+                      >
+                        <div className="flex min-w-0 items-start gap-2">
+                          <span className="mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-md bg-red-100 text-[10px] font-black text-red-700">
+                            {item.quantity}
+                          </span>
+                          <div className="min-w-0">
+                            <p className="truncate text-xs font-bold text-[#25130b]">
+                              {item.name}
+                            </p>
+                            {item.addOns.length > 0 ? (
+                              <p className="truncate text-[11px] font-medium text-orange-950/45">
+                                + {item.addOns.map((a) => a.name).join(", ")}
+                              </p>
+                            ) : null}
+                          </div>
+                        </div>
+                        <span className="shrink-0 text-xs font-black text-red-700 tabular-nums">
+                          {formatPeso(lineTotal)}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Total */}
+              <div className="relative overflow-hidden rounded-2xl border-2 border-red-600/20 bg-gradient-to-br from-red-50 to-orange-50/50 px-5 py-4 shadow-lg shadow-red-600/10">
+                <div className="flex items-center justify-between gap-3">
+                  <div>
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-red-700/70">
+                      Total{orderType === "DELIVERY" ? " · incl. delivery" : ""}
+                    </p>
+                    <p className="mt-0.5 text-2xl font-black text-red-700 tabular-nums">
+                      {formatPeso(total)}
+                    </p>
+                  </div>
+                  <div className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-red-600 to-red-700 text-white shadow-lg shadow-red-600/30">
+                    <ShoppingBag className="size-5" aria-hidden="true" />
+                  </div>
+                </div>
+              </div>
             </div>
-          </div>
 
           <DialogFooter className="border-t border-orange-900/8 bg-gradient-to-br from-white to-orange-50/50 px-6 py-6 sm:justify-between shrink-0">
             <button

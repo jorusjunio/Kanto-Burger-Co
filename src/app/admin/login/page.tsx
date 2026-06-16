@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 
 import { UserRole } from "@/generated/prisma/enums";
 import { LoginForm } from "@/features/admin/auth/login-form";
+import { isGoogleAuthEnabled } from "@/server/auth/config";
 import { getCurrentSession } from "@/server/auth/session";
 
 export default async function AdminLoginPage() {
@@ -22,7 +23,7 @@ export default async function AdminLoginPage() {
 
       {/* Centered Login Card */}
       <div className="relative z-10 flex items-center justify-center min-h-screen px-4">
-        <LoginForm />
+        <LoginForm googleEnabled={isGoogleAuthEnabled} />
       </div>
     </main>
   );

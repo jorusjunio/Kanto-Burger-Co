@@ -188,7 +188,7 @@ export function ProductForm({
       </section>
 
       <aside className="space-y-5">
-        <div className="rounded-lg border border-stone-200 bg-white p-4">
+        <div className="admin-card rounded-lg border border-stone-200 bg-white p-4">
           <h2 className="font-black text-[#25130b]">Inventory</h2>
           <div className="mt-4 space-y-4">
             <label className="flex items-center gap-3 text-sm font-bold text-[#25130b]">
@@ -227,7 +227,7 @@ export function ProductForm({
           </div>
         </div>
 
-        <div className="rounded-lg border border-stone-200 bg-white p-4">
+        <div className="admin-card rounded-lg border border-stone-200 bg-white p-4">
           <h2 className="font-black text-[#25130b]">Storefront</h2>
           <div className="mt-4 space-y-3">
             <label className="flex items-center gap-3 text-sm font-bold text-[#25130b]">
@@ -254,12 +254,20 @@ export function ProductForm({
         <div className="flex flex-col gap-2">
           <Button
             type="submit"
-            className="h-10 bg-gradient-to-r from-red-600 to-red-700 text-white hover:from-red-700 hover:to-red-800 font-black"
+            className="group h-10 bg-gradient-to-r from-red-600 to-red-700 text-white hover:from-red-700 hover:to-red-800 font-black transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-red-600/30 active:scale-[0.98]"
           >
-            <Save aria-hidden="true" />
+            <Save
+              aria-hidden="true"
+              className="transition-transform duration-300 group-hover:scale-110"
+            />
             {submitLabel}
           </Button>
-          <Button type="button" variant="outline" asChild>
+          <Button
+            type="button"
+            variant="outline"
+            asChild
+            className="transition-all duration-300 hover:-translate-y-0.5 hover:bg-stone-50"
+          >
             <Link href="/admin/menu">Cancel</Link>
           </Button>
         </div>

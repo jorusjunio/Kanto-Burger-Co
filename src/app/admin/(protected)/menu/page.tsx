@@ -55,14 +55,21 @@ export default async function AdminMenuPage() {
           <p className="text-sm font-black uppercase tracking-wide text-red-700">
             Admin
           </p>
-          <h1 className="mt-2 text-3xl font-black text-[#25130b]">Menu</h1>
+          <div className="mt-2 flex items-center gap-3">
+            <h1 className="text-3xl font-black text-[#25130b]">Menu</h1>
+            {products.length > 0 ? (
+              <span className="inline-flex items-center rounded-full bg-red-100 px-3 py-1 text-xs font-black text-red-700">
+                {products.length}
+              </span>
+            ) : null}
+          </div>
           <p className="mt-2 text-stone-500">
             Manage products, availability, add-ons, and stock levels.
           </p>
         </div>
-        <Button asChild className="bg-gradient-to-r from-red-600 to-red-700 text-white hover:from-red-700 hover:to-red-800 font-black">
+        <Button asChild className="group bg-gradient-to-r from-red-600 to-red-700 text-white hover:from-red-700 hover:to-red-800 font-black transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-red-600/30">
           <Link href="/admin/menu/new">
-            <Plus aria-hidden="true" />
+            <Plus aria-hidden="true" className="transition-transform duration-300 group-hover:rotate-90" />
             Add Product
           </Link>
         </Button>
@@ -85,7 +92,7 @@ export default async function AdminMenuPage() {
         </div>
       ) : (
         <div className="overflow-hidden rounded-2xl border border-white bg-white/90 shadow-md shadow-stone-100/50 animate-fade-in">
-          <Table>
+          <Table className="admin-table">
             <TableHeader>
               <TableRow>
                 <TableHead>Product</TableHead>
@@ -148,13 +155,25 @@ export default async function AdminMenuPage() {
                           name="isAvailable"
                           value={product.isAvailable ? "false" : "true"}
                         />
-                        <Button type="submit" size="sm" variant="outline">
+                        <Button
+                          type="submit"
+                          size="sm"
+                          variant="outline"
+                          className="transition-all duration-300 hover:-translate-y-0.5 hover:border-red-300 hover:text-red-700"
+                        >
                           {product.isAvailable ? "Hide" : "Show"}
                         </Button>
                       </form>
-                      <Button size="sm" asChild>
+                      <Button
+                        size="sm"
+                        asChild
+                        className="group bg-gradient-to-r from-red-600 to-red-700 text-white transition-all duration-300 hover:from-red-700 hover:to-red-800 hover:shadow-md hover:shadow-red-600/30"
+                      >
                         <Link href={`/admin/menu/${product.id}/edit`}>
-                          <Edit aria-hidden="true" />
+                          <Edit
+                            aria-hidden="true"
+                            className="transition-transform duration-300 group-hover:scale-110 group-hover:-rotate-6"
+                          />
                           Edit
                         </Link>
                       </Button>

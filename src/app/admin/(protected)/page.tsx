@@ -176,7 +176,7 @@ export default async function AdminDashboardPage() {
       {/* Metrics Grid */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {/* Total Sales Today */}
-        <div className="relative overflow-hidden rounded-2xl border border-white bg-white/90 px-6 py-5 shadow-md shadow-stone-100/50 animate-fade-in" style={{ animationDelay: '0ms' }}>
+        <div className="admin-card group relative overflow-hidden rounded-2xl border border-white bg-white/90 px-6 py-5 shadow-md shadow-stone-100/50 animate-fade-in" style={{ animationDelay: '0ms' }}>
           <div className="flex items-start justify-between">
             <div className="flex-1">
               <p className="text-[10px] font-black uppercase tracking-widest text-stone-500">
@@ -186,14 +186,14 @@ export default async function AdminDashboardPage() {
                 {formatPeso(metrics.totalSalesToday)}
               </p>
             </div>
-            <div className="flex size-12 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-red-600 to-red-700 shadow-lg shadow-red-600/30">
+            <div className="admin-icon-pop flex size-12 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-red-600 to-red-700 shadow-lg shadow-red-600/30">
               <TrendingUp className="size-6 text-white" />
             </div>
           </div>
         </div>
 
         {/* Pending Orders */}
-        <div className="relative overflow-hidden rounded-2xl border border-white bg-white/90 px-6 py-5 shadow-md shadow-stone-100/50 animate-fade-in" style={{ animationDelay: '100ms' }}>
+        <div className="admin-card group relative overflow-hidden rounded-2xl border border-white bg-white/90 px-6 py-5 shadow-md shadow-stone-100/50 animate-fade-in" style={{ animationDelay: '100ms' }}>
           {/* Liquid Wave Background */}
           <div
             className="absolute bottom-0 left-0 right-0 overflow-hidden"
@@ -239,7 +239,7 @@ export default async function AdminDashboardPage() {
                 {metrics.pendingOrders}
               </p>
             </div>
-            <div className="relative flex size-12 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-red-600 to-red-700 shadow-lg shadow-red-600/30">
+            <div className="relative admin-icon-pop flex size-12 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-red-600 to-red-700 shadow-lg shadow-red-600/30">
               <Clock className="size-6 text-white" />
               <div className="absolute -top-1 -right-1 flex size-3 items-center justify-center rounded-full bg-amber-400 shadow-sm">
                 <div className="size-2 rounded-full bg-amber-400 animate-ping" />
@@ -249,7 +249,7 @@ export default async function AdminDashboardPage() {
         </div>
 
         {/* Completed Orders Today */}
-        <div className="relative overflow-hidden rounded-2xl border border-white bg-white/90 px-6 py-5 shadow-md shadow-stone-100/50 animate-fade-in" style={{ animationDelay: '200ms' }}>
+        <div className="admin-card group relative overflow-hidden rounded-2xl border border-white bg-white/90 px-6 py-5 shadow-md shadow-stone-100/50 animate-fade-in" style={{ animationDelay: '200ms' }}>
           <div className="flex items-start justify-between">
             <div className="flex-1">
               <p className="text-[10px] font-black uppercase tracking-widest text-stone-500">
@@ -259,14 +259,14 @@ export default async function AdminDashboardPage() {
                 {metrics.completedOrdersToday}
               </p>
             </div>
-            <div className="flex size-12 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-600 to-emerald-700 shadow-lg shadow-emerald-600/30">
+            <div className="admin-icon-pop flex size-12 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-600 to-emerald-700 shadow-lg shadow-emerald-600/30">
               <ShoppingCart className="size-6 text-white" />
             </div>
           </div>
         </div>
 
         {/* Top Selling Products */}
-        <div className="relative overflow-hidden rounded-2xl border border-white bg-white/90 px-6 py-5 shadow-md shadow-stone-100/50 animate-fade-in" style={{ animationDelay: '300ms' }}>
+        <div className="admin-card group relative overflow-hidden rounded-2xl border border-white bg-white/90 px-6 py-5 shadow-md shadow-stone-100/50 animate-fade-in" style={{ animationDelay: '300ms' }}>
           <div className="flex items-start justify-between">
             <div className="flex-1">
               <p className="text-[10px] font-black uppercase tracking-widest text-stone-500">
@@ -279,7 +279,7 @@ export default async function AdminDashboardPage() {
                 {metrics.topSellingProducts[0].quantity} sold
               </p>
             </div>
-            <div className="flex size-12 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-amber-500 to-amber-600 shadow-lg shadow-amber-500/30">
+            <div className="admin-icon-pop flex size-12 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-amber-500 to-amber-600 shadow-lg shadow-amber-500/30">
               <Utensils className="size-6 text-white" />
             </div>
           </div>
@@ -289,7 +289,7 @@ export default async function AdminDashboardPage() {
       {/* Split Layout: Sales Analytics Chart + Top Products */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Column 1: Sales Analytics Chart (2/3 space) */}
-        <div className="lg:col-span-2 border border-white bg-white/90 rounded-3xl p-6 shadow-md shadow-stone-100/50 animate-fade-in" style={{ animationDelay: '400ms' }}>
+        <div className="admin-card lg:col-span-2 border border-white bg-white/90 rounded-3xl p-6 shadow-md shadow-stone-100/50 animate-fade-in" style={{ animationDelay: '400ms' }}>
           <h2 className="text-sm font-black uppercase tracking-wide text-[#25130b] mb-4">
             Sales Analytics Today
           </h2>
@@ -297,7 +297,7 @@ export default async function AdminDashboardPage() {
         </div>
 
         {/* Column 2: Top Selling Products (1/3 space) */}
-        <div className="border border-white bg-white/90 rounded-2xl px-6 py-5 shadow-md shadow-stone-100/50 animate-fade-in" style={{ animationDelay: '500ms' }}>
+        <div className="admin-card border border-white bg-white/90 rounded-2xl px-6 py-5 shadow-md shadow-stone-100/50 animate-fade-in" style={{ animationDelay: '500ms' }}>
           <h2 className="text-sm font-black uppercase tracking-wide text-[#25130b]">
             Top Selling Products Today
           </h2>
@@ -305,7 +305,7 @@ export default async function AdminDashboardPage() {
             {metrics.topSellingProducts.map((product, index) => (
               <div
                 key={product.name}
-                className="flex items-center gap-4 rounded-xl border border-stone-100 bg-white/60 px-4 py-3 shadow-sm"
+                className="group flex items-center gap-4 rounded-xl border border-stone-100 bg-white/60 px-4 py-3 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-red-200 hover:bg-red-50/40 hover:shadow-md"
               >
                 <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-red-600 to-red-700 text-xs font-black text-white shadow-sm">
                   {index + 1}
@@ -325,7 +325,7 @@ export default async function AdminDashboardPage() {
       {/* Bottom Row: Recent Orders + Order Breakdowns */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Column 1: Recent Orders Table (2/3 space) */}
-        <div className="lg:col-span-2 border border-white bg-white/90 rounded-3xl p-6 shadow-md shadow-stone-100/50 animate-fade-in" style={{ animationDelay: '600ms' }}>
+        <div className="admin-card lg:col-span-2 border border-white bg-white/90 rounded-3xl p-6 shadow-md shadow-stone-100/50 animate-fade-in" style={{ animationDelay: '600ms' }}>
           <h2 className="text-sm font-black uppercase tracking-wide text-[#25130b] mb-4">
             Recent Orders
           </h2>
@@ -333,7 +333,7 @@ export default async function AdminDashboardPage() {
         </div>
 
         {/* Column 2: Order Methods & Payments Breakdowns (1/3 space) */}
-        <div className="border border-white bg-white/90 rounded-2xl px-6 py-5 shadow-md shadow-stone-100/50 animate-fade-in" style={{ animationDelay: '700ms' }}>
+        <div className="admin-card border border-white bg-white/90 rounded-2xl px-6 py-5 shadow-md shadow-stone-100/50 animate-fade-in" style={{ animationDelay: '700ms' }}>
           <h2 className="text-sm font-black uppercase tracking-wide text-[#25130b] mb-4">
             Order Breakdowns
           </h2>

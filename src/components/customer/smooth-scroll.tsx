@@ -91,6 +91,10 @@ export function SmoothScroll() {
       prevent: canElementScroll,
     });
 
+    // Expose the instance so components (e.g. category nav "All") can drive
+    // smooth programmatic scrolls without fighting Lenis.
+    (window as Window & { __lenis?: Lenis }).__lenis = lenis;
+
     const stopSmoothScroll = () => lenis.stop();
     const startSmoothScroll = () => lenis.start();
     let frameId = 0;
@@ -109,6 +113,7 @@ export function SmoothScroll() {
       window.removeEventListener("project-preview-open", stopSmoothScroll);
       window.removeEventListener("project-preview-close", startSmoothScroll);
       cancelAnimationFrame(frameId);
+      delete (window as Window & { __lenis?: Lenis }).__lenis;
       lenis.destroy();
     };
   }, [pathname, enableLenis]);

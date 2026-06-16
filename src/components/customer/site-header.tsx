@@ -4,18 +4,44 @@ import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import { CustomerTopBar } from "@/components/customer/customer-top-bar";
-import { cn } from "@/lib/utils";
 
 const HEADER_HEIGHT = 56; // h-14
 const MARGIN = 16; // top-4 / bottom-4
+
+/**
+ * Customer top bar positioning.
+ *
+ * - On `/menu` the bar is permanently docked to the bottom-right corner with
+ *   no animation and no transition — it is simply fixed there from first paint.
+ * - On every other page (except the landing `/`) it flicks from the top-right
+ *   to the bottom-right as the user scrolls past the hero.
+ */
+export function SiteHeader() {
+  const pathname = usePathname();
+
+  if (pathname === "/") {
+    return null;
+  }
+
+  // Menu page: static, fixed bottom-right. No scroll listener, no transform,
+  // no transition — nothing to animate.
+  if (pathname === "/menu") {
+    return (
+      <header className="fixed z-40 bottom-4 right-4 sm:right-8 lg:right-12">
+        <CustomerTopBar />
+      </header>
+    );
+  }
+
+  return <ScrollAwareHeader />;
+}
 
 /**
  * Smoothly animate the top bar from top-right to bottom-right when scrolling
  * down past the hero. Uses translateY with a spring-like cubic-bezier for a
  * polished "flick" effect.
  */
-export function SiteHeader() {
-  const pathname = usePathname();
+function ScrollAwareHeader() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [translateYPx, setTranslateYPx] = useState(0);
   const prevScrolledRef = useRef(
@@ -63,15 +89,9 @@ export function SiteHeader() {
     return () => clearTimeout(timer);
   }, [isScrolled]);
 
-  if (pathname === "/") {
-    return null;
-  }
-
   return (
     <header
-      className={cn(
-        "fixed z-40 top-4 right-4 sm:right-8 lg:right-12",
-      )}
+      className="fixed z-40 top-4 right-4 sm:right-8 lg:right-12"
       style={
         animPhase !== "idle"
           ? ({

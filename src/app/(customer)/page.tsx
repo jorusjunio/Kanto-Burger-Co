@@ -1,10 +1,8 @@
 import Image from "next/image";
 import Link from "next/link";
-import type { CSSProperties } from "react";
 import {
   ArrowRight,
   Camera,
-  ChevronRight,
   Clock,
   Flame,
   MapPin,
@@ -12,7 +10,6 @@ import {
   Send,
   ShoppingBag,
   Sparkles,
-  Star,
   Truck,
   Utensils,
 } from "lucide-react";
@@ -20,10 +17,10 @@ import type { LucideIcon } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { CustomerTopBar } from "@/components/customer/customer-top-bar";
+import { FavoriteCard } from "@/components/customer/favorite-card";
 import { HeroBurgerShowcase } from "@/components/customer/hero-burger-showcase";
 import { getMenuCategories } from "@/features/menu/queries";
 import { formatPeso } from "@/lib/format";
-import { shouldUnoptimizeImage } from "@/lib/image";
 
 export const revalidate = 60;
 
@@ -52,6 +49,19 @@ const serviceNotes: Array<[LucideIcon, string]> = [
   [Clock, "20-30 min prep"],
   [Truck, "Pickup + delivery"],
   [MapPin, "Quezon City"],
+];
+
+// Drifting embers for the hero background — positions/timing keep them organic.
+const heroEmbers: Array<{ left: string; delay: string; duration: string }> = [
+  { left: "8%", delay: "0s", duration: "9s" },
+  { left: "18%", delay: "-3s", duration: "11s" },
+  { left: "29%", delay: "-6s", duration: "8.5s" },
+  { left: "41%", delay: "-1.5s", duration: "10.5s" },
+  { left: "55%", delay: "-4.5s", duration: "9.5s" },
+  { left: "67%", delay: "-2s", duration: "12s" },
+  { left: "78%", delay: "-7s", duration: "8s" },
+  { left: "88%", delay: "-5s", duration: "11.5s" },
+  { left: "95%", delay: "-3.5s", duration: "10s" },
 ];
 
 const crowdFavoriteNames = [
@@ -147,6 +157,24 @@ export default async function Home() {
           />
           <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(9,3,2,0.98)_0%,rgba(28,7,5,0.92)_42%,rgba(127,29,29,0.5)_100%)]" />
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_74%_36%,rgba(251,191,36,0.34),transparent_28%),linear-gradient(180deg,rgba(255,255,255,0.1),transparent_28%,rgba(0,0,0,0.2))]" />
+
+          {/* Floating embers — keeps the hero backdrop alive */}
+          <div className="hero-embers" aria-hidden="true">
+            {heroEmbers.map((ember, index) => (
+              <span
+                key={index}
+                className="hero-ember"
+                style={
+                  {
+                    left: ember.left,
+                    animationDelay: ember.delay,
+                    animationDuration: ember.duration,
+                  } as React.CSSProperties
+                }
+              />
+            ))}
+          </div>
+
           <div className="relative z-10 mx-auto grid max-w-[1380px] gap-10 lg:grid-cols-[0.78fr_1.22fr] lg:items-center lg:gap-20 xl:gap-28">
             <div
               className="hero-copy flex min-h-[470px] flex-col justify-center gap-7 lg:min-h-[calc(100vh-112px)] lg:-translate-x-4 xl:-translate-x-8"
@@ -239,6 +267,20 @@ export default async function Home() {
       </section>
 
       <section className="relative z-10 mx-auto grid max-w-6xl gap-4 bg-[oklch(0.982_0.025_82)] px-4 py-10 sm:px-6 lg:grid-cols-3">
+        <div className="ambient-orbs" aria-hidden="true">
+          <span
+            className="ambient-orb ambient-orb--amber"
+            style={{ top: "-4rem", left: "-3rem", animationDuration: "16s" } as React.CSSProperties}
+          />
+          <span
+            className="ambient-orb ambient-orb--green"
+            style={{ top: "20%", right: "-4rem", animationDuration: "20s", animationDelay: "-5s" } as React.CSSProperties}
+          />
+          <span
+            className="ambient-orb ambient-orb--red"
+            style={{ bottom: "-5rem", left: "42%", animationDuration: "18s", animationDelay: "-8s" } as React.CSSProperties}
+          />
+        </div>
         {highlights.map(([count, Icon, title, copy], index) => (
           <div
             key={title}
@@ -270,6 +312,16 @@ export default async function Home() {
       </section>
 
       <section className="relative z-10 mx-auto max-w-7xl bg-[oklch(0.982_0.025_82)] px-4 pb-12 pt-2 sm:px-6">
+        <div className="ambient-orbs" aria-hidden="true">
+          <span
+            className="ambient-orb ambient-orb--red"
+            style={{ top: "-3rem", right: "8%", animationDuration: "19s" } as React.CSSProperties}
+          />
+          <span
+            className="ambient-orb ambient-orb--amber"
+            style={{ bottom: "-4rem", left: "-2rem", animationDuration: "22s", animationDelay: "-6s" } as React.CSSProperties}
+          />
+        </div>
         <div
           className="mb-6 flex items-end justify-between gap-4"
           data-scroll-reveal
@@ -302,51 +354,15 @@ export default async function Home() {
             };
 
             return (
-              <Link
+              <FavoriteCard
                 key={product.id}
-                href="/menu"
-                className="favorite-card group relative flex min-h-[470px] overflow-hidden rounded-lg transition"
-                style={
-                  { "--favorite-delay": `${index * 70}ms` } as CSSProperties
-                }
-                data-scroll-reveal
-              >
-                <div className="favorite-card__media relative min-h-[285px] flex-1 overflow-hidden">
-                  {image ? (
-                    <Image
-                      src={image}
-                      alt={product.name}
-                      fill
-                      sizes="(min-width: 1280px) 300px, (min-width: 1024px) 280px, (min-width: 640px) 50vw, 100vw"
-                      unoptimized={shouldUnoptimizeImage(image)}
-                      className={`object-cover transition duration-700 group-hover:scale-110 ${accent.imageClass}`}
-                    />
-                  ) : null}
-                  <div className="favorite-card__wash" />
-                  <span className="favorite-card__badge favorite-card__badge--top">
-                    <Star className="size-3.5 fill-amber-300" aria-hidden="true" />
-                    {accent.label}
-                  </span>
-                  <span className="favorite-card__rank">0{index + 1}</span>
-                </div>
-                <div className="favorite-card__content">
-                  <p className="favorite-card__tone">{accent.tone}</p>
-                  <p className="text-lg font-black uppercase leading-tight text-white transition">
-                    {product.name}
-                  </p>
-                  <p className="mt-2 line-clamp-2 text-sm font-semibold leading-6 text-orange-50/68">
-                    {product.description}
-                  </p>
-                  <div className="mt-auto flex items-center justify-between gap-3 pt-3">
-                    <p className="text-xl font-black text-amber-300">
-                      {formatPeso(product.price)}
-                    </p>
-                    <span className="favorite-card__cta">
-                      <ChevronRight className="size-4" aria-hidden="true" />
-                    </span>
-                  </div>
-                </div>
-              </Link>
+                name={product.name}
+                description={product.description}
+                price={product.price}
+                image={image}
+                index={index}
+                accent={accent}
+              />
             );
           })}
         </div>

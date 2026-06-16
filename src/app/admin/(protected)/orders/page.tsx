@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ClipboardList } from "lucide-react";
+import { ClipboardList, ArrowRight } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -32,12 +32,23 @@ export default async function AdminOrdersPage() {
           <p className="text-sm font-black uppercase tracking-wide text-red-700">
             Admin
           </p>
-          <h1 className="mt-2 text-3xl font-black text-[#25130b]">Orders</h1>
+          <div className="mt-2 flex items-center gap-3">
+            <h1 className="text-3xl font-black text-[#25130b]">Orders</h1>
+            {orders.length > 0 ? (
+              <span className="inline-flex items-center rounded-full bg-red-100 px-3 py-1 text-xs font-black text-red-700">
+                {orders.length}
+              </span>
+            ) : null}
+          </div>
           <p className="mt-2 text-stone-500">
             Track incoming orders and update kitchen/payment status.
           </p>
         </div>
-        <Button variant="outline" asChild>
+        <Button
+          variant="outline"
+          asChild
+          className="transition-all duration-300 hover:-translate-y-0.5 hover:border-red-300 hover:text-red-700 hover:shadow-md"
+        >
           <Link href="/menu">View Storefront</Link>
         </Button>
       </div>
@@ -53,8 +64,8 @@ export default async function AdminOrdersPage() {
           </p>
         </div>
       ) : (
-        <div className="rounded-2xl border border-white bg-white/90 shadow-md shadow-stone-100/50 animate-fade-in">
-          <Table>
+        <div className="overflow-hidden rounded-2xl border border-white bg-white/90 shadow-md shadow-stone-100/50 animate-fade-in">
+          <Table className="admin-table">
             <TableHeader>
               <TableRow>
                 <TableHead>Order</TableHead>
@@ -95,8 +106,18 @@ export default async function AdminOrdersPage() {
                   </TableCell>
                   <TableCell>{formatDate(order.createdAt)}</TableCell>
                   <TableCell className="text-right">
-                    <Button size="sm" asChild>
-                      <Link href={`/admin/orders/${order.id}`}>Open</Link>
+                    <Button
+                      size="sm"
+                      asChild
+                      className="group bg-gradient-to-r from-red-600 to-red-700 text-white transition-all duration-300 hover:from-red-700 hover:to-red-800 hover:shadow-md hover:shadow-red-600/30"
+                    >
+                      <Link href={`/admin/orders/${order.id}`}>
+                        Open
+                        <ArrowRight
+                          aria-hidden="true"
+                          className="size-4 transition-transform duration-300 group-hover:translate-x-0.5"
+                        />
+                      </Link>
                     </Button>
                   </TableCell>
                 </TableRow>

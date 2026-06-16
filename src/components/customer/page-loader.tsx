@@ -3,8 +3,8 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 
-// Routes that trigger the cinematic loading screen
-const LOADING_ROUTES = new Set(["/", "/menu"]);
+// Routes that trigger the cinematic loading screen on initial/direct load
+const LOADING_ROUTES = new Set(["/"]);
 
 export function PageLoader() {
   const pathname = usePathname();
@@ -124,8 +124,13 @@ export function PageLoader() {
       prevPathname.current = pathname;
       return;
     }
-    if (prevPathname.current !== pathname && LOADING_ROUTES.has(pathname)) {
-      runLoader(pathname === "/menu");
+    if (prevPathname.current !== pathname) {
+      if (pathname === "/") {
+        runLoader(false);
+      } else if (pathname === "/menu" && prevPathname.current === "/") {
+        // Menu loader only when navigating from the home page
+        runLoader(true);
+      }
     }
     prevPathname.current = pathname;
     // eslint-disable-next-line react-hooks/exhaustive-deps

@@ -68,6 +68,12 @@ export default async function OrderPage({ params, searchParams }: OrderPageProps
   const { token = "" } = await searchParams;
   const order = await getOrderByNumber(orderNumber, token);
 
+  const placedAt = new Date(order.createdAt).toLocaleString("en-PH", {
+    dateStyle: "medium",
+    timeStyle: "short",
+  });
+  const itemCount = order.items.reduce((sum, item) => sum + item.quantity, 0);
+
   return (
     <main className="storefront-bg min-h-screen flex items-center justify-center px-4 py-10">
       <RealtimeOrderListener
@@ -94,6 +100,10 @@ export default async function OrderPage({ params, searchParams }: OrderPageProps
                 </h1>
                 <p className="mt-1 text-[11px] font-medium text-orange-950/65 sm:text-xs">
                   Save this number for pickup, delivery, or GCash verification.
+                </p>
+                <p className="mt-1 flex items-center gap-1 text-[10px] font-semibold text-orange-950/45">
+                  <Clock className="size-2.5" aria-hidden="true" />
+                  Placed {placedAt}
                 </p>
               </div>
             </div>
@@ -130,6 +140,11 @@ export default async function OrderPage({ params, searchParams }: OrderPageProps
                 )}
                 <p className="text-xs font-black text-[#25130b]">{order.paymentMethod}</p>
               </div>
+              {order.paymentMethod === "GCASH" && order.gcashReference ? (
+                <p className="mt-0.5 text-[10px] font-medium text-orange-950/60">
+                  Ref: {order.gcashReference}
+                </p>
+              ) : null}
             </div>
             <div className="rounded-lg border border-orange-900/8 bg-orange-50/40 p-2.5">
               <p className="text-[9px] font-bold uppercase tracking-wide text-orange-950/40">Payment Status</p>
@@ -139,7 +154,12 @@ export default async function OrderPage({ params, searchParams }: OrderPageProps
 
           {/* Items List */}
           <div className="border-y-2 border-dashed border-orange-900/10 px-3 py-3 sm:px-4 sm:py-4">
-            <h2 className="text-[10px] font-black uppercase tracking-wide text-[#25130b]">Order Items</h2>
+            <div className="flex items-center justify-between">
+              <h2 className="text-[10px] font-black uppercase tracking-wide text-[#25130b]">Order Items</h2>
+              <span className="text-[10px] font-bold text-orange-950/45">
+                {itemCount} item{itemCount !== 1 ? "s" : ""}
+              </span>
+            </div>
             <div className="mt-2 space-y-2">
               {order.items.map((item) => (
                 <div
@@ -153,6 +173,9 @@ export default async function OrderPage({ params, searchParams }: OrderPageProps
                       </span>
                       <div>
                         <p className="text-xs font-black text-[#25130b]">{item.productName}</p>
+                        <p className="mt-0.5 text-[9px] font-medium text-orange-950/40 tabular-nums">
+                          {item.quantity} × {formatPeso(Number(item.unitPrice))}
+                        </p>
                         {Array.isArray(item.selectedAddOns) && item.selectedAddOns.length > 0 && (
                           <p className="mt-0.5 text-[9px] text-orange-950/50">
                             Add-ons: {item.selectedAddOns.map((a) => (a as { name: string }).name).join(", ")}
@@ -172,15 +195,33 @@ export default async function OrderPage({ params, searchParams }: OrderPageProps
             </div>
           </div>
 
+          {/* Order Notes */}
+          {order.notes ? (
+            <div className="border-b-2 border-dashed border-orange-900/10 px-3 py-3 sm:px-4 sm:py-4">
+              <h2 className="text-[10px] font-black uppercase tracking-wide text-[#25130b]">
+                Notes
+              </h2>
+              <p className="mt-1 text-[11px] font-medium leading-relaxed text-orange-950/60">
+                {order.notes}
+              </p>
+            </div>
+          ) : null}
+
           {/* Total Section */}
           <div className="space-y-2 px-3 py-3 sm:px-4 sm:py-4">
             <div className="flex justify-between text-xs">
-              <span className="font-medium text-orange-950/50">Subtotal</span>
+              <span className="font-medium text-orange-950/50">
+                Items ({itemCount})
+              </span>
               <span className="font-bold text-[#25130b] tabular-nums">{formatPeso(Number(order.subtotal))}</span>
             </div>
             <div className="flex justify-between text-xs">
               <span className="font-medium text-orange-950/50">Delivery fee</span>
-              <span className="font-bold text-[#25130b] tabular-nums">{formatPeso(Number(order.deliveryFee))}</span>
+              {Number(order.deliveryFee) > 0 ? (
+                <span className="font-bold text-[#25130b] tabular-nums">{formatPeso(Number(order.deliveryFee))}</span>
+              ) : (
+                <span className="font-black uppercase tracking-wide text-emerald-600">Free</span>
+              )}
             </div>
             <div className="relative flex justify-between border-t-2 border-dashed border-orange-900/10 pt-2 text-sm">
               <div className="absolute inset-0 flex items-center justify-center">

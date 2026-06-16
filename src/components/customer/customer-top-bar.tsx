@@ -81,7 +81,7 @@ export function CustomerTopBar({ variant = "light" }: CustomerTopBarProps) {
     return (
       <div
         className={cn(
-          "fixed inset-x-0 top-4 z-50 mx-auto w-full max-w-[850px] overflow-hidden rounded-[2rem] backdrop-blur-2xl backdrop-saturate-[1.6] px-5 py-2 shadow-[0_12px_40px_rgba(0,0,0,0.25),inset_0_1px_1px_rgba(255,255,255,0.15)] transition-all duration-300 ease-in-out",
+          "home-topbar fixed inset-x-0 top-4 z-50 mx-auto w-full max-w-[850px] overflow-hidden rounded-[2rem] backdrop-blur-2xl backdrop-saturate-[1.6] px-5 py-2 shadow-[0_12px_40px_rgba(0,0,0,0.25),inset_0_1px_1px_rgba(255,255,255,0.15)] transition-all duration-300 ease-in-out",
           isPastHero
             ? "border border-black/10 bg-transparent text-stone-900"
             : "border border-white/10 bg-neutral-900/[0.25] text-white"
@@ -120,7 +120,7 @@ export function CustomerTopBar({ variant = "light" }: CustomerTopBarProps) {
                   "object-contain transition-all duration-500",
                   isPastHero
                     ? "brightness-0 saturate-100"
-                    : "brightness-100 invert-0",
+                    : "brightness-0 invert",
                 )}
                 priority
               />

@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState, type PointerEvent } from "react";
 import {
   Check,
   Minus,
@@ -66,6 +66,21 @@ export function ProductCard({ product }: ProductCardProps) {
   const shouldUnoptimizeProductImage = product.imageUrl
     ? shouldUnoptimizeImage(product.imageUrl)
     : false;
+  const spotlightFrame = useRef(0);
+
+  // Drive a cursor-following spotlight via CSS custom properties (rAF-throttled).
+  function handlePointerMove(event: PointerEvent<HTMLDivElement>) {
+    const card = event.currentTarget;
+    const rect = card.getBoundingClientRect();
+    const mx = ((event.clientX - rect.left) / rect.width) * 100;
+    const my = ((event.clientY - rect.top) / rect.height) * 100;
+    if (spotlightFrame.current) return;
+    spotlightFrame.current = requestAnimationFrame(() => {
+      spotlightFrame.current = 0;
+      card.style.setProperty("--mx", `${mx.toFixed(2)}%`);
+      card.style.setProperty("--my", `${my.toFixed(2)}%`);
+    });
+  }
 
   function toggleAddOn(addOnId: string) {
     setSelectedAddOnIds((current) =>
@@ -102,7 +117,10 @@ export function ProductCard({ product }: ProductCardProps) {
   }
 
   return (
-    <Card className="menu-card group h-full gap-0 overflow-hidden rounded-2xl border-0 p-0 shadow-[0_2px_16px_rgba(120,53,15,0.06)] transition-all duration-300 hover:shadow-[0_16px_48px_rgba(120,53,15,0.12)] hover:-translate-y-1">
+    <Card
+      onPointerMove={handlePointerMove}
+      className="menu-card group h-full gap-0 overflow-hidden rounded-2xl border-0 p-0"
+    >
       {/* ── Image Area ── */}
       <div className="menu-card__image relative aspect-[4/3] overflow-hidden bg-white -mb-[1px]">
         {product.imageUrl ? (
@@ -139,16 +157,19 @@ export function ProductCard({ product }: ProductCardProps) {
         {/* Gradient wash for depth */}
         <div className="menu-card__wash" />
 
+        {/* Cursor-following spotlight */}
+        <div className="menu-card__spotlight" aria-hidden="true" />
+
         {/* Featured badge */}
         {product.isFeatured ? (
-          <div className="absolute left-3 top-3 z-10 flex items-center gap-1 rounded-full bg-amber-400 px-3 py-1 text-[11px] font-black uppercase text-red-950 shadow-lg shadow-amber-400/30">
+          <div className="menu-card__badge absolute left-3 top-3 z-10 flex items-center gap-1 rounded-full bg-amber-400 px-3 py-1 text-[11px] font-black uppercase text-red-950 shadow-lg shadow-amber-400/30">
             <Star className="size-3 fill-red-950" aria-hidden="true" />
             Hot pick
           </div>
         ) : null}
 
         {/* Floating price badge */}
-        <div className="absolute bottom-3 right-3 z-10 rounded-xl bg-white/90 px-3 py-1.5 shadow-lg backdrop-blur-sm">
+        <div className="menu-card__price absolute bottom-3 right-3 z-10 rounded-xl bg-white/90 px-3 py-1.5 shadow-lg backdrop-blur-sm">
           <p className="text-lg font-black text-red-700">
             {formatPeso(product.price)}
           </p>

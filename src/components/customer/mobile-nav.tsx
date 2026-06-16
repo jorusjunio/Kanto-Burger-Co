@@ -10,6 +10,7 @@ import {
   ShoppingBag,
   Sparkles,
   Utensils,
+  X,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 
@@ -24,6 +25,11 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { useCartStore } from "@/features/cart/cart-store";
+import {
+  removeTrackedOrder,
+  useTrackedOrders,
+  type TrackedOrder,
+} from "@/features/orders/tracked-orders";
 import { formatPeso } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
@@ -33,55 +39,71 @@ const navItems = [
   { label: "Combos", href: "/menu#combos", icon: Sparkles },
 ];
 
-/* ─── Active Order Tracker ─── */
-function ActiveOrderTracker() {
-  const [activeOrder, setActiveOrder] = useState<{ orderNumber: string; token: string } | null>(null);
+/* ─── Tracked Orders (numbered, multi-order) ─── */
+function TrackedOrderRow({
+  order,
+  index,
+}: {
+  order: TrackedOrder;
+  index: number;
+}) {
   const router = useRouter();
 
-  /* eslint-disable react-hooks/set-state-in-effect */
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const stored = localStorage.getItem('activeOrder');
-      if (stored) {
-        try {
-          setActiveOrder(JSON.parse(stored));
-        } catch (e) {
-          console.error('Failed to parse active order from localStorage', e);
-        }
-      }
-    }
-  }, []);
-  /* eslint-enable react-hooks/set-state-in-effect */
+  return (
+    <div className="flex items-center gap-2.5 rounded-xl border-2 border-red-600/15 bg-gradient-to-br from-red-50 to-orange-50/50 px-3 py-2.5 shadow-sm shadow-red-600/5">
+      <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-red-600 to-red-700 text-sm font-black text-white shadow-sm">
+        #{index + 1}
+      </div>
+      <div className="min-w-0 flex-1">
+        <p className="text-[10px] font-black uppercase tracking-widest text-red-700/70">
+          Order #{index + 1}
+        </p>
+        <p className="truncate text-xs font-black text-[#25130b]">
+          {order.orderNumber}
+        </p>
+      </div>
+      <SheetClose asChild>
+        <button
+          type="button"
+          onClick={() =>
+            router.push(
+              `/order/${order.orderNumber}?token=${order.token}`,
+            )
+          }
+          className="flex h-8 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-red-600 to-red-700 px-3 text-[10px] font-black text-white shadow-sm transition-all duration-300 hover:scale-105 active:scale-95"
+        >
+          Track
+        </button>
+      </SheetClose>
+      <button
+        type="button"
+        onClick={() => removeTrackedOrder(order.orderNumber)}
+        aria-label={`Stop tracking ${order.orderNumber}`}
+        className="flex size-7 shrink-0 items-center justify-center rounded-lg text-orange-950/30 transition-colors duration-200 hover:bg-red-100 hover:text-red-700"
+      >
+        <X className="size-3.5" aria-hidden="true" />
+      </button>
+    </div>
+  );
+}
 
-  if (!activeOrder) return null;
-
-  const handleTrack = () => {
-    router.push(`/order/${activeOrder.orderNumber}?token=${activeOrder.token}`);
-  };
+function TrackedOrdersList({ orders }: { orders: TrackedOrder[] }) {
+  if (orders.length === 0) return null;
 
   return (
-    <div className="rounded-xl border-2 border-red-600/20 bg-gradient-to-br from-red-50 to-orange-50/50 px-4 py-3 shadow-sm shadow-red-600/10">
-      <div className="flex items-center gap-3">
-        <div className="flex size-9 items-center justify-center rounded-lg bg-gradient-to-br from-red-600 to-red-700 shadow-sm">
-          <span className="text-lg">🍔</span>
-        </div>
-        <div className="flex-1">
-          <p className="text-[10px] font-black uppercase tracking-widest text-red-700/70">
-            Track Active Order
-          </p>
-          <p className="mt-0.5 text-xs font-black text-[#25130b]">
-            {activeOrder.orderNumber}
-          </p>
-        </div>
-        <SheetClose asChild>
-          <button
-            type="button"
-            onClick={handleTrack}
-            className="flex h-8 items-center justify-center rounded-lg bg-gradient-to-br from-red-600 to-red-700 px-3 text-[10px] font-black text-white shadow-sm transition-all duration-300 hover:scale-105 active:scale-95"
-          >
-            Track
-          </button>
-        </SheetClose>
+    <div className="mt-5">
+      <p className="mb-2 px-1 text-[10px] font-bold uppercase tracking-widest text-orange-950/30">
+        Track Orders
+        <span className="ml-1 font-black text-red-700">{orders.length}</span>
+      </p>
+      <div className="space-y-2">
+        {orders.map((order, index) => (
+          <TrackedOrderRow
+            key={order.orderNumber}
+            order={order}
+            index={index}
+          />
+        ))}
       </div>
     </div>
   );
@@ -229,6 +251,8 @@ function NavLink({
 /* ─── Mobile Navigation Sheet ─── */
 export function MobileNav() {
   const [open, setOpen] = useState(false);
+  const trackedOrders = useTrackedOrders();
+  const trackedCount = trackedOrders.length;
 
   // Reset entrance animations when sheet opens
   const [animKey, setAnimKey] = useState(0);
@@ -247,9 +271,21 @@ export function MobileNav() {
           variant="ghost"
           size="icon"
           className="relative size-10 rounded-full"
-          aria-label="Open navigation"
+          aria-label={
+            trackedCount > 0
+              ? `Open navigation, ${trackedCount} order${trackedCount > 1 ? "s" : ""} to track`
+              : "Open navigation"
+          }
         >
           <MenuIcon className="size-5" aria-hidden="true" />
+          {trackedCount > 0 ? (
+            <span
+              key={trackedCount}
+              className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-red-600 px-1 text-[10px] font-black leading-none text-white shadow-sm ring-2 ring-[#fffbf5] animate-in zoom-in-50 duration-300"
+            >
+              {trackedCount}
+            </span>
+          ) : null}
         </Button>
       </SheetTrigger>
 
@@ -330,10 +366,8 @@ export function MobileNav() {
               ))}
             </div>
 
-            {/* ── Active Order Section ── */}
-            <div className="mt-5">
-              <ActiveOrderTracker />
-            </div>
+            {/* ── Tracked Orders Section ── */}
+            <TrackedOrdersList orders={trackedOrders} />
 
             {/* ── Cart Section ── */}
             <div className="mt-5">
