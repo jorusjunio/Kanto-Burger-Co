@@ -2874,10 +2874,6 @@
     animation-delay: -1.5s;
   }
 
-  .hero-showcase__steam--three {
-    display: none;
-  }
-
   .hero-showcase__orbit {
     position: absolute;
     z-index: 1;
