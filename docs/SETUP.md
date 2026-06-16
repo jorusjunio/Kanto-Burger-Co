@@ -12,6 +12,12 @@ If PowerShell blocks `npm`, use:
 npm.cmd install
 ```
 
+Then create your env file from the template and fill it in as you go:
+
+```bash
+cp .env.example .env
+```
+
 ## 2. Create a Neon database
 
 1. Go to Neon and create a new project.
@@ -64,7 +70,6 @@ Then set:
 ```env
 AUTH_SECRET=""
 NEXTAUTH_URL="http://localhost:3000"
-NEXT_PUBLIC_APP_URL="http://localhost:3000"
 ```
 
 ## 6. Run database migration

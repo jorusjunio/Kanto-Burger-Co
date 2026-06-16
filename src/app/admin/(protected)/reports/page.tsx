@@ -39,25 +39,25 @@ export default async function AdminReportsPage() {
 
       {/* Summary Metrics */}
       <section className="grid gap-4 md:grid-cols-4">
-        <div className="rounded-2xl border border-white bg-white/90 p-4 shadow-md shadow-stone-100/50 animate-fade-in" style={{ animationDelay: '0ms' }}>
+        <div className="rounded-2xl border border-orange-900/10 bg-white p-4 shadow-[0_10px_30px_-12px_rgba(120,53,15,0.18)] animate-fade-in" style={{ animationDelay: '0ms' }}>
           <p className="text-sm font-bold text-stone-500">Today sales</p>
           <p className="mt-2 text-2xl font-black text-[#25130b]">
             {formatPeso(reports.summary.todayRevenue)}
           </p>
         </div>
-        <div className="rounded-2xl border border-white bg-white/90 p-4 shadow-md shadow-stone-100/50 animate-fade-in" style={{ animationDelay: '100ms' }}>
+        <div className="rounded-2xl border border-orange-900/10 bg-white p-4 shadow-[0_10px_30px_-12px_rgba(120,53,15,0.18)] animate-fade-in" style={{ animationDelay: '100ms' }}>
           <p className="text-sm font-bold text-stone-500">Today orders</p>
           <p className="mt-2 text-2xl font-black text-[#25130b]">
             {reports.summary.todayOrderCount}
           </p>
         </div>
-        <div className="rounded-2xl border border-white bg-white/90 p-4 shadow-md shadow-stone-100/50 animate-fade-in" style={{ animationDelay: '200ms' }}>
+        <div className="rounded-2xl border border-orange-900/10 bg-white p-4 shadow-[0_10px_30px_-12px_rgba(120,53,15,0.18)] animate-fade-in" style={{ animationDelay: '200ms' }}>
           <p className="text-sm font-bold text-stone-500">30-day sales</p>
           <p className="mt-2 text-2xl font-black text-[#25130b]">
             {formatPeso(reports.summary.thirtyDayRevenue)}
           </p>
         </div>
-        <div className="rounded-2xl border border-white bg-white/90 p-4 shadow-md shadow-stone-100/50 animate-fade-in" style={{ animationDelay: '300ms' }}>
+        <div className="rounded-2xl border border-orange-900/10 bg-white p-4 shadow-[0_10px_30px_-12px_rgba(120,53,15,0.18)] animate-fade-in" style={{ animationDelay: '300ms' }}>
           <p className="text-sm font-bold text-stone-500">30-day orders</p>
           <p className="mt-2 text-2xl font-black text-[#25130b]">
             {reports.summary.thirtyDayOrderCount}
@@ -67,7 +67,7 @@ export default async function AdminReportsPage() {
 
       {/* Daily Sales & Payment Status */}
       <section className="grid gap-6 lg:grid-cols-[1.4fr_1fr]">
-        <div className="rounded-2xl border border-white bg-white/90 p-5 shadow-md shadow-stone-100/50 animate-fade-in" style={{ animationDelay: '400ms' }}>
+        <div className="rounded-2xl border border-orange-900/10 bg-white p-5 shadow-[0_10px_30px_-12px_rgba(120,53,15,0.18)] animate-fade-in" style={{ animationDelay: '400ms' }}>
           <div className="flex items-center gap-2">
             <BarChart3 className="size-5 text-red-700" aria-hidden="true" />
             <h2 className="font-black text-[#25130b]">Daily sales</h2>
@@ -97,7 +97,7 @@ export default async function AdminReportsPage() {
           </div>
         </div>
 
-        <div className="rounded-2xl border border-white bg-white/90 p-5 shadow-md shadow-stone-100/50 animate-fade-in" style={{ animationDelay: '500ms' }}>
+        <div className="rounded-2xl border border-orange-900/10 bg-white p-5 shadow-[0_10px_30px_-12px_rgba(120,53,15,0.18)] animate-fade-in" style={{ animationDelay: '500ms' }}>
           <div className="flex items-center gap-2">
             <CreditCard className="size-5 text-red-700" aria-hidden="true" />
             <h2 className="font-black text-[#25130b]">Payment status</h2>
@@ -129,7 +129,7 @@ export default async function AdminReportsPage() {
 
       {/* Top Products & Low Stock */}
       <section className="grid gap-6 lg:grid-cols-2">
-        <div className="rounded-2xl border border-white bg-white/90 p-5 shadow-md shadow-stone-100/50 animate-fade-in" style={{ animationDelay: '600ms' }}>
+        <div className="rounded-2xl border border-orange-900/10 bg-white p-5 shadow-[0_10px_30px_-12px_rgba(120,53,15,0.18)] animate-fade-in" style={{ animationDelay: '600ms' }}>
           <div className="flex items-center gap-2">
             <PackageSearch className="size-5 text-red-700" aria-hidden="true" />
             <h2 className="font-black text-[#25130b]">Top products</h2>
@@ -160,7 +160,7 @@ export default async function AdminReportsPage() {
           </div>
         </div>
 
-        <div className="rounded-2xl border border-white bg-white/90 p-5 shadow-md shadow-stone-100/50 animate-fade-in" style={{ animationDelay: '700ms' }}>
+        <div className="rounded-2xl border border-orange-900/10 bg-white p-5 shadow-[0_10px_30px_-12px_rgba(120,53,15,0.18)] animate-fade-in" style={{ animationDelay: '700ms' }}>
           <div className="flex items-center gap-2">
             <AlertTriangle className="size-5 text-red-700" aria-hidden="true" />
             <h2 className="font-black text-[#25130b]">Low stock</h2>

@@ -33,9 +33,9 @@ function SidebarBody({ onNavigate }: { onNavigate?: () => void }) {
   const pathname = usePathname();
 
   return (
-    <div className="flex h-full flex-col bg-zinc-950">
+    <div className="flex h-full flex-col bg-gradient-to-b from-stone-800 to-stone-900">
       {/* Brand header */}
-      <div className="flex items-center justify-between border-b border-white/10 bg-gradient-to-br from-zinc-900 to-zinc-950 px-5 py-5">
+      <div className="flex items-center justify-between border-b border-white/10 bg-white/5 px-5 py-5">
         <div className="flex items-center gap-3">
           <div className="flex size-11 items-center justify-center rounded-2xl bg-gradient-to-br from-red-600 to-amber-500 shadow-lg shadow-red-600/30">
             <Image
@@ -51,7 +51,7 @@ function SidebarBody({ onNavigate }: { onNavigate?: () => void }) {
             <h1 className="text-base font-black uppercase tracking-tight text-white">
               Kanto Admin
             </h1>
-            <p className="text-[11px] font-semibold text-zinc-400">
+            <p className="text-[11px] font-semibold text-stone-300">
               Control center
             </p>
           </div>
@@ -70,7 +70,7 @@ function SidebarBody({ onNavigate }: { onNavigate?: () => void }) {
 
       {/* Navigation */}
       <nav className="flex-1 space-y-1.5 px-3.5 py-6">
-        <p className="mb-2 px-2 text-[10px] font-black uppercase tracking-widest text-zinc-600">
+        <p className="mb-2 px-2 text-[10px] font-black uppercase tracking-widest text-stone-300/80">
           Menu
         </p>
         {navItems.map((item) => {
@@ -82,49 +82,45 @@ function SidebarBody({ onNavigate }: { onNavigate?: () => void }) {
               href={item.href}
               onClick={onNavigate}
               className={cn(
-                "group relative flex items-center gap-3 overflow-hidden rounded-xl px-3 py-3 text-sm font-black transition-all duration-300",
-                isActive ? "text-white" : "text-zinc-400 hover:text-white",
+                "group relative flex items-center gap-3 overflow-hidden rounded-xl px-3 py-3 text-sm font-black transition-colors duration-500 ease-out",
+                isActive ? "text-white" : "text-stone-200 hover:text-white",
               )}
             >
               {/* Active gradient backdrop */}
               <span
                 className={cn(
-                  "absolute inset-0 rounded-xl bg-gradient-to-r from-red-600 to-amber-500 shadow-lg shadow-red-600/30 transition-opacity duration-300",
+                  "absolute inset-0 rounded-xl bg-gradient-to-r from-red-600 to-amber-500 shadow-lg shadow-red-600/30 transition-opacity duration-500 ease-out",
                   isActive ? "opacity-100" : "opacity-0",
                 )}
               />
-              {/* Hover backdrop (inactive) */}
+              {/* Hover backdrop (inactive) — gentle fade */}
               {!isActive ? (
-                <span className="absolute inset-0 rounded-xl bg-white/0 transition-colors duration-300 group-hover:bg-white/10" />
+                <span className="absolute inset-0 rounded-xl bg-white/0 transition-colors duration-500 ease-out group-hover:bg-white/10" />
               ) : null}
               {/* Left rail */}
               <span
                 className={cn(
-                  "absolute left-0 top-1/2 w-1 -translate-y-1/2 rounded-r-full bg-white transition-all duration-300",
+                  "absolute left-0 top-1/2 w-1 -translate-y-1/2 rounded-r-full bg-white transition-all duration-500 ease-out",
                   isActive
                     ? "h-7 opacity-100"
-                    : "h-0 opacity-0 group-hover:h-4 group-hover:opacity-60",
+                    : "h-0 opacity-0 group-hover:h-5 group-hover:opacity-70",
                 )}
               />
               {/* Icon tile */}
               <span
                 className={cn(
-                  "relative z-10 flex size-8 items-center justify-center rounded-lg transition-all duration-300",
+                  "relative z-10 flex size-8 items-center justify-center rounded-lg transition-colors duration-500 ease-out",
                   isActive ? "bg-white/20" : "bg-white/5 group-hover:bg-white/15",
                 )}
               >
-                <Icon className="size-4 transition-transform duration-300 group-hover:scale-110 group-hover:-rotate-6" />
+                <Icon className="size-4 transition-transform duration-500 ease-out group-hover:scale-110" />
               </span>
-              <span className="relative z-10 transition-transform duration-300 group-hover:translate-x-0.5">
+              <span className="relative z-10 transition-transform duration-500 ease-out group-hover:translate-x-1">
                 {item.label}
               </span>
               {isActive ? (
                 <span className="relative z-10 ml-auto size-1.5 rounded-full bg-white/90 animate-pulse" />
-              ) : (
-                <span className="relative z-10 ml-auto translate-x-1 text-white/0 transition-all duration-300 group-hover:translate-x-0 group-hover:text-white/50">
-                  →
-                </span>
-              )}
+              ) : null}
             </Link>
           );
         })}
@@ -141,7 +137,7 @@ function SidebarBody({ onNavigate }: { onNavigate?: () => void }) {
               <p className="truncate text-xs font-black text-white">
                 Admin Account
               </p>
-              <p className="text-[10px] font-medium text-zinc-400">
+              <p className="text-[10px] font-medium text-stone-300">
                 Staff workspace
               </p>
             </div>

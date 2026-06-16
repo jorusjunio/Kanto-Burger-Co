@@ -76,7 +76,7 @@ export default async function AdminMenuPage() {
       </div>
 
       {products.length === 0 ? (
-        <div className="flex min-h-[360px] flex-col items-center justify-center rounded-2xl border border-white bg-white/90 p-8 text-center shadow-md shadow-stone-100/50 animate-fade-in">
+        <div className="flex min-h-[360px] flex-col items-center justify-center rounded-2xl border border-orange-900/10 bg-white p-8 text-center shadow-[0_10px_30px_-12px_rgba(120,53,15,0.18)] animate-fade-in">
           <div className="mb-4 flex size-12 items-center justify-center rounded-lg bg-zinc-950 text-amber-300">
             <Utensils aria-hidden="true" />
           </div>
@@ -91,7 +91,7 @@ export default async function AdminMenuPage() {
           </Button>
         </div>
       ) : (
-        <div className="overflow-hidden rounded-2xl border border-white bg-white/90 shadow-md shadow-stone-100/50 animate-fade-in">
+        <div className="overflow-hidden rounded-2xl border border-orange-900/10 bg-white shadow-[0_10px_30px_-12px_rgba(120,53,15,0.18)] animate-fade-in">
           <Table className="admin-table">
             <TableHeader>
               <TableRow>

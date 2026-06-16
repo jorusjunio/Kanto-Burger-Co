@@ -3,7 +3,7 @@
 import { useSearchParams } from "next/navigation";
 import { signIn } from "next-auth/react";
 import { FormEvent, useState, useTransition } from "react";
-import { AlertCircle } from "lucide-react";
+import { AlertCircle, Loader2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -46,14 +46,17 @@ export function LoginForm({ googleEnabled = false }: { googleEnabled?: boolean }
   const [password, setPassword] = useState("");
   const [error, setError] = useState(oauthError);
   const [isPending, startTransition] = useTransition();
-  const [isGooglePending, startGoogleTransition] = useTransition();
+  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
 
   function handleGoogleSignIn() {
     setError("");
-    // OAuth needs the full redirect round-trip; the result is decided after
-    // the callback, so let NextAuth drive the navigation.
-    startGoogleTransition(() => {
-      void signIn("google", { callbackUrl });
+    // OAuth does a full-page redirect to Google, so keep the button in its
+    // loading state until the browser navigates away — a transition would end
+    // the moment this handler returns and make the spinner flicker.
+    setIsGoogleLoading(true);
+    signIn("google", { callbackUrl }).catch(() => {
+      setError("Could not start Google sign-in. Please try again.");
+      setIsGoogleLoading(false);
     });
   }
 
@@ -132,27 +135,42 @@ export function LoginForm({ googleEnabled = false }: { googleEnabled?: boolean }
       <div className="mt-6 flex gap-3">
         <Button
           type="submit"
-          disabled={isPending}
+          disabled={isPending || isGoogleLoading}
           className={`h-12 rounded-xl bg-gradient-to-r from-red-600 to-red-700 text-white hover:from-red-700 hover:to-red-800 font-black text-base group ${
             googleEnabled ? "flex-1" : "w-full"
           }`}
         >
-          {isPending ? "Signing in..." : "Sign In"}
+          {isPending ? (
+            <>
+              <Loader2 className="size-4 animate-spin" aria-hidden="true" />
+              Signing in…
+            </>
+          ) : (
+            "Sign In"
+          )}
         </Button>
 
         {googleEnabled ? (
           <button
             type="button"
             onClick={handleGoogleSignIn}
-            disabled={isGooglePending}
+            disabled={isPending || isGoogleLoading}
             aria-label="Continue with Google"
             title="Continue with Google"
-            className="group flex h-12 flex-1 items-center justify-center gap-2 rounded-xl border border-stone-200 bg-white px-4 text-sm font-black text-zinc-800 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-stone-300 hover:shadow-md active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
+            aria-busy={isGoogleLoading}
+            className="group flex h-12 flex-1 items-center justify-center gap-2 rounded-xl border border-stone-200 bg-white px-4 text-sm font-black text-zinc-800 shadow-sm transition-all duration-300 ease-out hover:-translate-y-0.5 hover:border-stone-300 hover:shadow-md active:translate-y-0 active:scale-[0.98] disabled:pointer-events-none disabled:opacity-60"
           >
-            <span className="transition-transform duration-300 group-hover:scale-110">
-              <GoogleGlyph />
-            </span>
-            <span>{isGooglePending ? "Connecting…" : "Google"}</span>
+            {isGoogleLoading ? (
+              <Loader2
+                className="size-5 animate-spin text-red-600"
+                aria-hidden="true"
+              />
+            ) : (
+              <span className="transition-transform duration-300 ease-out group-hover:scale-110 group-hover:-rotate-3">
+                <GoogleGlyph />
+              </span>
+            )}
+            <span>{isGoogleLoading ? "Connecting…" : "Google"}</span>
           </button>
         ) : null}
       </div>

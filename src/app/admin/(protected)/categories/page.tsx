@@ -53,7 +53,7 @@ export default async function AdminCategoriesPage() {
       {/* Add Category Form */}
       <form
         action={createCategory}
-        className="grid gap-4 rounded-2xl border border-white bg-white/90 p-5 shadow-md shadow-stone-100/50 md:grid-cols-[1fr_1fr_160px_auto] md:items-end animate-fade-in"
+        className="grid gap-4 rounded-2xl border border-orange-900/10 bg-white p-5 shadow-[0_10px_30px_-12px_rgba(120,53,15,0.18)] md:grid-cols-[1fr_1fr_160px_auto] md:items-end animate-fade-in"
       >
         <div className="space-y-2">
           <Label htmlFor="new-name">Name</Label>
@@ -93,7 +93,7 @@ export default async function AdminCategoriesPage() {
       </form>
 
       {categories.length === 0 ? (
-        <div className="flex min-h-[320px] flex-col items-center justify-center rounded-2xl border border-white bg-white/90 p-8 text-center shadow-md shadow-stone-100/50 animate-fade-in">
+        <div className="flex min-h-[320px] flex-col items-center justify-center rounded-2xl border border-orange-900/10 bg-white p-8 text-center shadow-[0_10px_30px_-12px_rgba(120,53,15,0.18)] animate-fade-in">
           <div className="mb-4 flex size-12 items-center justify-center rounded-lg bg-zinc-950 text-amber-300">
             <Tags aria-hidden="true" />
           </div>
@@ -105,7 +105,7 @@ export default async function AdminCategoriesPage() {
           </p>
         </div>
       ) : (
-        <div className="overflow-hidden rounded-2xl border border-white bg-white/90 shadow-md shadow-stone-100/50 animate-fade-in">
+        <div className="overflow-hidden rounded-2xl border border-orange-900/10 bg-white shadow-[0_10px_30px_-12px_rgba(120,53,15,0.18)] animate-fade-in">
           <Table className="admin-table">
             <TableHeader>
               <TableRow>

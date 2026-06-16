@@ -24,7 +24,7 @@ export default async function ProtectedAdminLayout({
         channelName="admin-orders"
         events={["order-created", "order-updated"]}
       />
-      <div className="flex min-h-screen bg-stone-50/70">
+      <div className="flex min-h-screen bg-gradient-to-br from-[#f6f1e8] to-[#efe6d7]">
         {/* Sidebar owns its own desktop (fixed) + mobile (drawer) positioning */}
         <AdminSidebar />
 
