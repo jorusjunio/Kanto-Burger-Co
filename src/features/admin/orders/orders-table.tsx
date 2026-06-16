@@ -63,7 +63,7 @@ const typeOptions = [
 ];
 
 const triggerClassName =
-  "h-10 w-full min-w-[140px] rounded-xl border-2 border-orange-900/10 bg-white px-3.5 text-sm font-bold text-[#25130b] shadow-sm transition-all duration-300 ease-out hover:border-orange-900/20 focus-visible:border-red-500/50 focus-visible:ring-4 focus-visible:ring-red-500/10";
+  "h-10 w-full min-w-0 rounded-xl border-2 border-orange-900/10 bg-white px-3.5 text-sm font-bold text-[#25130b] shadow-sm transition-all duration-300 ease-out hover:border-orange-900/20 focus-visible:border-red-500/50 focus-visible:ring-4 focus-visible:ring-red-500/10 sm:min-w-[150px]";
 
 function formatDate(value: Date) {
   return new Intl.DateTimeFormat("en-PH", {
@@ -84,7 +84,7 @@ function FilterSelect({
   options: string[][];
 }) {
   return (
-    <label className="flex flex-col gap-1.5">
+    <label className="flex w-full flex-col gap-1.5 sm:w-auto">
       <span className="text-[11px] font-black uppercase tracking-wider text-orange-950/50">
         {label}
       </span>
@@ -150,7 +150,7 @@ export function OrdersView({ orders }: { orders: AdminOrderRow[] }) {
         </div>
 
         {orders.length > 0 ? (
-          <div className="flex flex-wrap items-end gap-3">
+          <div className="grid grid-cols-2 gap-3 sm:flex sm:flex-wrap sm:items-end">
             <FilterSelect
               label="Status"
               value={status}
@@ -174,7 +174,7 @@ export function OrdersView({ orders }: { orders: AdminOrderRow[] }) {
                 type="button"
                 variant="outline"
                 onClick={clearFilters}
-                className="h-10 rounded-xl border-2 border-orange-900/10 font-bold text-orange-950/70 transition-all duration-300 ease-out hover:-translate-y-0.5 hover:border-red-300 hover:text-red-700 hover:shadow-md"
+                className="h-10 w-full self-end rounded-xl border-2 border-orange-900/10 font-bold text-orange-950/70 transition-all duration-300 ease-out hover:-translate-y-0.5 hover:border-red-300 hover:text-red-700 hover:shadow-md sm:w-auto"
               >
                 <FilterX className="size-4" aria-hidden="true" />
                 Clear

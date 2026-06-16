@@ -362,6 +362,7 @@ export default async function Home() {
                 image={image}
                 index={index}
                 accent={accent}
+                href={`/menu#item-${product.slug}`}
               />
             );
           })}

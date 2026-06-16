@@ -96,7 +96,7 @@ export function CustomerTopBar({ variant = "light" }: CustomerTopBarProps) {
             : "from-white/10 to-transparent"
         )} />
         
-        <div className="relative z-10 flex w-full items-center justify-between gap-4">
+        <div className="relative z-10 flex w-full items-center justify-between gap-2 sm:gap-4">
           
           {/* DYNAMIC LOGO SECTION */}
           <div className="flex items-center gap-3">
@@ -104,7 +104,7 @@ export function CustomerTopBar({ variant = "light" }: CustomerTopBarProps) {
               href="/"
               prefetch
               className={cn(
-                "group flex items-center gap-2.5 rounded-[2rem] border p-1 pr-3.5 transition-all duration-300",
+                "group flex items-center gap-2.5 rounded-full border p-1.5 transition-all duration-300 lg:rounded-[2rem] lg:p-1 lg:pr-3.5",
                 isPastHero
                   ? "border-black/5 bg-black/5 hover:bg-black/10"
                   : "border-white/5 bg-white/5 hover:bg-white/10 hover:border-white/20",
@@ -125,7 +125,7 @@ export function CustomerTopBar({ variant = "light" }: CustomerTopBarProps) {
                 priority
               />
 
-              <span className="hidden sm:flex flex-col gap-0.5 leading-none">
+              <span className="hidden lg:flex flex-col gap-0.5 leading-none">
                 <span
                   className={cn(
                     "text-xs font-bold tracking-[0.2em] transition-colors duration-500",
@@ -146,9 +146,9 @@ export function CustomerTopBar({ variant = "light" }: CustomerTopBarProps) {
             </Link>
           </div>
 
-          {/* COMPACT CAPSULE NAV LINKS WITH ICONS */}
+          {/* CAPSULE NAV LINKS — icon-only on phones/tablets, icon + label on desktop */}
           <div className={cn(
-            "hidden lg:flex items-center gap-1 rounded-full p-0.5 backdrop-blur-md border transition-all duration-300",
+            "flex items-center gap-1 rounded-full p-0.5 backdrop-blur-md border transition-all duration-300",
             isPastHero
               ? "bg-black/5 border-black/5"
               : "bg-white/5 border-white/5"
@@ -159,19 +159,21 @@ export function CustomerTopBar({ variant = "light" }: CustomerTopBarProps) {
                 <Link
                   key={item.href}
                   href={item.href}
+                  aria-label={item.label}
+                  title={item.label}
                   className={cn(
-                    "group relative flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.15em] transition-all duration-300",
+                    "group relative flex items-center gap-1.5 rounded-full px-2.5 py-1.5 text-[10px] font-bold uppercase tracking-[0.15em] transition-all duration-300 lg:px-3",
                     isPastHero
                       ? "text-stone-700/80 hover:text-stone-900 hover:bg-black/5"
                       : "text-white/80 hover:text-white hover:bg-white/10"
                   )}
                 >
                   <Icon className={cn(
-                    "size-3.5 transition-colors group-hover:text-amber-300",
+                    "size-4 transition-colors group-hover:text-amber-300 lg:size-3.5",
                     isPastHero ? "text-stone-600" : "text-white/60"
                   )} />
-                  <span className="relative z-10">{item.label}</span>
-                  <span className="absolute bottom-1 left-3 right-3 h-[1.5px] bg-amber-500 scale-x-0 transition-transform duration-300 origin-center group-hover:scale-x-100" />
+                  <span className="relative z-10 hidden lg:inline">{item.label}</span>
+                  <span className="absolute bottom-1 left-3 right-3 hidden h-[1.5px] bg-amber-500 scale-x-0 transition-transform duration-300 origin-center group-hover:scale-x-100 lg:block" />
                 </Link>
               );
             })}
@@ -182,15 +184,17 @@ export function CustomerTopBar({ variant = "light" }: CustomerTopBarProps) {
             <Link
               href="/cart"
               prefetch
+              aria-label="Cart"
+              title="Cart"
               className={cn(
-                "group hidden md:inline-flex items-center gap-2 rounded-full border px-3.5 py-1.5 text-[10px] font-bold uppercase tracking-[0.15em] transition-all duration-300 hover:-translate-y-0.5",
+                "group inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.15em] transition-all duration-300 hover:-translate-y-0.5 md:px-3.5",
                 isPastHero
                   ? "border-black/10 bg-black/5 text-stone-700/90 hover:bg-black/10 hover:text-stone-900 hover:border-black/20"
                   : "border-white/10 bg-white/5 text-white/90 hover:bg-white/15 hover:text-white hover:border-white/20"
               )}
             >
-              <ShoppingBag className="size-3 transition-transform duration-300 group-hover:scale-110" aria-hidden="true" />
-              <span>Cart</span>
+              <ShoppingBag className="size-4 transition-transform duration-300 group-hover:scale-110 md:size-3" aria-hidden="true" />
+              <span className="hidden md:inline">Cart</span>
               {itemCount > 0 ? (
                 <span className="rounded-full bg-gradient-to-r from-red-500 to-orange-600 px-1.5 py-0.5 text-[8px] font-black text-white shadow-sm">
                   {itemCount}
@@ -209,11 +213,6 @@ export function CustomerTopBar({ variant = "light" }: CustomerTopBarProps) {
             >
               <Link href="/menu">Order</Link>
             </Button>
-
-            {/* MOBILE MENU BUTTON — Hero variant */}
-            <div className="inline-flex lg:hidden">
-              <MobileNav />
-            </div>
           </div>
         </div>
       </div>

@@ -118,8 +118,9 @@ export function ProductCard({ product }: ProductCardProps) {
 
   return (
     <Card
+      id={`item-${product.slug}`}
       onPointerMove={handlePointerMove}
-      className="menu-card group h-full gap-0 overflow-hidden rounded-2xl border-0 p-0"
+      className="menu-card group h-full scroll-mt-32 gap-0 overflow-hidden rounded-2xl border-0 p-0"
     >
       {/* ── Image Area ── */}
       <div className="menu-card__image relative aspect-[4/3] overflow-hidden bg-white -mb-[1px]">
