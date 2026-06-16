@@ -119,6 +119,7 @@ export function PageLoader() {
   /* eslint-enable react-hooks/set-state-in-effect */
 
   // Route changes
+  /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
     if (prevPathname.current === null) {
       prevPathname.current = pathname;
@@ -135,6 +136,7 @@ export function PageLoader() {
     prevPathname.current = pathname;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pathname]);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   if (!visible) return null;
 
