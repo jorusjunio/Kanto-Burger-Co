@@ -18,6 +18,21 @@ const MARGIN = 16; // top-4 / bottom-4
  */
 export function SiteHeader() {
   const pathname = usePathname();
+  const [mounted, setMounted] = useState(false);
+
+  // Decide the header on the CLIENT only. During static prerender and ISR
+  // regeneration on the server, `usePathname()` can return null instead of the
+  // real route — which would otherwise bake the floating nav into the home
+  // page's HTML, where it must never appear. Rendering nothing until mounted
+  // guarantees the correct header per route and keeps server HTML header-free.
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setMounted(true);
+  }, []);
+
+  if (!mounted) {
+    return null;
+  }
 
   if (pathname === "/") {
     return null;
