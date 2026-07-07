@@ -52,12 +52,28 @@ export function PageLoader() {
     [],
   );
 
+  // Full teardown of the loader. Safe to call at any point — clears pending
+  // timers, removes the overlay, and drops the is-page-loading class so the
+  // full-screen loader can never stay stuck and block scrolling/clicks.
+  const dismiss = useCallback(() => {
+    clearTimers();
+    document.documentElement.classList.remove("is-page-loading");
+    setVisible(false);
+    setPhase("idle");
+    setProgress(0);
+  }, [clearTimers]);
+
   const runLoader = useCallback((isMenu: boolean) => {
     clearTimers();
     setProgress(0);
     setPhase("enter");
     setVisible(true);
     document.documentElement.classList.add("is-page-loading");
+
+    // Failsafe: guarantee teardown even if an animation callback is ever
+    // dropped, so the overlay can't get stuck. Fires safely after the normal
+    // completion window for each variant.
+    timer(() => dismiss(), isMenu ? 2600 : 3600);
 
     if (isMenu) {
       // Menu timings: ~1000ms load + 500ms exit = ~1.5s total
@@ -106,7 +122,7 @@ export function PageLoader() {
         });
       }, 50);
     }
-  }, [clearTimers, timer, animateProgress]);
+  }, [clearTimers, timer, animateProgress, dismiss]);
 
   // Initial page load
   /* eslint-disable react-hooks/set-state-in-effect */
@@ -131,6 +147,11 @@ export function PageLoader() {
       } else if (pathname === "/menu" && prevPathname.current === "/") {
         // Menu loader only when navigating from the home page
         runLoader(true);
+      } else {
+        // Navigated to a route that shows no loader — tear down any loader that
+        // was still animating on the previous route, otherwise its stuck
+        // overlay would block scrolling and clicks on the new page.
+        dismiss();
       }
     }
     prevPathname.current = pathname;
