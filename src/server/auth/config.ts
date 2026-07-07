@@ -43,7 +43,7 @@ export const authOptions: NextAuthOptions = {
           return null;
         }
 
-        const rateLimit = authRateLimiter.check(email);
+        const rateLimit = await authRateLimiter.check(email);
         if (!rateLimit.allowed) {
           return null;
         }

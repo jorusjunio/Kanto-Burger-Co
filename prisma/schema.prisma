@@ -69,6 +69,10 @@ model Product {
   imageUrl          String?
   isFeatured        Boolean     @default(false)
   isAvailable       Boolean     @default(true)
+  // Soft-delete flag. Distinct from isAvailable (the temporary Hide/Show
+  // toggle): isActive=false means the product is deleted and hidden everywhere,
+  // but kept as a row so historical OrderItem references stay intact.
+  isActive          Boolean     @default(true)
   trackStock        Boolean     @default(true)
   stockQuantity     Int         @default(0)
   lowStockThreshold Int         @default(5)
@@ -78,6 +82,7 @@ model Product {
   updatedAt         DateTime    @updatedAt
 
   @@index([categoryId])
+  @@index([isActive])
 }
 
 model AddOn {
@@ -104,6 +109,11 @@ model Order {
   paymentMethod   PaymentMethod
   paymentStatus   PaymentStatus @default(UNPAID)
   gcashReference  String?
+  // Automated payment gateway tracking. paymentIntentId is the provider's
+  // session/intent id and is the idempotency key for settlement callbacks.
+  paymentIntentId String?       @unique
+  paymentProvider String?
+  paidAt          DateTime?
   status          OrderStatus   @default(PENDING)
   subtotal        Decimal       @db.Decimal(10, 2)
   deliveryFee     Decimal       @default(0) @db.Decimal(10, 2)

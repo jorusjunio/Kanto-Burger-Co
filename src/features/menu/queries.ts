@@ -11,6 +11,7 @@ async function fetchMenuCategories(): Promise<MenuCategory[]> {
       orderBy: { sortOrder: "asc" },
       include: {
         products: {
+          where: { isActive: true },
           orderBy: [{ isFeatured: "desc" }, { name: "asc" }],
           include: {
             addOns: {

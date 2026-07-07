@@ -1,103 +1,63 @@
 import { z } from "zod";
 
+import type { Order, OrderItem, Prisma, Product } from "@/generated/prisma/client";
 import {
   PaymentMethod,
   OrderStatus,
   PaymentStatus,
 } from "@/generated/prisma/enums";
+import { logger } from "@/lib/logger";
 
 import { assertAllowedStatusTransition } from "./lifecycle";
 
 const updateOrderStatusSchema = z.object({
   orderId: z.string().min(1),
-  status: z.enum([
-    "PENDING",
-    "PREPARING",
-    "READY",
-    "OUT_FOR_DELIVERY",
-    "COMPLETED",
-    "CANCELLED",
-  ]),
+  // Enum values sourced from the generated Prisma enum so this schema stays in
+  // lockstep with the DB enum and lifecycle.ts — single source of truth, no
+  // hand-duplicated string list to drift.
+  status: z.enum(OrderStatus),
 });
 
 const updatePaymentStatusSchema = z.object({
   orderId: z.string().min(1),
-  paymentStatus: z.enum(["UNPAID", "PENDING", "PAID"]),
+  paymentStatus: z.enum(PaymentStatus),
 });
 
-type OrderUpdatePayload = {
-  id: string;
-  orderNumber: string;
-  trackingToken: string;
-  status: OrderStatus;
-  paymentStatus: PaymentStatus;
-  timestamp?: number;
+// Dependency-injection contract types. Kept intentionally narrow (only the
+// fields these handlers actually read/write) so tests can inject lightweight
+// mocks — but every field shape is now derived from the generated Prisma models
+// and arg types. A schema change that renames or retypes a column now fails
+// compilation here instead of drifting silently out of sync.
+
+type OrderUpdatePayload = Pick<
+  Order,
+  "id" | "orderNumber" | "trackingToken" | "status" | "paymentStatus"
+> & { timestamp?: number };
+
+/** Order + line items read inside the status transaction to restore stock. */
+type OrderWithRestockItems = Pick<Order, "status"> & {
+  items: Array<
+    Pick<OrderItem, "quantity" | "productId"> & {
+      product: Pick<Product, "id" | "trackStock"> | null;
+    }
+  >;
 };
 
-type ProductUpdateInput = {
-  where: { id: string };
-  data: {
-    stockQuantity: {
-      increment: number;
-    };
-  };
-};
-
-type OrderFindUniqueArgs = {
-  where: { id: string };
-  include?: {
-    items?: {
-      include?: {
-        product?: {
-          select?: {
-            id: boolean;
-            trackStock: boolean;
-          };
-        };
-      };
-    };
-  };
-};
-
-type OrderUpdateArgs = {
-  where: { id: string };
-  data: {
-    status?: OrderStatus;
-    paymentStatus?: PaymentStatus;
-  };
-  select?: {
-    id: boolean;
-    orderNumber: boolean;
-    trackingToken: boolean;
-    status: boolean;
-    paymentStatus: boolean;
-  };
-};
-
-type OrderPaymentMethodArgs = {
-  where: { id: string };
-  select?: {
-    paymentMethod: boolean;
-  };
+/** Atomic stock-increment issued when an active order is cancelled. */
+type RestockProductArgs = {
+  where: Pick<Product, "id">;
+  data: { stockQuantity: { increment: number } };
 };
 
 export type OrderTransactionClient = {
   order: {
-    findUnique: (args: OrderFindUniqueArgs) => Promise<{
-      status: OrderStatus;
-      items: Array<{
-        quantity: number;
-        productId: string | null;
-        product: {
-          id: string;
-          trackStock: boolean;
-        } | null;
-      }>;
-    } | null>;
-    update: (args: OrderUpdateArgs) => Promise<OrderUpdatePayload>;
+    findUnique: (
+      args: Prisma.OrderFindUniqueArgs,
+    ) => Promise<OrderWithRestockItems | null>;
+    update: (args: Prisma.OrderUpdateArgs) => Promise<OrderUpdatePayload>;
   };
   product: {
-    update: (args: ProductUpdateInput) => Promise<{ count: number }>;
+    update: (args: RestockProductArgs) => Promise<{ count: number }>;
   };
 };
 
@@ -106,10 +66,10 @@ type OrderPrismaClient = {
     callback: (tx: OrderTransactionClient) => Promise<T>,
   ) => Promise<T>;
   order: {
-    findUnique: (args: OrderPaymentMethodArgs) => Promise<{
-      paymentMethod: PaymentMethod;
-    } | null>;
-    update: (args: OrderUpdateArgs) => Promise<OrderUpdatePayload>;
+    findUnique: (
+      args: Prisma.OrderFindUniqueArgs,
+    ) => Promise<Pick<Order, "paymentMethod"> | null>;
+    update: (args: Prisma.OrderUpdateArgs) => Promise<OrderUpdatePayload>;
   };
 };
 
@@ -147,7 +107,7 @@ async function triggerOrderUpdatedEvents(
       timestamp: Date.now(),
     });
   } catch (error) {
-    console.error("Failed to trigger order update events:", error);
+    logger.error("Failed to trigger order update events", error);
     // Don't throw - event failure shouldn't break the main operation
   }
 }
@@ -163,7 +123,7 @@ export async function updateOrderStatusWithDeps(
     status: formData.get("status"),
   });
 
-  const nextStatus = parsed.status as OrderStatus;
+  const nextStatus = parsed.status;
 
   const order = await deps.prisma.$transaction(async (tx) => {
     const currentOrder = await tx.order.findUnique({
@@ -260,7 +220,7 @@ export async function updatePaymentStatusWithDeps(
 
   const order = await deps.prisma.order.update({
     where: { id: parsed.orderId },
-    data: { paymentStatus: parsed.paymentStatus as PaymentStatus },
+    data: { paymentStatus: parsed.paymentStatus },
     select: {
       id: true,
       orderNumber: true,

@@ -76,16 +76,14 @@ test("rejects cash at pickup for delivery orders", () => {
   });
 });
 
-test("requires a GCash reference for GCash payments", () => {
+test("accepts GCash orders without a manual reference (settled via gateway)", () => {
   const result = validateCreateOrderInput({
     ...baseOrder,
     paymentMethod: "GCASH",
   });
 
-  assert.deepEqual(result, {
-    ok: false,
-    message: "GCash reference is required.",
-  });
+  assert.equal(result.ok, true);
+  assert.equal(result.ok && result.data.paymentMethod, "GCASH");
 });
 
 test("rejects empty carts", () => {

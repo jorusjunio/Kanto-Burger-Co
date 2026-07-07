@@ -162,6 +162,10 @@ export function parseAddOns(value?: string) {
     });
 }
 
+export function readProductId(formData: FormData) {
+  return z.string().min(1, "Product is required.").parse(formData.get("productId"));
+}
+
 export function readAvailabilityToggle(formData: FormData) {
   const productId = z.string().min(1).parse(formData.get("productId"));
   const isAvailable = z

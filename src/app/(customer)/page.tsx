@@ -183,6 +183,7 @@ export default async function Home() {
                 <p
                   className="hero-kicker text-sm font-black uppercase text-amber-300"
                   data-scroll-reveal
+                  suppressHydrationWarning
                   style={{ "--reveal-delay": "0ms" } as React.CSSProperties}
                 >
                   Affordable and very filling
@@ -190,6 +191,7 @@ export default async function Home() {
                 <h1
                   className="max-w-[11ch] text-4xl font-black uppercase leading-[0.98] tracking-[0] text-white sm:max-w-xl sm:text-7xl lg:transition-transform lg:duration-500 lg:hover:translate-x-1"
                   data-scroll-reveal
+                  suppressHydrationWarning
                   style={{ "--reveal-delay": "80ms" } as React.CSSProperties}
                 >
                   Hot, fresh burgers made for{" "}
@@ -198,6 +200,7 @@ export default async function Home() {
                 <p
                   className="max-w-[22rem] text-sm font-semibold leading-6 text-white/80 sm:max-w-md sm:text-base sm:leading-7"
                   data-scroll-reveal
+                  suppressHydrationWarning
                   style={{ "--reveal-delay": "160ms" } as React.CSSProperties}
                 >
                   Fresh buns, juicy patties, loaded sides, and cold drinks made
@@ -209,6 +212,7 @@ export default async function Home() {
               <div
                 className="flex max-w-[22rem] flex-col gap-3 sm:max-w-none sm:flex-row"
                 data-scroll-reveal
+                suppressHydrationWarning
                 style={{ "--reveal-delay": "240ms" } as React.CSSProperties}
               >
                 <Button
@@ -235,6 +239,7 @@ export default async function Home() {
               <div
                 className="grid max-w-[22rem] gap-3 text-sm font-black text-white/80 sm:max-w-xl sm:grid-cols-3"
                 data-scroll-reveal
+                suppressHydrationWarning
                 style={{ "--reveal-delay": "320ms" } as React.CSSProperties}
               >
                 {serviceNotes.map(([Icon, label]) => (
@@ -255,6 +260,7 @@ export default async function Home() {
             <div
               className="relative min-h-[440px] lg:min-h-[calc(100vh-112px)] lg:translate-x-6 xl:translate-x-10"
               data-scroll-reveal
+              suppressHydrationWarning
               style={{ "--reveal-delay": "480ms" } as React.CSSProperties}
             >
               <HeroBurgerShowcase
@@ -286,6 +292,7 @@ export default async function Home() {
             key={title}
             className="highlight-card group relative overflow-hidden rounded-xl border border-orange-900/15 bg-white/90 p-5 shadow-[0_18px_45px_rgb(120_53_15_/_0.08)]"
             data-scroll-reveal="static"
+            suppressHydrationWarning
             style={{ "--reveal-delay": `${index * 120}ms` } as React.CSSProperties}
           >
             <div className="relative z-10 flex items-start justify-between gap-4">
@@ -325,6 +332,7 @@ export default async function Home() {
         <div
           className="mb-6 flex items-end justify-between gap-4"
           data-scroll-reveal
+          suppressHydrationWarning
         >
           <div>
             <p className="section-kicker">Featured picks</p>
@@ -372,9 +380,10 @@ export default async function Home() {
       <footer
         className="border-t border-red-950/10 bg-[#1d0906] px-4 py-10 text-orange-50 sm:px-6"
         data-scroll-reveal
+        suppressHydrationWarning
       >
         <div className="mx-auto grid max-w-6xl gap-8 md:grid-cols-[1.25fr_0.8fr_0.8fr_0.8fr]">
-          <div data-scroll-reveal>
+          <div data-scroll-reveal suppressHydrationWarning>
             <p className="text-2xl font-black uppercase text-amber-300">
               Kanto Burger Co.
             </p>
@@ -407,20 +416,20 @@ export default async function Home() {
             </div>
           </div>
 
-          <div data-scroll-reveal>
+          <div data-scroll-reveal suppressHydrationWarning>
             <p className="footer-title">Visit</p>
             <p className="footer-copy">Quezon City, Philippines</p>
             <p className="footer-copy">Open daily, 10:00 AM - 10:00 PM</p>
           </div>
 
-          <div data-scroll-reveal>
+          <div data-scroll-reveal suppressHydrationWarning>
             <p className="footer-title">Contact</p>
             <p className="footer-copy">0912 345 6789</p>
             <p className="footer-copy">hello@kantoburger.co</p>
             <p className="footer-copy">GCash payments supported</p>
           </div>
 
-          <div data-scroll-reveal>
+          <div data-scroll-reveal suppressHydrationWarning>
             <p className="footer-title">Quick Links</p>
             <div className="mt-3 grid gap-2 text-sm font-bold text-orange-50/70">
               <Link href="/menu" className="footer-link">

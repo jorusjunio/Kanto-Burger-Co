@@ -6,6 +6,7 @@ import { logger } from "@/lib/logger";
 export async function getAdminMenuProducts() {
   try {
     return await prisma.product.findMany({
+      where: { isActive: true },
       orderBy: [{ category: { sortOrder: "asc" } }, { name: "asc" }],
       include: {
         category: true,
@@ -37,7 +38,9 @@ export async function getAdminMenuCategoriesWithProductCounts() {
       orderBy: [{ sortOrder: "asc" }, { name: "asc" }],
       include: {
         _count: {
-          select: { products: true },
+          // Only count active products so soft-deleted ones don't inflate the
+          // per-category totals shown in the admin dashboard.
+          select: { products: { where: { isActive: true } } },
         },
       },
     });
@@ -49,8 +52,8 @@ export async function getAdminMenuCategoriesWithProductCounts() {
 
 export async function getAdminMenuProduct(productId: string) {
   try {
-    const product = await prisma.product.findUnique({
-      where: { id: productId },
+    const product = await prisma.product.findFirst({
+      where: { id: productId, isActive: true },
       include: {
         addOns: {
           orderBy: { name: "asc" },

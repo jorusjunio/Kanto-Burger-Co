@@ -24,7 +24,6 @@ export const createOrderSchema = z
     orderType: z.enum(["PICKUP", "DELIVERY"]),
     deliveryAddress: z.string().trim(),
     paymentMethod: z.enum(["CASH", "COD", "GCASH"]),
-    gcashReference: z.string().trim(),
     notes: z.string().trim(),
     items: z.array(cartItemSchema).min(1, "Cart is empty."),
   })
@@ -34,14 +33,6 @@ export const createOrderSchema = z
         code: "custom",
         path: ["deliveryAddress"],
         message: "Delivery address is required.",
-      });
-    }
-
-    if (value.paymentMethod === "GCASH" && !value.gcashReference) {
-      context.addIssue({
-        code: "custom",
-        path: ["gcashReference"],
-        message: "GCash reference is required.",
       });
     }
 

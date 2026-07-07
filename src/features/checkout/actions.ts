@@ -6,6 +6,7 @@ import { prisma } from "@/server/db/prisma";
 import { triggerRealtimeEvent } from "@/server/services/pusher";
 import { logger } from "@/lib/logger";
 import { checkoutRateLimiter } from "@/lib/rate-limiter";
+import { paymentProvider } from "@/features/payments/provider";
 
 import type { CreateOrderResult } from "./types";
 import { createOrderSchema } from "./validation";
@@ -52,7 +53,7 @@ export async function createOrder(
   const values = parsed.data;
 
   // Rate limiting based on customer phone
-  const rateLimitResult = checkoutRateLimiter.check(values.customerPhone);
+  const rateLimitResult = await checkoutRateLimiter.check(values.customerPhone);
   if (!rateLimitResult.allowed) {
     logger.warn("Rate limit exceeded for checkout", { customerPhone: values.customerPhone });
     return {
@@ -66,8 +67,11 @@ export async function createOrder(
   const orderNumber = makeOrderNumber();
   const trackingToken = makeTrackingToken();
 
+  let orderId = "";
+  let orderTotal = 0;
+
   try {
-    await prisma.$transaction(async (tx) => {
+    const createdOrder = await prisma.$transaction(async (tx) => {
       const products = await tx.product.findMany({
         where: { id: { in: productIds } },
         select: {
@@ -170,8 +174,9 @@ export async function createOrder(
             values.paymentMethod === "GCASH"
               ? PaymentStatus.PENDING
               : PaymentStatus.UNPAID,
-          gcashReference:
-            values.paymentMethod === "GCASH" ? values.gcashReference : null,
+          // Manual GCash reference retired — GCash now settles via the
+          // automated payment gateway, so no reference is collected.
+          gcashReference: null,
           subtotal: money(subtotal),
           deliveryFee: money(deliveryFee),
           total: money(total),
@@ -212,6 +217,9 @@ export async function createOrder(
 
       return order;
     });
+
+    orderId = createdOrder.id;
+    orderTotal = Number(createdOrder.total);
   } catch (error) {
     logger.error("Checkout failed", error, { orderNumber });
     return {
@@ -233,10 +241,39 @@ export async function createOrder(
     timestamp: Date.now(),
   });
 
+  // Automated gateway: for online (GCash) orders, open a payment session and
+  // hand the customer a redirect URL. Runs AFTER the order transaction commits,
+  // so it never touches the stock-decrement locking. A failure here leaves a
+  // valid PENDING order the customer can still pay from their tracker.
+  let redirectUrl: string | undefined;
+  if (values.paymentMethod === "GCASH") {
+    try {
+      const session = await paymentProvider.createSession({
+        orderId,
+        orderNumber,
+        trackingToken,
+        amount: orderTotal,
+      });
+
+      await prisma.order.update({
+        where: { id: orderId },
+        data: {
+          paymentIntentId: session.intentId,
+          paymentProvider: paymentProvider.id,
+        },
+      });
+
+      redirectUrl = session.redirectUrl;
+    } catch (error) {
+      logger.error("Failed to open payment session", error, { orderNumber });
+    }
+  }
+
   return {
     ok: true,
     orderNumber,
     trackingToken,
+    redirectUrl,
   };
 }
 

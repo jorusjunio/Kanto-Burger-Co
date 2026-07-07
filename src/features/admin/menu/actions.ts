@@ -14,6 +14,7 @@ import {
   readAvailabilityToggle,
   readCategoryForm,
   readProductForm,
+  readProductId,
   resolveSlug,
 } from "./action-helpers";
 
@@ -144,6 +145,35 @@ export async function toggleProductAvailability(formData: FormData) {
     where: { id: productId },
     data: { isAvailable },
   });
+
+  revalidateAdminMenu();
+}
+
+/**
+ * Delete a product. To protect order history and avoid a foreign-key crash,
+ * products already referenced by an OrderItem are SOFT-deleted (isActive=false),
+ * keeping the row so past orders and reports still resolve the product. Products
+ * never ordered are safe to HARD-delete (add-ons cascade away).
+ */
+export async function deleteProduct(formData: FormData) {
+  await requireAdminRoleSession();
+
+  const productId = readProductId(formData);
+
+  const referencedByOrders = await prisma.orderItem.count({
+    where: { productId },
+  });
+
+  if (referencedByOrders > 0) {
+    await prisma.product.update({
+      where: { id: productId },
+      data: { isActive: false, isAvailable: false },
+    });
+  } else {
+    await prisma.product.delete({
+      where: { id: productId },
+    });
+  }
 
   revalidateAdminMenu();
 }

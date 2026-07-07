@@ -84,6 +84,7 @@ export function FavoriteCard({
     <div
       className="favorite-card-reveal h-full"
       data-scroll-reveal
+      suppressHydrationWarning
       onPointerMove={handlePointerMove}
       onPointerLeave={handlePointerLeave}
     >

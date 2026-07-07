@@ -7,7 +7,6 @@ import {
   ArrowLeft,
   CheckCircle2,
   CreditCard,
-  FileText,
   MapPin,
   MessageSquare,
   Phone,
@@ -38,11 +37,7 @@ import { formatPeso } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
 import { createOrder } from "./actions";
-import type {
-  CheckoutOrderType,
-  CheckoutPageProps,
-  CheckoutPaymentMethod,
-} from "./types";
+import type { CheckoutOrderType, CheckoutPaymentMethod } from "./types";
 
 const deliveryFee = 49;
 
@@ -50,7 +45,7 @@ function formatPhoneInput(value: string) {
   return value.replace(/[^\d+]/g, "").slice(0, 13);
 }
 
-export function CheckoutPage({ gcashNumber }: CheckoutPageProps) {
+export function CheckoutPage() {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const items = useCartStore((state) => state.items);
@@ -62,7 +57,6 @@ export function CheckoutPage({ gcashNumber }: CheckoutPageProps) {
   const [deliveryAddress, setDeliveryAddress] = useState("");
   const [paymentMethod, setPaymentMethod] =
     useState<CheckoutPaymentMethod>("CASH");
-  const [gcashReference, setGcashReference] = useState("");
   const [notes, setNotes] = useState("");
   const [confirmOpen, setConfirmOpen] = useState(false);
   const confirmedRef = useRef(false);
@@ -101,7 +95,6 @@ export function CheckoutPage({ gcashNumber }: CheckoutPageProps) {
         orderType,
         deliveryAddress,
         paymentMethod,
-        gcashReference,
         notes,
         items,
       });
@@ -118,6 +111,14 @@ export function CheckoutPage({ gcashNumber }: CheckoutPageProps) {
       clearCart();
       // One-shot flag so the receipt page shows the success toast exactly once.
       sessionStorage.setItem("kanto:justPlaced", result.orderNumber);
+
+      // Online (GCash) orders go to the payment gateway first; other methods
+      // go straight to the order tracker.
+      if (result.redirectUrl) {
+        router.push(result.redirectUrl);
+        return;
+      }
+
       router.push(`/order/${result.orderNumber}?token=${result.trackingToken}`);
     });
   }
@@ -496,44 +497,26 @@ export function CheckoutPage({ gcashNumber }: CheckoutPageProps) {
                     GCash Payment
                   </h2>
                   <p className="text-[11px] font-medium text-orange-950/40">
-                    Manual bank transfer
+                    Secure online gateway
                   </p>
                 </div>
               </div>
               <div className="checkout-section-body">
                 <div className="rounded-2xl border border-sky-200 bg-gradient-to-br from-sky-50 to-blue-50 p-4 sm:p-5">
-                  <div className="flex items-start gap-3 mb-4">
+                  <div className="flex items-start gap-3">
                     <div className="flex size-8 shrink-0 items-center justify-center rounded-xl bg-sky-100 shadow-sm">
                       <CreditCard className="size-4 text-sky-600" aria-hidden="true" />
                     </div>
                     <div className="min-w-0">
                       <p className="text-sm font-black text-zinc-950">
-                        GCash manual payment
+                        Pay securely with GCash
                       </p>
                       <p className="mt-1 text-[13px] leading-relaxed text-zinc-600">
-                        Send the total to{" "}
-                        <span className="font-bold text-sky-700 whitespace-nowrap">
-                          {gcashNumber || "the store GCash number"}
-                        </span>
-                        , then enter the reference number below.
+                        After you place the order, you&apos;ll be redirected to a
+                        secure GCash payment page to complete your payment — no
+                        manual reference number needed.
                       </p>
                     </div>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="gcashReference" className="checkout-label">
-                      <FileText className="size-3.5" aria-hidden="true" />
-                      GCash reference number
-                    </Label>
-                    <Input
-                      id="gcashReference"
-                      value={gcashReference}
-                      onChange={(event) =>
-                        setGcashReference(event.target.value)
-                      }
-                      placeholder="Reference number from receipt"
-                      required
-                      className="checkout-input"
-                    />
                   </div>
                 </div>
               </div>
@@ -783,9 +766,7 @@ export function CheckoutPage({ gcashNumber }: CheckoutPageProps) {
                   </p>
                   <p className="truncate text-xs font-medium text-orange-950/55">
                     {paymentMethod === "GCASH"
-                      ? gcashReference
-                        ? `Ref: ${gcashReference}`
-                        : "Manual transfer"
+                      ? "Pay via secure gateway"
                       : "Pay on arrival"}
                   </p>
                 </div>

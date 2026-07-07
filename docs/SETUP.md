@@ -111,7 +111,71 @@ Open:
 http://localhost:3000
 ```
 
-## 8. (Optional) Enable Google login for the admin
+## 8. Rate limiter (Upstash Redis)
+
+Checkout and admin login are rate-limited. The limiter has two backends and
+picks one automatically at startup:
+
+- **Local dev / tests:** if `UPSTASH_REDIS_REST_URL` and
+  `UPSTASH_REDIS_REST_TOKEN` are **not** set, it falls back to an in-memory Map.
+  No setup needed — but note this state is per-process, so it only limits within
+  a single instance.
+- **Vercel production:** serverless runs many isolated instances, so the
+  in-memory Map is ineffective. Set both env vars to enable the durable Upstash
+  Redis backend and get correct **cross-instance** limiting.
+
+Create a database at [Upstash](https://upstash.com/) (Redis) and copy the REST
+credentials:
+
+```env
+UPSTASH_REDIS_REST_URL="https://YOUR-DB.upstash.io"
+UPSTASH_REDIS_REST_TOKEN="..."
+```
+
+If the backend is ever unreachable, the limiter **fails open** (allows the
+request) so a Redis hiccup never blocks legitimate checkout or login traffic.
+
+## 9. Payments (automated gateway)
+
+GCash orders settle through an automated payment gateway instead of a manual
+reference number. The provider is pluggable — `mock` (built-in simulation) ships
+by default; real providers (Maya, Stripe, Xendit) can be added later behind the
+same `PaymentProvider` interface in `src/features/payments/`.
+
+```env
+PAYMENT_PROVIDER="mock"
+PAYMENT_SIGNING_SECRET="a-long-random-string"
+```
+
+- `PAYMENT_SIGNING_SECRET` is **required**: settlement callbacks are HMAC-signed
+  so an order can't be marked paid without a valid signature. Generate one with
+  the same command as `AUTH_SECRET`.
+- **Flow:** placing a GCash order redirects to `/checkout/pay/[intentId]` (the
+  mock gateway), where **Pay now** / **Simulate failure** POST to
+  `/api/payments/callback`. A successful callback auto-transitions the order from
+  `PENDING` → `PAID` (no staff action) and pushes the update live to the admin
+  dashboard and the customer's order tracker.
+
+## 10. Observability & Log Drains
+
+The app logs through `src/lib/logger.ts`. In development you get readable
+console lines; in production every log is emitted as a **single-line JSON object**
+(`level`, `message`, `timestamp`, `context`, and a serialized `error`) on
+stdout/stderr. Vercel automatically parses this JSON into queryable fields — so
+no logging library or agent is needed.
+
+To forward those logs to an aggregator (Axiom, Better Stack, Datadog, etc.):
+
+1. In the Vercel dashboard, open **Project → Settings → Log Drains**.
+2. **Add a Log Drain**, choose your provider (or a generic HTTPS/JSON endpoint),
+   and paste the destination URL/token from that provider.
+3. Save. New logs stream to the aggregator automatically — no code or redeploy
+   required.
+
+Log Drains are a Pro/Enterprise feature; on Hobby you can still read the JSON
+logs under the project's **Logs** tab.
+
+## 11. (Optional) Enable Google login for the admin
 
 Admins/staff can sign in with Google. The "Continue with Google" button on
 `/admin/login` appears only when both Google env vars are set, and a Google

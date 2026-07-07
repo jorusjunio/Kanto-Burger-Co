@@ -14,6 +14,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { toggleProductAvailability } from "@/features/admin/menu/actions";
+import { DeleteProductDialog } from "@/features/admin/menu/delete-product-dialog";
 import { getAdminMenuProducts } from "@/features/admin/menu/queries";
 import { formatPeso } from "@/lib/format";
 import { getCurrentSession } from "@/server/auth/session";
@@ -177,6 +178,10 @@ export default async function AdminMenuPage() {
                           Edit
                         </Link>
                       </Button>
+                      <DeleteProductDialog
+                        productId={product.id}
+                        productName={product.name}
+                      />
                     </div>
                   </TableCell>
                 </TableRow>
