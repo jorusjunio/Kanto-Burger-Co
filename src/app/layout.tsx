@@ -2,8 +2,6 @@ import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Toaster } from "sonner";
 
-import { PageLoader } from "@/components/customer/page-loader";
-import { SmoothScroll } from "@/components/customer/smooth-scroll";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -39,8 +37,6 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <body className="relative flex min-h-screen flex-col">
-        <SmoothScroll />
-        <PageLoader />
         {children}
         <Toaster
           position="top-center"
