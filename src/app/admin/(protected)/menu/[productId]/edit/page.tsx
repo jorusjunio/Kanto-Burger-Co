@@ -34,6 +34,17 @@ export default async function EditProductPage({
   ]);
   const updateProductWithId = updateProduct.bind(null, product.id);
 
+  // Prisma Decimal values can't cross the server→client boundary, so serialize
+  // prices to plain numbers before handing the product to the client form.
+  const productForForm = {
+    ...product,
+    price: Number(product.price),
+    addOns: product.addOns.map((addOn) => ({
+      ...addOn,
+      price: Number(addOn.price),
+    })),
+  };
+
   return (
     <div className="space-y-6">
       {/* Back Button */}
@@ -59,7 +70,7 @@ export default async function EditProductPage({
       <ProductForm
         action={updateProductWithId}
         categories={categories}
-        product={product}
+        product={productForForm}
         submitLabel="Save Changes"
       />
     </div>
