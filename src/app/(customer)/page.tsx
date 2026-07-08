@@ -54,13 +54,9 @@ const serviceNotes: Array<[LucideIcon, string]> = [
 // Drifting embers for the hero background — positions/timing keep them organic.
 const heroEmbers: Array<{ left: string; delay: string; duration: string }> = [
   { left: "8%", delay: "0s", duration: "9s" },
-  { left: "18%", delay: "-3s", duration: "11s" },
   { left: "29%", delay: "-6s", duration: "8.5s" },
-  { left: "41%", delay: "-1.5s", duration: "10.5s" },
   { left: "55%", delay: "-4.5s", duration: "9.5s" },
-  { left: "67%", delay: "-2s", duration: "12s" },
   { left: "78%", delay: "-7s", duration: "8s" },
-  { left: "88%", delay: "-5s", duration: "11.5s" },
   { left: "95%", delay: "-3.5s", duration: "10s" },
 ];
 
@@ -273,20 +269,6 @@ export default async function Home() {
       </section>
 
       <section className="relative z-10 mx-auto grid max-w-6xl gap-4 bg-[oklch(0.982_0.025_82)] px-4 py-10 sm:px-6 lg:grid-cols-3">
-        <div className="ambient-orbs" aria-hidden="true">
-          <span
-            className="ambient-orb ambient-orb--amber"
-            style={{ top: "-4rem", left: "-3rem", animationDuration: "16s" } as React.CSSProperties}
-          />
-          <span
-            className="ambient-orb ambient-orb--green"
-            style={{ top: "20%", right: "-4rem", animationDuration: "20s", animationDelay: "-5s" } as React.CSSProperties}
-          />
-          <span
-            className="ambient-orb ambient-orb--red"
-            style={{ bottom: "-5rem", left: "42%", animationDuration: "18s", animationDelay: "-8s" } as React.CSSProperties}
-          />
-        </div>
         {highlights.map(([count, Icon, title, copy], index) => (
           <div
             key={title}
@@ -319,16 +301,6 @@ export default async function Home() {
       </section>
 
       <section className="relative z-10 mx-auto max-w-7xl bg-[oklch(0.982_0.025_82)] px-4 pb-12 pt-2 sm:px-6">
-        <div className="ambient-orbs" aria-hidden="true">
-          <span
-            className="ambient-orb ambient-orb--red"
-            style={{ top: "-3rem", right: "8%", animationDuration: "19s" } as React.CSSProperties}
-          />
-          <span
-            className="ambient-orb ambient-orb--amber"
-            style={{ bottom: "-4rem", left: "-2rem", animationDuration: "22s", animationDelay: "-6s" } as React.CSSProperties}
-          />
-        </div>
         <div
           className="mb-6 flex items-end justify-between gap-4"
           data-scroll-reveal
