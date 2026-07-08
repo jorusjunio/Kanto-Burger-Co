@@ -268,7 +268,7 @@ export default async function Home() {
         </div>
       </section>
 
-      <section className="relative z-10 mx-auto grid max-w-6xl gap-4 bg-[oklch(0.982_0.025_82)] px-4 py-10 sm:px-6 lg:grid-cols-3">
+      <section className="relative z-10 mx-auto grid max-w-6xl gap-4 px-4 py-10 sm:px-6 lg:grid-cols-3">
         {highlights.map(([count, Icon, title, copy], index) => (
           <div
             key={title}
@@ -300,7 +300,7 @@ export default async function Home() {
         ))}
       </section>
 
-      <section className="relative z-10 mx-auto max-w-7xl bg-[oklch(0.982_0.025_82)] px-4 pb-12 pt-2 sm:px-6">
+      <section className="relative z-10 mx-auto max-w-7xl px-4 pb-12 pt-2 sm:px-6">
         <div
           className="mb-6 flex items-end justify-between gap-4"
           data-scroll-reveal
