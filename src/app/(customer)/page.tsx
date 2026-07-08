@@ -379,11 +379,9 @@ export default async function Home() {
 
       <footer
         className="border-t border-red-950/10 bg-[#1d0906] px-4 py-10 text-orange-50 sm:px-6"
-        data-scroll-reveal
-        suppressHydrationWarning
       >
         <div className="mx-auto grid max-w-6xl gap-8 md:grid-cols-[1.25fr_0.8fr_0.8fr_0.8fr]">
-          <div data-scroll-reveal suppressHydrationWarning>
+          <div>
             <p className="text-2xl font-black uppercase text-amber-300">
               Kanto Burger Co.
             </p>
@@ -416,20 +414,20 @@ export default async function Home() {
             </div>
           </div>
 
-          <div data-scroll-reveal suppressHydrationWarning>
+          <div>
             <p className="footer-title">Visit</p>
             <p className="footer-copy">Quezon City, Philippines</p>
             <p className="footer-copy">Open daily, 10:00 AM - 10:00 PM</p>
           </div>
 
-          <div data-scroll-reveal suppressHydrationWarning>
+          <div>
             <p className="footer-title">Contact</p>
             <p className="footer-copy">0912 345 6789</p>
             <p className="footer-copy">hello@kantoburger.co</p>
             <p className="footer-copy">GCash payments supported</p>
           </div>
 
-          <div data-scroll-reveal suppressHydrationWarning>
+          <div>
             <p className="footer-title">Quick Links</p>
             <div className="mt-3 grid gap-2 text-sm font-bold text-orange-50/70">
               <Link href="/menu" className="footer-link">
