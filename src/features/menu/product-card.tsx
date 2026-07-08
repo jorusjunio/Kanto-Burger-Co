@@ -177,8 +177,10 @@ export function ProductCard({ product }: ProductCardProps) {
         </div>
       </div>
 
-      {/* ── Content Area ── */}
-      <CardContent className="flex flex-1 flex-col gap-3 p-4 pt-4">
+      {/* ── Content Area ──
+          relative z-10 + opaque bg-card overlaps the image's bottom edge so the
+          rounded-clip compositing seam can't show a dark line on hover. */}
+      <CardContent className="relative z-10 flex flex-1 flex-col gap-3 bg-card p-4 pt-4">
         <div className="flex flex-1 flex-col gap-2">
           <div className="space-y-1.5">
             <div className="flex items-start justify-between gap-2">
