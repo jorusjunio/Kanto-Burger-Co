@@ -26,6 +26,13 @@ type CustomerTopBarProps = {
   variant?: "hero" | "light";
 };
 
+// Navbar tone follows the section behind it. Instead of sampling pixel colors
+// (unreliable — elementFromPoint returns the fixed navbar itself), we switch
+// tone based on whether the dark hero has scrolled above the bar: over the dark
+// hero → light text; over the light content below → dark text. This keeps the
+// text readable against both dark and light backgrounds.
+const NAV_TONE_SWITCH_Y = 60; // ~bar vertical center from the top of the viewport
+
 function useHeroNavPastHero(enabled: boolean) {
   const [isPastHero, setIsPastHero] = useState(false);
 
@@ -34,34 +41,21 @@ function useHeroNavPastHero(enabled: boolean) {
       return;
     }
 
-    const checkBackgroundAtNavbar = () => {
-      // Get element directly behind navbar (center, at navbar height)
-      const element = document.elementFromPoint(
-        window.innerWidth / 2,
-        50 // Check at navbar level (50px from top)
-      );
-
-      if (element) {
-        const bgColor = window.getComputedStyle(element).backgroundColor;
-        
-        // Parse RGB values
-        const rgbMatch = bgColor.match(/\d+/g);
-        if (rgbMatch && rgbMatch.length >= 3) {
-          const [r, g, b] = rgbMatch.map(Number);
-          // Calculate luminance to determine if background is light
-          const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
-          // Only switch to dark text when background is VERY light (> 0.85)
-          setIsPastHero(luminance > 0.85);
-        }
-      }
+    const update = () => {
+      const hero = document.getElementById("home-hero");
+      const heroBottom = hero
+        ? hero.getBoundingClientRect().bottom
+        : window.innerHeight - window.scrollY;
+      setIsPastHero(heroBottom < NAV_TONE_SWITCH_Y);
     };
 
-    // Check on mount and on scroll
-    checkBackgroundAtNavbar();
-    window.addEventListener("scroll", checkBackgroundAtNavbar, { passive: true });
-    
+    update();
+    window.addEventListener("scroll", update, { passive: true });
+    window.addEventListener("resize", update, { passive: true });
+
     return () => {
-      window.removeEventListener("scroll", checkBackgroundAtNavbar);
+      window.removeEventListener("scroll", update);
+      window.removeEventListener("resize", update);
       setIsPastHero(false);
     };
   }, [enabled]);
@@ -81,21 +75,13 @@ export function CustomerTopBar({ variant = "light" }: CustomerTopBarProps) {
     return (
       <div
         className={cn(
-          "home-topbar fixed inset-x-0 top-4 z-50 mx-auto w-full max-w-[850px] overflow-hidden rounded-[2rem] backdrop-blur-2xl backdrop-saturate-[1.6] px-5 py-2 shadow-[0_12px_40px_rgba(0,0,0,0.25),inset_0_1px_1px_rgba(255,255,255,0.15)] transition-all duration-300 ease-in-out",
+          "home-topbar fixed inset-x-0 top-4 z-50 mx-auto w-full max-w-[850px] rounded-full backdrop-blur-xl px-5 py-2 shadow-[0_8px_28px_rgba(0,0,0,0.14)] transition-all duration-300 ease-in-out",
           isPastHero
-            ? "border border-black/10 bg-transparent text-stone-900"
-            : "border border-white/10 bg-neutral-900/[0.25] text-white"
+            ? "border border-black/10 bg-white/55 text-stone-900"
+            : "border border-white/10 bg-neutral-900/35 text-white"
         )}
         data-nav-tone={isPastHero ? "light" : "hero"}
       >
-        {/* Subtle liquid glass shine layer */}
-        <div className={cn(
-          "pointer-events-none absolute inset-0 rounded-[2rem] bg-gradient-to-b opacity-100",
-          isPastHero
-            ? "from-black/5 to-transparent"
-            : "from-white/10 to-transparent"
-        )} />
-        
         <div className="relative z-10 flex w-full items-center justify-between gap-2 sm:gap-4">
           
           {/* DYNAMIC LOGO SECTION */}
@@ -134,21 +120,13 @@ export function CustomerTopBar({ variant = "light" }: CustomerTopBarProps) {
                 >
                   Kanto Burger Co.
                 </span>
-                <span
-                  className={cn(
-                    "text-[9px] font-semibold uppercase tracking-[0.18em] transition-colors duration-500",
-                    isPastHero ? "text-stone-500" : "text-white/50",
-                  )}
-                >
-                  Hot burgers • Fast pickup
-                </span>
               </span>
             </Link>
           </div>
 
           {/* CAPSULE NAV LINKS — icon-only on phones/tablets, icon + label on desktop */}
           <div className={cn(
-            "flex items-center gap-1 rounded-full p-0.5 backdrop-blur-md border transition-all duration-300",
+            "flex items-center gap-1 rounded-full border p-0.5 transition-all duration-300",
             isPastHero
               ? "bg-black/5 border-black/5"
               : "bg-white/5 border-white/5"
@@ -162,18 +140,18 @@ export function CustomerTopBar({ variant = "light" }: CustomerTopBarProps) {
                   aria-label={item.label}
                   title={item.label}
                   className={cn(
-                    "group relative flex items-center gap-1.5 rounded-full px-2.5 py-1.5 text-[10px] font-bold uppercase tracking-[0.15em] transition-all duration-300 lg:px-3",
+                    "group relative flex items-center gap-1.5 px-2.5 py-1.5 text-[10px] font-bold uppercase tracking-[0.15em] transition-colors duration-200 lg:px-3",
                     isPastHero
-                      ? "text-stone-700/80 hover:text-stone-900 hover:bg-black/5"
-                      : "text-white/80 hover:text-white hover:bg-white/10"
+                      ? "text-stone-700/80 hover:text-stone-900"
+                      : "text-white/80 hover:text-white"
                   )}
                 >
+                  {/* Playful icon spin + scale on hover (matches the badge star). */}
                   <Icon className={cn(
-                    "size-4 transition-colors group-hover:text-amber-300 lg:size-3.5",
+                    "size-4 transition-all duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] group-hover:-rotate-12 group-hover:scale-125 group-hover:text-amber-300 lg:size-3.5",
                     isPastHero ? "text-stone-600" : "text-white/60"
                   )} />
                   <span className="relative z-10 hidden lg:inline">{item.label}</span>
-                  <span className="absolute bottom-1 left-3 right-3 hidden h-[1.5px] bg-amber-500 scale-x-0 transition-transform duration-300 origin-center group-hover:scale-x-100 lg:block" />
                 </Link>
               );
             })}
@@ -193,7 +171,7 @@ export function CustomerTopBar({ variant = "light" }: CustomerTopBarProps) {
                   : "border-white/10 bg-white/5 text-white/90 hover:bg-white/15 hover:text-white hover:border-white/20"
               )}
             >
-              <ShoppingBag className="size-4 transition-transform duration-300 group-hover:scale-110 md:size-3" aria-hidden="true" />
+              <ShoppingBag className="size-4 transition-transform duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] group-hover:-rotate-12 group-hover:scale-125 md:size-3" aria-hidden="true" />
               <span className="hidden md:inline">Cart</span>
               {itemCount > 0 ? (
                 <span className="rounded-full bg-gradient-to-r from-red-500 to-orange-600 px-1.5 py-0.5 text-[8px] font-black text-white shadow-sm">
@@ -205,7 +183,7 @@ export function CustomerTopBar({ variant = "light" }: CustomerTopBarProps) {
             <Button
               asChild
               className={cn(
-                "hidden md:inline-flex h-8 rounded-full px-3.5 text-[10px] font-bold uppercase tracking-[0.15em] shadow-[0_4px_25px_rgba(255,255,255,0.15)] transition-all duration-300 hover:scale-[1.02] hover:-translate-y-0.5",
+                "hidden md:inline-flex h-8 rounded-full px-3.5 text-[10px] font-bold uppercase tracking-[0.15em] transition-all duration-300 hover:-translate-y-0.5",
                 isPastHero
                   ? "bg-amber-400 text-amber-950 hover:bg-amber-300 hover:shadow-[0_6px_20px_rgba(251,191,36,0.25)]"
                   : "bg-white text-slate-950 hover:bg-amber-300 hover:shadow-[0_6px_20px_rgba(251,191,36,0.25)]"

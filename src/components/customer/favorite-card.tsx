@@ -91,7 +91,7 @@ export function FavoriteCard({
       <Link
         ref={cardRef}
         href={href}
-        className="favorite-card group relative flex h-full min-h-[470px] flex-col overflow-hidden rounded-lg"
+        className="favorite-card group relative flex h-full min-h-[470px] flex-col overflow-hidden rounded-xl"
       >
         <div className="favorite-card__media relative min-h-[285px] flex-1 overflow-hidden">
           {image ? (
@@ -107,7 +107,7 @@ export function FavoriteCard({
           <div className="favorite-card__wash" />
           <div className="favorite-card__spotlight" aria-hidden="true" />
           <span className="favorite-card__badge favorite-card__badge--top">
-            <Star className="size-3.5 fill-amber-300" aria-hidden="true" />
+            <Star className="size-3 fill-amber-300 text-amber-300" aria-hidden="true" />
             {accent.label}
           </span>
           <span className="favorite-card__rank">0{index + 1}</span>

@@ -2334,7 +2334,7 @@
     isolation: isolate;
     flex-direction: column;
     border: 1px solid rgb(255 255 255 / 0.16);
-    border-radius: 8px;
+    border-radius: var(--radius-xl);
     background:
       linear-gradient(180deg, #2a0d08, #150604),
       radial-gradient(circle at 50% 0%, rgb(251 191 36 / 0.18), transparent 40%);
@@ -2413,7 +2413,7 @@
   .favorite-card__media {
     position: relative;
     overflow: hidden;
-    border-radius: 8px 8px 0 0;
+    border-radius: var(--radius-xl) var(--radius-xl) 0 0;
     background:
       radial-gradient(circle at 50% 38%, rgb(255 237 213 / 0.32), transparent 30%),
       linear-gradient(135deg, rgb(251 191 36 / 0.24), transparent 48%),
@@ -2471,30 +2471,40 @@
     display: inline-flex;
     align-items: center;
     gap: 0.35rem;
-    border: 1px solid rgb(255 255 255 / 0.22);
-    border-radius: 8px;
-    background: rgb(24 8 6 / 0.62);
-    padding: 0.45rem 0.65rem;
-    color: rgb(255 247 237 / 0.94);
-    font-size: 0.75rem;
-    font-weight: 950;
+    /* Fully rounded pill to match the buttons and service chips. */
+    border-radius: 999px;
+    background: rgb(24 8 6 / 0.55);
+    padding: 0.32rem 0.72rem;
+    color: rgb(255 247 237 / 0.92);
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
     text-transform: uppercase;
-    backdrop-filter: blur(14px);
-    box-shadow: 0 10px 22px rgb(0 0 0 / 0.2);
     transition:
-      transform 400ms cubic-bezier(0.34, 1.56, 0.64, 1),
-      border-color 350ms ease,
-      box-shadow 350ms ease;
+      transform 350ms cubic-bezier(0.34, 1.56, 0.64, 1),
+      background-color 300ms ease,
+      color 300ms ease,
+      box-shadow 300ms ease;
+  }
+
+  .favorite-card__badge svg {
+    transition: transform 400ms cubic-bezier(0.34, 1.56, 0.64, 1);
   }
 
   .favorite-card__badge--top {
     max-width: calc(100% - 5.5rem);
   }
 
+  /* Interactive: badge lifts + tints and its star spins on card hover. */
   .favorite-card:hover .favorite-card__badge {
-    transform: translateY(-2px);
-    border-color: rgb(251 191 36 / 0.45);
-    box-shadow: 0 14px 26px rgb(0 0 0 / 0.28);
+    transform: translateY(-3px) scale(1.05);
+    background: rgb(24 8 6 / 0.74);
+    color: #fff;
+    box-shadow: 0 8px 18px rgb(0 0 0 / 0.3);
+  }
+
+  .favorite-card:hover .favorite-card__badge svg {
+    transform: rotate(-20deg) scale(1.25);
   }
 
   .favorite-card__rank {
@@ -2665,18 +2675,17 @@
   }
 
   .hero-action-primary:hover {
-    transform: translateY(-3px) scale(1.02);
-    box-shadow: 0 16px 36px rgb(251 191 36 / 0.34);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgb(251 191 36 / 0.22);
   }
 
   .hero-action-secondary:hover {
-    transform: translateY(-3px) scale(1.02);
-    box-shadow: 0 16px 36px rgb(255 255 255 / 0.12);
+    transform: translateY(-2px);
   }
 
   .hero-action-primary:active,
   .hero-action-secondary:active {
-    transform: translateY(-1px) scale(0.98);
+    transform: translateY(0);
   }
 
   .hero-service-card,

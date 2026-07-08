@@ -213,7 +213,7 @@ export default async function Home() {
               >
                 <Button
                   asChild
-                  className="hero-action-primary h-12 w-full bg-amber-400 px-6 text-base font-black text-red-950 shadow-lg shadow-amber-500/20 hover:bg-amber-300 sm:w-auto"
+                  className="hero-action-primary h-12 w-full rounded-full bg-amber-400 px-7 text-base font-bold text-red-950 hover:bg-amber-300 sm:w-auto"
                 >
                   <Link href="/menu">
                     Order Now
@@ -223,7 +223,7 @@ export default async function Home() {
                 <Button
                   asChild
                   variant="outline"
-                  className="hero-action-secondary h-12 w-full border-white/40 bg-white/10 px-6 font-black text-white backdrop-blur-md hover:bg-white hover:text-red-900 sm:w-auto"
+                  className="hero-action-secondary h-12 w-full rounded-full border-white/25 bg-transparent px-7 font-bold text-white hover:bg-white/10 hover:text-white sm:w-auto"
                 >
                   <Link href="/menu#combos">
                     See Our Menu
@@ -233,7 +233,7 @@ export default async function Home() {
               </div>
 
               <div
-                className="grid max-w-[22rem] gap-3 text-sm font-black text-white/80 sm:max-w-xl sm:grid-cols-3"
+                className="flex max-w-[22rem] flex-wrap gap-2 sm:max-w-xl"
                 data-scroll-reveal
                 suppressHydrationWarning
                 style={{ "--reveal-delay": "320ms" } as React.CSSProperties}
@@ -241,10 +241,10 @@ export default async function Home() {
                 {serviceNotes.map(([Icon, label]) => (
                   <div
                     key={label}
-                    className="hero-service-card group flex items-center gap-2 rounded-xl border border-white/15 bg-white/10 px-3 py-3 backdrop-blur-md"
+                    className="flex items-center gap-2 rounded-full bg-white/5 px-3.5 py-2 text-[13px] font-semibold text-white/65"
                   >
                     <Icon
-                      className="size-4 text-amber-300 transition-transform duration-300 group-hover:scale-110"
+                      className="size-3.5 text-amber-300/90"
                       aria-hidden="true"
                     />
                     {label}
