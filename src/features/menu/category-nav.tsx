@@ -46,6 +46,10 @@ export function CategoryNav({ categories }: CategoryNavProps) {
   );
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
+  // When pinned to the page bottom the last category owns the active state —
+  // the observer must not override it (its band sits too high to ever see a
+  // short final section).
+  const nearBottomRef = useRef(false);
 
   const setItemRef = useCallback(
     (slug: string) => (el: HTMLAnchorElement | null) => {
@@ -62,6 +66,7 @@ export function CategoryNav({ categories }: CategoryNavProps) {
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
+        if (nearBottomRef.current) return;
         for (const entry of entries) {
           if (entry.isIntersecting) {
             setActiveCategory(entry.target.id);
@@ -78,16 +83,28 @@ export function CategoryNav({ categories }: CategoryNavProps) {
     return () => observer.disconnect();
   }, [categories]);
 
-  /* ─── Scroll: reset to "all" at top ─── */
+  /* ─── Scroll: reset to "all" at top; pin the last category at the bottom.
+     The observer's detection band sits in the upper viewport, so a short final
+     section (e.g. Combos) can never reach it — detect page bottom instead. ─── */
   useEffect(() => {
     const handleScroll = () => {
       if (window.scrollY < 100) {
+        nearBottomRef.current = false;
         setActiveCategory("all");
+        return;
+      }
+
+      const nearBottom =
+        window.innerHeight + window.scrollY >=
+        document.documentElement.scrollHeight - 80;
+      nearBottomRef.current = nearBottom;
+      if (nearBottom && categories.length > 0) {
+        setActiveCategory(categories[categories.length - 1].slug);
       }
     };
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+  }, [categories]);
 
   /* ─── Slide the thumb under the active item ─── */
   useEffect(() => {
@@ -207,8 +224,9 @@ export function CategoryNav({ categories }: CategoryNavProps) {
   return (
     <div className="sticky top-0 z-50 border-b border-orange-900/8 bg-[#fffbf2]/90 backdrop-blur-xl">
       <div className="mx-auto max-w-6xl px-4 py-3 sm:px-6">
-        {/* ── Segmented control ── */}
-        <div className="relative rounded-full bg-white/75 p-1 ring-1 ring-orange-900/10 shadow-sm">
+        {/* ── Segmented control — hugs its content (centered); scrolls only
+            when the categories overflow the row. ── */}
+        <div className="relative mx-auto w-fit max-w-full rounded-full bg-white/75 p-1 ring-1 ring-orange-900/10 shadow-sm">
           {/* Edge fades (only when the track overflows) */}
           <div
             className={cn(
@@ -228,7 +246,7 @@ export function CategoryNav({ categories }: CategoryNavProps) {
             className="overflow-x-auto [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
           >
             {/* Track: relative so the thumb scrolls together with the items. */}
-            <div className="relative flex w-max min-w-full items-center gap-1">
+            <div className="relative flex w-max items-center gap-1">
               {/* Sliding thumb */}
               <span
                 aria-hidden="true"
