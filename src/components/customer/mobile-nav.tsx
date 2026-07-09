@@ -249,7 +249,12 @@ function NavLink({
 }
 
 /* ─── Mobile Navigation Sheet ─── */
-export function MobileNav() {
+export function MobileNav({
+  triggerClassName,
+}: {
+  /** Extra classes for the trigger button (e.g. dark-dock styling). */
+  triggerClassName?: string;
+} = {}) {
   const [open, setOpen] = useState(false);
   const trackedOrders = useTrackedOrders();
   const trackedCount = trackedOrders.length;
@@ -270,7 +275,7 @@ export function MobileNav() {
         <Button
           variant="ghost"
           size="icon"
-          className="relative size-10 rounded-full"
+          className={cn("relative size-10 rounded-full", triggerClassName)}
           aria-label={
             trackedCount > 0
               ? `Open navigation, ${trackedCount} order${trackedCount > 1 ? "s" : ""} to track`
@@ -281,7 +286,7 @@ export function MobileNav() {
           {trackedCount > 0 ? (
             <span
               key={trackedCount}
-              className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-red-600 px-1 text-[10px] font-black leading-none text-white shadow-sm ring-2 ring-[#fffbf5] animate-in zoom-in-50 duration-300"
+              className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-amber-400 px-1 text-[10px] font-black leading-none text-red-950 shadow-sm ring-2 ring-[#1d0906] animate-in zoom-in-50 duration-300"
             >
               {trackedCount}
             </span>

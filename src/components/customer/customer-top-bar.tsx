@@ -69,7 +69,6 @@ export function CustomerTopBar({ variant = "light" }: CustomerTopBarProps) {
   );
   const isHeroVariant = variant === "hero";
   const isPastHero = useHeroNavPastHero(isHeroVariant);
-  const isHeroOnDark = isHeroVariant && !isPastHero;
 
   if (isHeroVariant) {
     return (
@@ -197,69 +196,50 @@ export function CustomerTopBar({ variant = "light" }: CustomerTopBarProps) {
     );
   }
 
+  // Floating dock — dark brand surface used on menu/cart/checkout/order pages.
   return (
-    <div
-      className={cn(
-        "customer-nav-wrapper customer-nav relative isolate inline-flex h-14 items-center gap-1 rounded-full border px-2 py-2 transition-all",
-        isHeroOnDark
-          ? "customer-nav--hero border-white/20 text-white"
-          : "customer-nav--light border-white/80 text-[#25130b]",
-      )}
-      data-nav-tone={isHeroOnDark ? "hero" : "light"}
-    >
+    <div className="customer-nav-wrapper inline-flex items-center gap-0.5 rounded-full bg-[#1d0906]/92 p-1.5 shadow-[0_14px_36px_rgba(29,9,6,0.38)] ring-1 ring-white/10 backdrop-blur-md">
+      {/* Home */}
       <Link
         href="/"
         prefetch
-            className={cn(
-          "relative flex size-10 shrink-0 items-center justify-center rounded-full transition-all duration-300 will-change-transform",
-          isHeroOnDark
-            ? "hover:bg-white/12 hover:shadow-[0_0_0_6px_rgba(255,255,255,0.06)]"
-            : "hover:bg-orange-950/6 hover:shadow-[0_0_0_6px_rgba(251,191,36,0.10)]",
-          "hover:-translate-y-0.5"
-        )}
         aria-label="Home"
+        className="group flex size-10 shrink-0 items-center justify-center rounded-full transition-colors duration-300 hover:bg-white/10"
       >
-        <span
-          className={cn(
-            "relative flex size-8 shrink-0 items-center justify-center rounded-full bg-white shadow-sm ring-1",
-            isHeroOnDark ? "ring-white/40" : "ring-orange-900/10",
-          )}
-        >
+        <span className="flex size-7.5 items-center justify-center rounded-full bg-white shadow-sm transition-transform duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] group-hover:-rotate-12 group-hover:scale-110">
           <Image
             src="/assets/brand/J logo without bg.png"
             alt="Kanto Burger Co."
-            width={22}
-            height={22}
+            width={19}
+            height={19}
             className="object-contain"
             priority
           />
         </span>
       </Link>
 
-      <Button
-        variant="ghost"
-        size="icon"
-        className={cn(
-          "relative size-10 rounded-full transition-all duration-300 will-change-transform",
-          "hover:-translate-y-0.5",
-          "focus-visible:ring-2 focus-visible:ring-amber-300/60 focus-visible:ring-offset-0",
-          isHeroOnDark
-            ? "text-white hover:bg-white/16 hover:text-amber-300"
-            : "text-orange-950 hover:bg-orange-100/80 hover:text-red-700",
-        )}
-        asChild
-      >
-        <Link href="/cart" prefetch aria-label="Cart">
-          <ShoppingBag className="size-5" aria-hidden="true" />
-          {itemCount > 0 ? (
-            <span className="absolute right-0 top-0 flex size-4 items-center justify-center rounded-full bg-red-600 text-[10px] font-extrabold text-white shadow-sm">
-              {itemCount}
-            </span>
-          ) : null}
-        </Link>
-      </Button>
+      <span aria-hidden="true" className="mx-0.5 h-5 w-px bg-white/12" />
 
-      <MobileNav />
+      {/* Cart */}
+      <Link
+        href="/cart"
+        prefetch
+        aria-label="Cart"
+        className="group relative flex size-10 shrink-0 items-center justify-center rounded-full text-white/70 transition-colors duration-300 hover:bg-white/10 hover:text-amber-300"
+      >
+        <ShoppingBag
+          className="size-5 transition-transform duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] group-hover:-rotate-12 group-hover:scale-125"
+          aria-hidden="true"
+        />
+        {itemCount > 0 ? (
+          <span className="absolute right-0.5 top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-red-600 px-1 text-[10px] font-extrabold leading-none text-white ring-2 ring-[#1d0906]">
+            {itemCount}
+          </span>
+        ) : null}
+      </Link>
+
+      {/* Menu drawer */}
+      <MobileNav triggerClassName="text-white/70 hover:bg-white/10 hover:text-amber-300" />
     </div>
   );
 }

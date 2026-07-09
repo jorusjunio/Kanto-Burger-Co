@@ -49,7 +49,11 @@ export function MockGatewayForm({
       }
 
       if (outcome === "SUCCEEDED") {
-        toast.success("Payment successful!");
+        // Consume checkout's "just placed" flag so the receipt page doesn't
+        // stack a second success toast on top of this one — one combined
+        // message covers both the order and the payment.
+        sessionStorage.removeItem("kanto:justPlaced");
+        toast.success("Order placed — payment successful!");
         router.push(`/order/${orderNumber}?token=${trackingToken}`);
         return;
       }

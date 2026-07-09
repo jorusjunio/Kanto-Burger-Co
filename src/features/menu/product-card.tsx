@@ -237,7 +237,7 @@ export function ProductCard({ product }: ProductCardProps) {
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent
           showCloseButton={false}
-          className="max-h-[90vh] overflow-y-auto rounded-3xl border-0 p-0 shadow-2xl sm:max-w-lg md:rounded-[2rem]"
+          className="menu-dialog-content max-h-[90vh] overflow-y-auto rounded-3xl border-0 p-0 shadow-2xl sm:max-w-lg md:rounded-[2rem]"
         >
           <DialogTitle className="sr-only">{product.name}</DialogTitle>
           <div className="product-dialog flex flex-col">
@@ -293,8 +293,11 @@ export function ProductCard({ product }: ProductCardProps) {
               ) : null}
             </div>
 
-            {/* ── Body ── */}
-            <div className="flex-1 space-y-5 px-6 pb-5 pt-5">
+            {/* ── Body ──
+                relative z-10 + opaque bg-popover overlaps the banner's bottom
+                edge (banner has margin-bottom:-1px) so the rounded/animated clip
+                seam can't show a dark line while the dialog opens. */}
+            <div className="relative z-10 flex-1 space-y-5 bg-[#fffbf5] px-6 pb-5 pt-5">
               {/* Description */}
               <p className="text-sm leading-relaxed text-orange-950/50">
                 {product.description}

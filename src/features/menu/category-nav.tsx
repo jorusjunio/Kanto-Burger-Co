@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   Beef,
   ChefHat,
@@ -32,12 +32,31 @@ function getCategoryIcon(slug: string) {
   return categoryIcons[slug] ?? ChefHat;
 }
 
+/**
+ * Sliding segmented control: one rounded container holding every category,
+ * with a red "thumb" that glides behind whichever section is active. The thumb
+ * lives inside the scrollable track so it follows horizontal overflow scrolling.
+ */
 export function CategoryNav({ categories }: CategoryNavProps) {
   const [activeCategory, setActiveCategory] = useState<string>("all");
   const scrollRef = useRef<HTMLDivElement>(null);
-  const activePillRef = useRef<HTMLAnchorElement>(null);
+  const itemRefs = useRef<Map<string, HTMLAnchorElement>>(new Map());
+  const [thumb, setThumb] = useState<{ left: number; width: number } | null>(
+    null,
+  );
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
+
+  const setItemRef = useCallback(
+    (slug: string) => (el: HTMLAnchorElement | null) => {
+      if (el) {
+        itemRefs.current.set(slug, el);
+      } else {
+        itemRefs.current.delete(slug);
+      }
+    },
+    [],
+  );
 
   /* ─── IntersectionObserver: detect active section ─── */
   useEffect(() => {
@@ -66,36 +85,48 @@ export function CategoryNav({ categories }: CategoryNavProps) {
         setActiveCategory("all");
       }
     };
-    const scrollOpts = { passive: true };
-    window.addEventListener("scroll", handleScroll, scrollOpts);
+    window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  /* ─── Auto-scroll active pill into center only on click ─── */
+  /* ─── Slide the thumb under the active item ─── */
   useEffect(() => {
-    const pill = activePillRef.current;
+    const update = () => {
+      const el = itemRefs.current.get(activeCategory);
+      if (el) {
+        setThumb({ left: el.offsetLeft, width: el.offsetWidth });
+      }
+    };
+
+    update();
+    // Re-measure once webfonts settle (label widths shift slightly).
+    document.fonts?.ready.then(update);
+    window.addEventListener("resize", update);
+    return () => window.removeEventListener("resize", update);
+  }, [activeCategory, categories]);
+
+  /* ─── Auto-center the active item only when it was clicked ─── */
+  useEffect(() => {
+    const item = itemRefs.current.get(activeCategory);
     const container = scrollRef.current;
-    
-    if (!pill || !container) return;
-    
-    // Only scroll if pill was clicked (has focus)
-    if (document.activeElement === pill) {
+    if (!item || !container) return;
+
+    if (document.activeElement === item) {
       const cr = container.getBoundingClientRect();
-      const pr = pill.getBoundingClientRect();
+      const pr = item.getBoundingClientRect();
       const scrollLeft = pr.left - cr.left - cr.width / 2 + pr.width / 2;
       container.scrollBy({ left: scrollLeft, behavior: "smooth" });
     }
   }, [activeCategory]);
 
-  /* ─── Detect scrollable edges for fade hints (ref-based, no re-renders) ─── */
+  /* ─── Edge fades for horizontal overflow ─── */
   useEffect(() => {
     const el = scrollRef.current;
     if (!el) return;
 
     const checkScroll = () => {
-      const left = el!.scrollLeft > 4;
-      const right = el!.scrollLeft + el!.clientWidth < el!.scrollWidth - 4;
-      // Only set state when values actually change to avoid re-renders
+      const left = el.scrollLeft > 4;
+      const right = el.scrollLeft + el.clientWidth < el.scrollWidth - 4;
       setCanScrollLeft((prev) => (prev !== left ? left : prev));
       setCanScrollRight((prev) => (prev !== right ? right : prev));
     };
@@ -108,22 +139,6 @@ export function CategoryNav({ categories }: CategoryNavProps) {
       window.removeEventListener("resize", checkScroll);
     };
   }, [categories]);
-
-  const totalItems = categories.reduce(
-    (sum, cat) => sum + cat.products.length,
-    0,
-  );
-
-  function getActiveCount() {
-    if (activeCategory === "all") return totalItems;
-    return (
-      categories.find((c) => c.slug === activeCategory)?.products.length ?? 0
-    );
-  }
-
-  function isActive(slug: string) {
-    return activeCategory === slug;
-  }
 
   /* ─── "All" returns to the top (works even when already on /menu) ─── */
   function handleAllClick(event: React.MouseEvent<HTMLAnchorElement>) {
@@ -141,128 +156,107 @@ export function CategoryNav({ categories }: CategoryNavProps) {
     }
   }
 
-  return (
-      <div 
-        className="sticky z-50 border-b border-orange-900/8 bg-[#fffbf2] backdrop-blur-2xl"
-        style={{ top: '0px', position: 'sticky' }}
+  function renderItem(options: {
+    slug: string;
+    label: string;
+    Icon: LucideIcon;
+    count?: number;
+    href: string;
+    onClick?: (event: React.MouseEvent<HTMLAnchorElement>) => void;
+  }) {
+    const { slug, label, Icon, count, href, onClick } = options;
+    const active = activeCategory === slug;
+
+    return (
+      <Link
+        key={slug}
+        href={href}
+        onClick={onClick ?? (() => setActiveCategory(slug))}
+        ref={setItemRef(slug)}
+        className={cn(
+          "relative z-10 flex shrink-0 items-center gap-2 rounded-full px-4 py-2 text-sm font-bold whitespace-nowrap transition-colors duration-300",
+          active
+            ? "text-white"
+            : "text-orange-950/55 hover:text-red-700",
+        )}
       >
-      <div className="mx-auto max-w-6xl px-4 sm:px-6">
-        <div className="flex items-center gap-3 py-2.5 pb-3.5">
-          {/* ── Item count chip ── */}
-          <div className="hidden shrink-0 items-center gap-1.5 rounded-full bg-gradient-to-r from-red-700 to-red-600 px-3.5 py-1.5 text-[11px] font-black uppercase tracking-wider text-white shadow-lg shadow-red-700/25 sm:flex">
-            <span className="cat-count-value tabular-nums">
-              {getActiveCount()}
-            </span>
-            <span className="opacity-70">items</span>
-          </div>
+        <Icon
+          className={cn(
+            "size-4 transition-colors duration-300",
+            active ? "text-amber-300" : "text-orange-950/30",
+          )}
+          aria-hidden="true"
+        />
+        {label}
+        {typeof count === "number" ? (
+          <span
+            className={cn(
+              "inline-flex h-5 min-w-5 items-center justify-center rounded-full px-1 text-[11px] font-black tabular-nums transition-colors duration-300",
+              active
+                ? "bg-white/20 text-white"
+                : "bg-orange-900/8 text-orange-950/30",
+            )}
+          >
+            {count}
+          </span>
+        ) : null}
+      </Link>
+    );
+  }
 
-          {/* ── Scrollable pills with edge fade ── */}
-          <div className="relative flex-1 overflow-hidden pb-1.5">
-            {/* Left fade */}
-            <div
-              className={cn(
-                "cat-nav-fade pointer-events-none absolute inset-y-0 left-0 z-10 w-8 bg-gradient-to-r from-[#fffbf2]/85 to-transparent transition-opacity duration-300",
-                canScrollLeft ? "opacity-100" : "opacity-0",
-              )}
-            />
-            {/* Right fade */}
-            <div
-              className={cn(
-                "cat-nav-fade pointer-events-none absolute inset-y-0 right-0 z-10 w-8 bg-gradient-to-l from-[#fffbf2]/85 to-transparent transition-opacity duration-300",
-                canScrollRight ? "opacity-100" : "opacity-0",
-              )}
-            />
+  return (
+    <div className="sticky top-0 z-50 border-b border-orange-900/8 bg-[#fffbf2]/90 backdrop-blur-xl">
+      <div className="mx-auto max-w-6xl px-4 py-3 sm:px-6">
+        {/* ── Segmented control ── */}
+        <div className="relative rounded-full bg-white/75 p-1 ring-1 ring-orange-900/10 shadow-sm">
+          {/* Edge fades (only when the track overflows) */}
+          <div
+            className={cn(
+              "pointer-events-none absolute inset-y-1 left-1 z-20 w-8 rounded-l-full bg-gradient-to-r from-white to-transparent transition-opacity duration-300",
+              canScrollLeft ? "opacity-100" : "opacity-0",
+            )}
+          />
+          <div
+            className={cn(
+              "pointer-events-none absolute inset-y-1 right-1 z-20 w-8 rounded-r-full bg-gradient-to-l from-white to-transparent transition-opacity duration-300",
+              canScrollRight ? "opacity-100" : "opacity-0",
+            )}
+          />
 
-            <div
-              ref={scrollRef}
-              className="cat-scroll flex gap-2 overflow-x-auto [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-            >
-              {/* "All" pill */}
-              <Link
-                href="/menu"
-                onClick={handleAllClick}
-                ref={isActive("all") ? activePillRef : undefined}
+          <div
+            ref={scrollRef}
+            className="overflow-x-auto [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+          >
+            {/* Track: relative so the thumb scrolls together with the items. */}
+            <div className="relative flex w-max min-w-full items-center gap-1">
+              {/* Sliding thumb */}
+              <span
+                aria-hidden="true"
                 className={cn(
-                  "shrink-0 rounded-xl px-4 py-2 text-sm font-bold transition-colors duration-200 antialiased subpixel-antialiased transform-gpu will-change-transform",
-                  isActive("all")
-                    ? "bg-red-600 text-white"
-                    : "border border-orange-900/10 bg-white/70 text-orange-950/60 hover:bg-white hover:text-red-700",
+                  "absolute inset-y-0 z-0 rounded-full bg-red-600 shadow-md shadow-red-700/25 transition-[left,width] duration-300 ease-out",
+                  thumb ? "opacity-100" : "opacity-0",
                 )}
-              >
-                <span className="flex items-center gap-2">
-                  <Sparkles
-                    className={cn(
-                      "size-4 transition-all duration-300",
-                      isActive("all")
-                        ? "text-amber-300"
-                        : "text-orange-950/30 group-hover:text-red-500",
-                    )}
-                    aria-hidden="true"
-                  />
-                  All
-                </span>
-                {/* Active shimmer */}
-                {isActive("all") ? (
-                  <span className="cat-pill-shimmer pointer-events-none absolute inset-0 rounded-xl" />
-                ) : null}
-              </Link>
+                style={{ left: thumb?.left ?? 0, width: thumb?.width ?? 0 }}
+              />
 
-              {/* Category pills */}
-              {categories.map((category) => {
-                const Icon = getCategoryIcon(category.slug);
-                const active = isActive(category.slug);
-                return (
-                  <Link
-                    key={category.id}
-                    href={`/menu#${category.slug}`}
-                    onClick={() => setActiveCategory(category.slug)}
-                    ref={active ? activePillRef : undefined}
-                    className={cn(
-                      "shrink-0 rounded-xl px-4 py-2 text-sm font-bold transition-colors duration-200 antialiased subpixel-antialiased transform-gpu will-change-transform",
-                      active
-                        ? "bg-red-600 text-white"
-                        : "border border-orange-900/10 bg-white/70 text-orange-950/60 hover:bg-white hover:text-red-700",
-                    )}
-                  >
-                    <span className="flex items-center gap-2">
-                      <Icon
-                        className={cn(
-                          "size-4 transition-all duration-300",
-                          active
-                            ? "text-amber-300"
-                            : "text-orange-950/30 group-hover:text-red-500",
-                        )}
-                        aria-hidden="true"
-                      />
-                      {category.name}
-                      <span
-                        className={cn(
-                          "inline-flex h-5 w-5 items-center justify-center rounded-md text-[11px] font-black tabular-nums transition-all duration-300 will-change-transform",
-                          active
-                            ? "bg-white/20 text-white"
-                            : "bg-orange-900/8 text-orange-950/25 group-hover:bg-red-50 group-hover:text-red-600",
-                        )}
-                      >
-                        {category.products.length}
-                      </span>
-                    </span>
-                  </Link>
-                );
+              {renderItem({
+                slug: "all",
+                label: "All",
+                Icon: Sparkles,
+                href: "/menu",
+                onClick: handleAllClick,
               })}
-            </div>
-          </div>
 
-          {/* ── Active filter label (desktop) ── */}
-          <div className="hidden shrink-0 text-right lg:block">
-            <p className="text-[10px] font-bold uppercase tracking-wider text-orange-950/30">
-              Filtering
-            </p>
-            <p className="text-xs font-black text-[#25130b]">
-              {activeCategory === "all"
-                ? "All items"
-                : categories.find((c) => c.slug === activeCategory)?.name ??
-                  "All items"}
-            </p>
+              {categories.map((category) =>
+                renderItem({
+                  slug: category.slug,
+                  label: category.name,
+                  Icon: getCategoryIcon(category.slug),
+                  count: category.products.length,
+                  href: `/menu#${category.slug}`,
+                }),
+              )}
+            </div>
           </div>
         </div>
       </div>
