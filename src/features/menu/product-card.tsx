@@ -242,7 +242,11 @@ export function ProductCard({ product }: ProductCardProps) {
           <DialogTitle className="sr-only">{product.name}</DialogTitle>
           <div className="product-dialog flex flex-col">
             {/* ── Image Banner ── */}
-            <div className="product-dialog-banner relative h-48 overflow-hidden sm:h-56">
+            {/* -mb-1: the banner is a composited layer (ken-burns transform on
+                the image), and at fractional DPRs (125%/150% scaling) its
+                clipped bottom edge anti-aliases into a visible 1px dark row.
+                The opaque body overlaps 4px over it to bury that edge. */}
+            <div className="product-dialog-banner relative -mb-1 h-48 overflow-hidden sm:h-56">
               {product.imageUrl ? (
                 <>
                   <Image
@@ -271,8 +275,11 @@ export function ProductCard({ product }: ProductCardProps) {
                 </div>
               )}
 
-              {/* Gradient overlay */}
-              <div className="absolute inset-0 bg-gradient-to-t from-[#fffbf5] via-[#fffbf5]/60 to-transparent" />
+              {/* Gradient overlay. The bottom 10% is FULLY opaque cream so the
+                  body's overlapping top edge always anti-aliases against the
+                  exact same color — no hairline at fractional DPRs (125%/150%
+                  Windows display scaling). */}
+              <div className="absolute inset-0 bg-gradient-to-t from-[#fffbf5] from-10% via-[#fffbf5]/60 to-transparent" />
 
               {/* Decorative glow */}
               <div className="pointer-events-none absolute -top-8 -right-8 size-48 rounded-full bg-gradient-to-br from-amber-300/20 to-transparent blur-3xl" />
