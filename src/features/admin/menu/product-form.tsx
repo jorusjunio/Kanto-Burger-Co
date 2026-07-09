@@ -129,7 +129,7 @@ export function ProductForm({
       className="grid gap-6 lg:grid-cols-[1fr_340px] animate-fade-in"
     >
       {/* Main panel */}
-      <div className="space-y-7 rounded-2xl border border-orange-900/10 bg-white p-6 shadow-[0_10px_30px_-12px_rgba(120,53,15,0.18)]">
+      <div className="space-y-7 rounded-xl bg-white p-6 ring-1 ring-orange-900/10">
         {/* Details */}
         <section className="space-y-4">
           <SectionLabel icon={Tag}>Product details</SectionLabel>
@@ -232,7 +232,7 @@ export function ProductForm({
                 htmlFor="imageFile"
                 className="group flex cursor-pointer flex-col items-center justify-center gap-3 rounded-2xl border-2 border-dashed border-orange-900/15 bg-stone-50/70 px-4 py-8 text-center transition-all duration-300 ease-out hover:-translate-y-0.5 hover:border-red-400/60 hover:bg-red-50/40"
               >
-                <span className="flex size-12 items-center justify-center rounded-xl bg-gradient-to-br from-red-600 to-red-700 text-white shadow-lg shadow-red-600/30 transition-transform duration-300 group-hover:scale-110">
+                <span className="flex size-12 items-center justify-center rounded-xl bg-red-600 text-white transition-transform duration-300 group-hover:scale-110">
                   <UploadCloud className="size-6" aria-hidden="true" />
                 </span>
                 <span>
@@ -308,7 +308,7 @@ export function ProductForm({
 
       {/* Sidebar */}
       <aside className="space-y-5">
-        <div className="admin-card rounded-2xl border border-orange-900/10 bg-white p-5 shadow-[0_10px_30px_-12px_rgba(120,53,15,0.18)]">
+        <div className="admin-card rounded-xl bg-white p-5 ring-1 ring-orange-900/10">
           <div className="flex items-center gap-2">
             <span className="flex size-8 items-center justify-center rounded-xl bg-gradient-to-br from-amber-500 to-amber-600 text-white shadow-md shadow-amber-500/30">
               <Boxes className="size-4" aria-hidden="true" />
@@ -352,9 +352,9 @@ export function ProductForm({
           </div>
         </div>
 
-        <div className="admin-card rounded-2xl border border-orange-900/10 bg-white p-5 shadow-[0_10px_30px_-12px_rgba(120,53,15,0.18)]">
+        <div className="admin-card rounded-xl bg-white p-5 ring-1 ring-orange-900/10">
           <div className="flex items-center gap-2">
-            <span className="flex size-8 items-center justify-center rounded-xl bg-gradient-to-br from-red-600 to-red-700 text-white shadow-md shadow-red-600/30">
+            <span className="flex size-8 items-center justify-center rounded-xl bg-red-600 text-white shadow-md shadow-red-600/30">
               <Store className="size-4" aria-hidden="true" />
             </span>
             <h2 className="font-black text-[#25130b]">Storefront</h2>
@@ -384,7 +384,7 @@ export function ProductForm({
         <div className="flex flex-col gap-2">
           <Button
             type="submit"
-            className="group h-11 rounded-xl bg-gradient-to-br from-red-600 to-red-700 font-black text-white shadow-lg shadow-red-600/30 transition-all duration-300 ease-out hover:-translate-y-0.5 hover:shadow-xl hover:shadow-red-600/40 active:translate-y-0 active:scale-[0.98]"
+            className="group h-11 rounded-xl bg-red-600 font-black text-white transition-all duration-300 ease-out hover:-translate-y-0.5 hover:shadow-xl hover:shadow-red-600/40 active:translate-y-0 active:scale-[0.98]"
           >
             <Save
               aria-hidden="true"

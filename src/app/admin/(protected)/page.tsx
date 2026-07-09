@@ -171,149 +171,108 @@ async function getDashboardData() {
 export default async function AdminDashboardPage() {
   const metrics = await getDashboardData();
 
+  const stats = [
+    {
+      label: "Total Sales Today",
+      value: formatPeso(metrics.totalSalesToday),
+      Icon: TrendingUp,
+      iconClass: "bg-red-700/8 text-red-700",
+    },
+    {
+      label: "Pending Orders",
+      value: String(metrics.pendingOrders),
+      Icon: Clock,
+      iconClass: "bg-amber-500/10 text-amber-600",
+      valueClass: metrics.pendingOrders > 0 ? "text-red-700" : undefined,
+    },
+    {
+      label: "Completed Today",
+      value: String(metrics.completedOrdersToday),
+      Icon: ShoppingCart,
+      iconClass: "bg-emerald-600/8 text-emerald-700",
+    },
+    {
+      label: "Top Product",
+      value: metrics.topSellingProducts[0].name,
+      sub: `${metrics.topSellingProducts[0].quantity} sold`,
+      Icon: Utensils,
+      iconClass: "bg-orange-950/5 text-orange-950/60",
+      valueClass: "text-sm leading-snug",
+    },
+  ];
+
   return (
     <div className="space-y-6">
+      {/* Page header */}
+      <div>
+        <p className="text-xs font-black uppercase tracking-wide text-red-700">
+          Admin
+        </p>
+        <h1 className="mt-1 text-2xl font-black text-[#25130b]">Dashboard</h1>
+      </div>
+
       {/* Metrics Grid */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {/* Total Sales Today */}
-        <div className="admin-card group relative overflow-hidden rounded-2xl border border-orange-900/10 bg-white px-6 py-5 shadow-[0_10px_30px_-12px_rgba(120,53,15,0.18)] animate-fade-in" style={{ animationDelay: '0ms' }}>
-          <div className="flex items-start justify-between">
-            <div className="flex-1">
-              <p className="text-[10px] font-black uppercase tracking-widest text-stone-500">
-                Total Sales Today
-              </p>
-              <p className="mt-2 text-2xl font-black text-[#25130b] tabular-nums">
-                {formatPeso(metrics.totalSalesToday)}
-              </p>
-            </div>
-            <div className="admin-icon-pop flex size-12 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-red-600 to-red-700 shadow-lg shadow-red-600/30">
-              <TrendingUp className="size-6 text-white" />
-            </div>
-          </div>
-        </div>
-
-        {/* Pending Orders */}
-        <div className="admin-card group relative overflow-hidden rounded-2xl border border-orange-900/10 bg-white px-6 py-5 shadow-[0_10px_30px_-12px_rgba(120,53,15,0.18)] animate-fade-in" style={{ animationDelay: '100ms' }}>
-          {/* Liquid Wave Background */}
+        {stats.map(({ label, value, sub, Icon, iconClass, valueClass }, index) => (
           <div
-            className="absolute bottom-0 left-0 right-0 overflow-hidden"
-            style={{ height: `${Math.min((metrics.pendingOrders / 30) * 100, 100)}%` }}
+            key={label}
+            className="admin-card rounded-xl bg-white p-5 ring-1 ring-orange-900/10 animate-fade-in"
+            style={{ animationDelay: `${index * 100}ms` }}
           >
-            {/* Wave 1 */}
-            <div className="absolute bottom-0 left-0 right-0 h-full">
-              <svg
-                className="absolute bottom-0 w-[200%] h-full animate-wave-1"
-                viewBox="0 0 1440 320"
-                preserveAspectRatio="none"
-                style={{ animationDuration: '8s' }}
-              >
-                <path
-                  fill="rgba(220, 38, 38, 0.1)"
-                  d="M0,192L48,197.3C96,203,192,213,288,229.3C384,245,480,267,576,250.7C672,235,768,181,864,181.3C960,181,1056,235,1152,234.7C1248,235,1344,181,1392,154.7L1440,128L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"
-                />
-              </svg>
-            </div>
-            {/* Wave 2 */}
-            <div className="absolute bottom-0 left-0 right-0 h-full">
-              <svg
-                className="absolute bottom-0 w-[200%] h-full animate-wave-2"
-                viewBox="0 0 1440 320"
-                preserveAspectRatio="none"
-                style={{ animationDuration: '12s' }}
-              >
-                <path
-                  fill="rgba(185, 28, 28, 0.15)"
-                  d="M0,160L48,176C96,192,192,224,288,224C384,224,480,192,576,165.3C672,139,768,117,864,128C960,139,1056,181,1152,197.3C1248,213,1344,203,1392,197.3L1440,192L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"
-                />
-              </svg>
-            </div>
-          </div>
-
-          {/* Content Overlay */}
-          <div className="relative z-10 flex items-start justify-between">
-            <div className="flex-1">
-              <p className="text-[10px] font-black uppercase tracking-widest text-red-700/70">
-                Pending Orders
-              </p>
-              <p className="mt-2 text-2xl font-black text-red-700 tabular-nums">
-                {metrics.pendingOrders}
-              </p>
-            </div>
-            <div className="relative admin-icon-pop flex size-12 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-red-600 to-red-700 shadow-lg shadow-red-600/30">
-              <Clock className="size-6 text-white" />
-              <div className="absolute -top-1 -right-1 flex size-3 items-center justify-center rounded-full bg-amber-400 shadow-sm">
-                <div className="size-2 rounded-full bg-amber-400 animate-ping" />
+            <div className="flex items-start justify-between gap-3">
+              <div className="min-w-0 flex-1">
+                <p className="text-[10px] font-bold uppercase tracking-widest text-orange-950/40">
+                  {label}
+                </p>
+                <p
+                  className={`mt-2 truncate text-2xl font-black text-[#25130b] tabular-nums ${valueClass ?? ""}`}
+                >
+                  {value}
+                </p>
+                {sub ? (
+                  <p className="mt-0.5 text-xs font-medium text-orange-950/40">
+                    {sub}
+                  </p>
+                ) : null}
               </div>
+              <span
+                className={`flex size-9 shrink-0 items-center justify-center rounded-lg ${iconClass}`}
+              >
+                <Icon className="size-4" />
+              </span>
             </div>
           </div>
-        </div>
-
-        {/* Completed Orders Today */}
-        <div className="admin-card group relative overflow-hidden rounded-2xl border border-orange-900/10 bg-white px-6 py-5 shadow-[0_10px_30px_-12px_rgba(120,53,15,0.18)] animate-fade-in" style={{ animationDelay: '200ms' }}>
-          <div className="flex items-start justify-between">
-            <div className="flex-1">
-              <p className="text-[10px] font-black uppercase tracking-widest text-stone-500">
-                Completed Today
-              </p>
-              <p className="mt-2 text-2xl font-black text-[#25130b] tabular-nums">
-                {metrics.completedOrdersToday}
-              </p>
-            </div>
-            <div className="admin-icon-pop flex size-12 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-600 to-emerald-700 shadow-lg shadow-emerald-600/30">
-              <ShoppingCart className="size-6 text-white" />
-            </div>
-          </div>
-        </div>
-
-        {/* Top Selling Products */}
-        <div className="admin-card group relative overflow-hidden rounded-2xl border border-orange-900/10 bg-white px-6 py-5 shadow-[0_10px_30px_-12px_rgba(120,53,15,0.18)] animate-fade-in" style={{ animationDelay: '300ms' }}>
-          <div className="flex items-start justify-between">
-            <div className="flex-1">
-              <p className="text-[10px] font-black uppercase tracking-widest text-stone-500">
-                Top Product
-              </p>
-              <p className="mt-2 text-sm font-black text-[#25130b]">
-                {metrics.topSellingProducts[0].name}
-              </p>
-              <p className="mt-1 text-xs font-medium text-stone-500">
-                {metrics.topSellingProducts[0].quantity} sold
-              </p>
-            </div>
-            <div className="admin-icon-pop flex size-12 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-amber-500 to-amber-600 shadow-lg shadow-amber-500/30">
-              <Utensils className="size-6 text-white" />
-            </div>
-          </div>
-        </div>
+        ))}
       </div>
 
       {/* Split Layout: Sales Analytics Chart + Top Products */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Column 1: Sales Analytics Chart (2/3 space) */}
-        <div className="admin-card lg:col-span-2 border border-orange-900/10 bg-white rounded-3xl p-6 shadow-[0_10px_30px_-12px_rgba(120,53,15,0.18)] animate-fade-in" style={{ animationDelay: '400ms' }}>
-          <h2 className="text-sm font-black uppercase tracking-wide text-[#25130b] mb-4">
+        <div className="admin-card lg:col-span-2 rounded-xl bg-white p-6 ring-1 ring-orange-900/10 animate-fade-in" style={{ animationDelay: '400ms' }}>
+          <h2 className="text-[13px] font-black uppercase tracking-wide text-[#25130b] mb-4">
             Sales Analytics Today
           </h2>
           <SalesAnalyticsChart data={metrics.salesByHour} />
         </div>
 
         {/* Column 2: Top Selling Products (1/3 space) */}
-        <div className="admin-card border border-orange-900/10 bg-white rounded-2xl px-6 py-5 shadow-[0_10px_30px_-12px_rgba(120,53,15,0.18)] animate-fade-in" style={{ animationDelay: '500ms' }}>
-          <h2 className="text-sm font-black uppercase tracking-wide text-[#25130b]">
-            Top Selling Products Today
+        <div className="admin-card rounded-xl bg-white p-6 ring-1 ring-orange-900/10 animate-fade-in" style={{ animationDelay: '500ms' }}>
+          <h2 className="text-[13px] font-black uppercase tracking-wide text-[#25130b]">
+            Top Sellers Today
           </h2>
-          <div className="mt-4 space-y-3">
+          <div className="mt-3 divide-y divide-orange-900/6">
             {metrics.topSellingProducts.map((product, index) => (
               <div
                 key={product.name}
-                className="group flex items-center gap-4 rounded-xl border border-stone-100 bg-white/60 px-4 py-3 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-red-200 hover:bg-red-50/40 hover:shadow-md"
+                className="flex items-center gap-3 py-3 first:pt-0 last:pb-0"
               >
-                <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-red-600 to-red-700 text-xs font-black text-white shadow-sm">
-                  {index + 1}
-                </div>
-                <div className="flex-1">
-                  <p className="text-xs font-black text-[#25130b]">{product.name}</p>
-                </div>
-                <p className="text-xs font-black text-red-700 tabular-nums">
+                <span className="w-5 shrink-0 font-mono text-xs font-bold text-orange-950/35">
+                  {String(index + 1).padStart(2, "0")}
+                </span>
+                <p className="min-w-0 flex-1 truncate text-sm font-bold text-[#25130b]">
+                  {product.name}
+                </p>
+                <p className="shrink-0 text-xs font-bold text-orange-950/45 tabular-nums">
                   {product.quantity} sold
                 </p>
               </div>
@@ -325,16 +284,16 @@ export default async function AdminDashboardPage() {
       {/* Bottom Row: Recent Orders + Order Breakdowns */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Column 1: Recent Orders Table (2/3 space) */}
-        <div className="admin-card lg:col-span-2 border border-orange-900/10 bg-white rounded-3xl p-6 shadow-[0_10px_30px_-12px_rgba(120,53,15,0.18)] animate-fade-in" style={{ animationDelay: '600ms' }}>
-          <h2 className="text-sm font-black uppercase tracking-wide text-[#25130b] mb-4">
+        <div className="admin-card lg:col-span-2 rounded-xl bg-white p-6 ring-1 ring-orange-900/10 animate-fade-in" style={{ animationDelay: '600ms' }}>
+          <h2 className="text-[13px] font-black uppercase tracking-wide text-[#25130b] mb-4">
             Recent Orders
           </h2>
           <RecentOrdersTable data={metrics.recentOrders} />
         </div>
 
         {/* Column 2: Order Methods & Payments Breakdowns (1/3 space) */}
-        <div className="admin-card border border-orange-900/10 bg-white rounded-2xl px-6 py-5 shadow-[0_10px_30px_-12px_rgba(120,53,15,0.18)] animate-fade-in" style={{ animationDelay: '700ms' }}>
-          <h2 className="text-sm font-black uppercase tracking-wide text-[#25130b] mb-4">
+        <div className="admin-card rounded-xl bg-white p-6 ring-1 ring-orange-900/10 animate-fade-in" style={{ animationDelay: '700ms' }}>
+          <h2 className="text-[13px] font-black uppercase tracking-wide text-[#25130b] mb-4">
             Order Breakdowns
           </h2>
           <OrderBreakdowns

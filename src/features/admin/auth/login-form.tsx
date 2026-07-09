@@ -136,7 +136,7 @@ export function LoginForm({ googleEnabled = false }: { googleEnabled?: boolean }
         <Button
           type="submit"
           disabled={isPending || isGoogleLoading}
-          className={`h-12 rounded-xl bg-gradient-to-r from-red-600 to-red-700 text-white hover:from-red-700 hover:to-red-800 font-black text-base group ${
+          className={`h-12 rounded-xl bg-red-600 text-white hover:bg-red-700 font-black text-base group ${
             googleEnabled ? "flex-1" : "w-full"
           }`}
         >

@@ -35,7 +35,7 @@ type OrderUpdatePayload = Pick<
 > & { timestamp?: number };
 
 /** Order + line items read inside the status transaction to restore stock. */
-type OrderWithRestockItems = Pick<Order, "status"> & {
+type OrderWithRestockItems = Pick<Order, "status" | "paymentStatus"> & {
   items: Array<
     Pick<OrderItem, "quantity" | "productId"> & {
       product: Pick<Product, "id" | "trackStock"> | null;
@@ -89,6 +89,7 @@ function revalidateOrderViews(
   orderNumber: string,
 ) {
   revalidatePath("/admin/orders");
+  revalidatePath("/admin/kitchen");
   revalidatePath("/admin/reports");
   revalidatePath(`/order/${orderNumber}`);
 }
@@ -148,9 +149,21 @@ export async function updateOrderStatusWithDeps(
 
     assertAllowedStatusTransition(currentOrder.status, nextStatus);
 
+    // Completing an order settles the payment: for cash/COD the customer pays on
+    // hand-off, and even GCash orders are guaranteed paid by the time they close.
+    // Auto-marking Paid here spares staff a second manual step (see kitchen flow).
+    const shouldSettlePayment =
+      nextStatus === OrderStatus.COMPLETED &&
+      currentOrder.paymentStatus !== PaymentStatus.PAID;
+
     const updatedOrder = await tx.order.update({
       where: { id: parsed.orderId },
-      data: { status: nextStatus },
+      data: {
+        status: nextStatus,
+        ...(shouldSettlePayment
+          ? { paymentStatus: PaymentStatus.PAID }
+          : {}),
+      },
       select: {
         id: true,
         orderNumber: true,

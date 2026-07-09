@@ -24,33 +24,28 @@ export default async function ProtectedAdminLayout({
         channelName="admin-orders"
         events={["order-created", "order-updated"]}
       />
-      <div className="flex min-h-screen bg-gradient-to-br from-[#f6f1e8] to-[#efe6d7]">
+      <div className="flex min-h-screen bg-[#f7f3ea]">
         {/* Sidebar owns its own desktop (fixed) + mobile (drawer) positioning */}
         <AdminSidebar />
 
-        {/* Main body — pl-72 on desktop so the fixed sidebar doesn't overlap */}
-        <div className="flex-1 lg:pl-72 flex flex-col min-w-0">
+        {/* Main body — pl-64 on desktop so the fixed sidebar doesn't overlap */}
+        <div className="flex-1 lg:pl-64 flex flex-col min-w-0">
           {/* MAIN VIEW CONTENT CONTAINER */}
-          <main className="flex-1 px-4 py-6 lg:px-8 lg:py-8 w-full">
-            {/* Header */}
-            <div className="mb-8 flex flex-col gap-3 pl-14 sm:flex-row sm:items-center sm:justify-between sm:pl-0 lg:pl-0">
-              <div>
-                <h1 className="text-2xl font-black uppercase tracking-tight text-[#25130b] lg:text-3xl">
-                  {isAdmin ? "Admin Dashboard" : "Staff Workspace"}
-                </h1>
-                <p className="text-sm font-medium text-orange-950/40">
-                  {session.user.email}
-                </p>
-              </div>
+          <main className="flex-1 px-4 py-6 lg:px-8 lg:py-7 w-full">
+            {/* Slim workspace bar */}
+            <div className="mb-6 flex items-center justify-between gap-3 pl-14 lg:pl-0">
+              <p className="min-w-0 truncate text-xs font-medium text-orange-950/45">
+                {session.user.email}
+              </p>
               <span
-                className={`inline-flex w-fit items-center gap-2 rounded-full border px-3.5 py-1.5 text-[11px] font-black uppercase tracking-wider shadow-sm ${
+                className={`inline-flex shrink-0 items-center gap-1.5 rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider ${
                   isAdmin
-                    ? "border-red-200 bg-red-50 text-red-700"
-                    : "border-amber-200 bg-amber-50 text-amber-700"
+                    ? "bg-red-700/8 text-red-700"
+                    : "bg-amber-600/10 text-amber-700"
                 }`}
               >
                 <span
-                  className={`size-2 rounded-full ${isAdmin ? "bg-red-600" : "bg-amber-500"} animate-pulse`}
+                  className={`size-1.5 rounded-full ${isAdmin ? "bg-red-600" : "bg-amber-500"}`}
                 />
                 {session.user.role ?? "STAFF"}
               </span>

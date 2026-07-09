@@ -7,6 +7,7 @@ import { useState } from "react";
 import {
   LayoutDashboard,
   ShoppingCart,
+  ChefHat,
   Utensils,
   Folder,
   Menu,
@@ -18,6 +19,7 @@ import { SignOutButton } from "@/features/admin/auth/sign-out-button";
 
 const navItems = [
   { label: "Dashboard", href: "/admin", icon: LayoutDashboard },
+  { label: "Kitchen", href: "/admin/kitchen", icon: ChefHat },
   { label: "Orders", href: "/admin/orders", icon: ShoppingCart },
   { label: "Menu", href: "/admin/menu", icon: Utensils },
   { label: "Categories", href: "/admin/categories", icon: Folder },
@@ -33,35 +35,30 @@ function SidebarBody({ onNavigate }: { onNavigate?: () => void }) {
   const pathname = usePathname();
 
   return (
-    <div className="flex h-full flex-col bg-gradient-to-b from-stone-800 to-stone-900">
+    <div className="flex h-full flex-col bg-stone-950">
       {/* Brand header */}
-      <div className="flex items-center justify-between border-b border-white/10 bg-white/5 px-5 py-5">
+      <div className="flex items-center justify-between px-5 py-6">
         <div className="flex items-center gap-3">
-          <div className="flex size-11 items-center justify-center rounded-2xl bg-gradient-to-br from-red-600 to-amber-500 shadow-lg shadow-red-600/30">
+          <span className="flex size-9 items-center justify-center rounded-full bg-white shadow-sm">
             <Image
               src="/assets/brand/J logo without bg.png"
               alt=""
-              width={22}
-              height={22}
-              className="object-contain brightness-0 invert"
+              width={18}
+              height={18}
+              className="object-contain"
               priority
             />
-          </div>
-          <div>
-            <h1 className="text-base font-black uppercase tracking-tight text-white">
-              Kanto Admin
-            </h1>
-            <p className="text-[11px] font-semibold text-stone-300">
-              Control center
-            </p>
-          </div>
+          </span>
+          <h1 className="text-sm font-black uppercase tracking-tight text-white">
+            Kanto Admin
+          </h1>
         </div>
         {onNavigate ? (
           <button
             type="button"
             onClick={onNavigate}
             aria-label="Close navigation"
-            className="flex size-8 items-center justify-center rounded-lg bg-white/10 text-white transition-colors duration-200 hover:bg-white/20 lg:hidden"
+            className="flex size-8 items-center justify-center rounded-full text-stone-400 transition-colors duration-200 hover:bg-white/10 hover:text-white lg:hidden"
           >
             <X className="size-4" />
           </button>
@@ -69,8 +66,8 @@ function SidebarBody({ onNavigate }: { onNavigate?: () => void }) {
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 space-y-1.5 px-3.5 py-6">
-        <p className="mb-2 px-2 text-[10px] font-black uppercase tracking-widest text-stone-300/80">
+      <nav className="flex-1 space-y-0.5 border-t border-white/8 px-3 py-5">
+        <p className="mb-2 px-3 text-[10px] font-bold uppercase tracking-widest text-stone-500">
           Menu
         </p>
         {navItems.map((item) => {
@@ -82,66 +79,49 @@ function SidebarBody({ onNavigate }: { onNavigate?: () => void }) {
               href={item.href}
               onClick={onNavigate}
               className={cn(
-                "group relative flex items-center gap-3 overflow-hidden rounded-xl px-3 py-3 text-sm font-black transition-colors duration-500 ease-out",
-                isActive ? "text-white" : "text-stone-200 hover:text-white",
+                "group relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-bold transition-colors duration-200",
+                isActive
+                  ? "bg-white/10 text-white"
+                  : "text-stone-400 hover:bg-white/5 hover:text-white",
               )}
             >
-              {/* Active gradient backdrop */}
+              {/* Active rail */}
               <span
                 className={cn(
-                  "absolute inset-0 rounded-xl bg-gradient-to-r from-red-600 to-amber-500 shadow-lg shadow-red-600/30 transition-opacity duration-500 ease-out",
+                  "absolute left-0 top-1/2 h-5 w-0.5 -translate-y-1/2 rounded-r-full bg-amber-400 transition-opacity duration-200",
                   isActive ? "opacity-100" : "opacity-0",
                 )}
               />
-              {/* Hover backdrop (inactive) — gentle fade */}
-              {!isActive ? (
-                <span className="absolute inset-0 rounded-xl bg-white/0 transition-colors duration-500 ease-out group-hover:bg-white/10" />
-              ) : null}
-              {/* Left rail */}
-              <span
+              <Icon
                 className={cn(
-                  "absolute left-0 top-1/2 w-1 -translate-y-1/2 rounded-r-full bg-white transition-all duration-500 ease-out",
+                  "size-[18px] transition-colors duration-200",
                   isActive
-                    ? "h-7 opacity-100"
-                    : "h-0 opacity-0 group-hover:h-5 group-hover:opacity-70",
+                    ? "text-amber-400"
+                    : "text-stone-500 group-hover:text-stone-300",
                 )}
               />
-              {/* Icon tile */}
-              <span
-                className={cn(
-                  "relative z-10 flex size-8 items-center justify-center rounded-lg transition-colors duration-500 ease-out",
-                  isActive ? "bg-white/20" : "bg-white/5 group-hover:bg-white/15",
-                )}
-              >
-                <Icon className="size-4 transition-transform duration-500 ease-out group-hover:scale-110" />
-              </span>
-              <span className="relative z-10 transition-transform duration-500 ease-out group-hover:translate-x-1">
-                {item.label}
-              </span>
-              {isActive ? (
-                <span className="relative z-10 ml-auto size-1.5 rounded-full bg-white/90 animate-pulse" />
-              ) : null}
+              {item.label}
             </Link>
           );
         })}
       </nav>
 
       {/* Account + sign out */}
-      <div className="border-t border-white/10 px-3.5 py-5">
-        <div className="rounded-2xl border border-white/10 bg-white/5 p-3 shadow-lg shadow-black/20">
-          <div className="mb-3 flex items-center gap-3">
-            <div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-red-600 to-amber-500 shadow-lg shadow-red-600/30">
-              <User className="size-4 text-white" />
-            </div>
-            <div className="min-w-0">
-              <p className="truncate text-xs font-black text-white">
-                Admin Account
-              </p>
-              <p className="text-[10px] font-medium text-stone-300">
-                Staff workspace
-              </p>
-            </div>
+      <div className="border-t border-white/8 px-5 py-5">
+        <div className="flex items-center gap-3">
+          <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-white/10">
+            <User className="size-3.5 text-stone-300" />
+          </span>
+          <div className="min-w-0 flex-1">
+            <p className="truncate text-xs font-bold text-white">
+              Admin Account
+            </p>
+            <p className="text-[10px] font-medium text-stone-500">
+              Staff workspace
+            </p>
           </div>
+        </div>
+        <div className="mt-3">
           <SignOutButton />
         </div>
       </div>
@@ -155,7 +135,7 @@ export function AdminSidebar() {
   return (
     <>
       {/* Desktop sidebar (fixed) */}
-      <aside className="fixed inset-y-0 left-0 z-20 hidden w-72 border-r border-white/10 lg:block">
+      <aside className="fixed inset-y-0 left-0 z-20 hidden w-64 lg:block">
         <SidebarBody />
       </aside>
 
@@ -164,7 +144,7 @@ export function AdminSidebar() {
         type="button"
         onClick={() => setIsOpen(true)}
         aria-label="Open navigation"
-        className="fixed left-4 top-4 z-50 flex size-10 items-center justify-center rounded-xl bg-gradient-to-br from-red-600 to-red-700 text-white shadow-lg shadow-red-600/30 transition-transform duration-300 hover:scale-105 active:scale-95 lg:hidden"
+        className="fixed left-4 top-4 z-50 flex size-10 items-center justify-center rounded-full bg-stone-950 text-white shadow-lg transition-transform duration-200 hover:scale-105 active:scale-95 lg:hidden"
       >
         <Menu className="size-5" />
       </button>
@@ -181,7 +161,7 @@ export function AdminSidebar() {
       {/* Mobile drawer */}
       <aside
         className={cn(
-          "fixed left-0 top-0 z-50 h-screen w-72 border-r border-white/10 shadow-2xl transition-transform duration-300 lg:hidden",
+          "fixed left-0 top-0 z-50 h-screen w-64 shadow-2xl transition-transform duration-300 lg:hidden",
           isOpen ? "translate-x-0" : "-translate-x-full",
         )}
       >

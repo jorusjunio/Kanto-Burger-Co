@@ -1,7 +1,32 @@
 import { notFound } from "next/navigation";
 
+import { OrderStatus } from "@/generated/prisma/enums";
 import { prisma } from "@/server/db/prisma";
 import { logger } from "@/lib/logger";
+
+/**
+ * Active orders for the kitchen board — everything still being worked on, oldest
+ * first so the crew clears the queue in the order it came in. Closed orders
+ * (Completed / Cancelled) drop off the board entirely.
+ */
+export async function getKitchenOrders() {
+  try {
+    return await prisma.order.findMany({
+      where: {
+        status: {
+          in: [OrderStatus.PENDING, OrderStatus.PREPARING, OrderStatus.READY],
+        },
+      },
+      orderBy: { createdAt: "asc" },
+      include: {
+        items: true,
+      },
+    });
+  } catch (error) {
+    logger.error("Failed to fetch kitchen orders", error);
+    throw new Error("Unable to load kitchen orders. Please try again.");
+  }
+}
 
 export async function getAdminOrders() {
   try {

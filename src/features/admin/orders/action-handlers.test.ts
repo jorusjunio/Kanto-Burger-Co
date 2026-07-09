@@ -86,6 +86,7 @@ test("cancelling an active order restores tracked product stock once per tracked
           order: {
             findUnique: async () => ({
               status: OrderStatus.PREPARING,
+              paymentStatus: PaymentStatus.UNPAID,
               items: [
                 {
                   quantity: 3,
@@ -146,6 +147,7 @@ test("cancelling an active order restores tracked product stock once per tracked
   ]);
   assert.deepEqual(revalidatedPaths, [
     "/admin/orders",
+    "/admin/kitchen",
     "/admin/reports",
     "/order/KBC-1001",
   ]);
@@ -153,6 +155,96 @@ test("cancelling an active order restores tracked product stock once per tracked
     "admin-orders:order-updated",
     "order-track-1001:order-updated",
   ]);
+});
+
+test("completing an unpaid order auto-settles its payment to PAID", async () => {
+  const orderUpdates: Array<{ data: Record<string, unknown> }> = [];
+  const deps: AdminOrderActionDeps = {
+    requireAdminSession: async () => ({ user: { id: "staff-1" } }),
+    prisma: {
+      $transaction: (<T>(
+        callback: (tx: OrderTransactionClient) => Promise<T>,
+      ): Promise<T> =>
+        callback({
+          order: {
+            findUnique: async () => ({
+              status: OrderStatus.READY,
+              paymentStatus: PaymentStatus.UNPAID,
+              items: [],
+            }),
+            update: async (args: { data: Record<string, unknown> }) => {
+              orderUpdates.push(args);
+              return orderPayload({
+                status: OrderStatus.COMPLETED,
+                paymentStatus: PaymentStatus.PAID,
+              });
+            },
+          },
+          product: {
+            update: async () => ({ count: 0 }),
+          },
+        })) as AdminOrderActionDeps['prisma']['$transaction'],
+      order: {
+        findUnique: async () => ({ paymentMethod: PaymentMethod.CASH }),
+        update: async () => orderPayload(),
+      },
+    },
+    revalidatePath: () => {},
+    triggerRealtimeEvent: async () => {},
+  };
+
+  await updateOrderStatusWithDeps(
+    formData({ orderId: "order-1", status: OrderStatus.COMPLETED }),
+    deps,
+  );
+
+  assert.equal(orderUpdates.length, 1);
+  assert.deepEqual(orderUpdates[0].data, {
+    status: OrderStatus.COMPLETED,
+    paymentStatus: PaymentStatus.PAID,
+  });
+});
+
+test("completing an already-paid order leaves its payment untouched", async () => {
+  const orderUpdates: Array<{ data: Record<string, unknown> }> = [];
+  const deps: AdminOrderActionDeps = {
+    requireAdminSession: async () => ({ user: { id: "staff-1" } }),
+    prisma: {
+      $transaction: (<T>(
+        callback: (tx: OrderTransactionClient) => Promise<T>,
+      ): Promise<T> =>
+        callback({
+          order: {
+            findUnique: async () => ({
+              status: OrderStatus.READY,
+              paymentStatus: PaymentStatus.PAID,
+              items: [],
+            }),
+            update: async (args: { data: Record<string, unknown> }) => {
+              orderUpdates.push(args);
+              return orderPayload({ status: OrderStatus.COMPLETED });
+            },
+          },
+          product: {
+            update: async () => ({ count: 0 }),
+          },
+        })) as AdminOrderActionDeps['prisma']['$transaction'],
+      order: {
+        findUnique: async () => ({ paymentMethod: PaymentMethod.CASH }),
+        update: async () => orderPayload(),
+      },
+    },
+    revalidatePath: () => {},
+    triggerRealtimeEvent: async () => {},
+  };
+
+  await updateOrderStatusWithDeps(
+    formData({ orderId: "order-1", status: OrderStatus.COMPLETED }),
+    deps,
+  );
+
+  assert.equal(orderUpdates.length, 1);
+  assert.deepEqual(orderUpdates[0].data, { status: OrderStatus.COMPLETED });
 });
 
 test("payment status updates validate input and refresh order views", async () => {
@@ -206,6 +298,7 @@ test("payment status updates validate input and refresh order views", async () =
   ]);
   assert.deepEqual(revalidatedPaths, [
     "/admin/orders",
+    "/admin/kitchen",
     "/admin/reports",
     "/order/KBC-1001",
   ]);

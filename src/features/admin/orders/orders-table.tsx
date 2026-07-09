@@ -185,7 +185,7 @@ export function OrdersView({ orders }: { orders: AdminOrderRow[] }) {
       </div>
 
       {orders.length === 0 ? (
-        <div className="flex min-h-[360px] flex-col items-center justify-center rounded-2xl border border-orange-900/10 bg-white p-8 text-center shadow-[0_10px_30px_-12px_rgba(120,53,15,0.18)] animate-fade-in">
+        <div className="flex min-h-[360px] flex-col items-center justify-center rounded-2xl border border-orange-900/10 bg-white p-8 text-center  animate-fade-in">
           <div className="mb-4 flex size-12 items-center justify-center rounded-lg bg-zinc-950 text-amber-300">
             <ClipboardList aria-hidden="true" />
           </div>
@@ -195,7 +195,7 @@ export function OrdersView({ orders }: { orders: AdminOrderRow[] }) {
           </p>
         </div>
       ) : (
-        <div className="overflow-hidden rounded-2xl border border-orange-900/10 bg-white shadow-[0_10px_30px_-12px_rgba(120,53,15,0.18)] animate-fade-in">
+        <div className="overflow-hidden rounded-xl bg-white ring-1 ring-orange-900/10 animate-fade-in">
           {filtered.length === 0 ? (
             <div className="flex min-h-[280px] flex-col items-center justify-center p-8 text-center">
               <div className="mb-4 flex size-12 items-center justify-center rounded-xl bg-stone-100 text-stone-400">
@@ -257,7 +257,7 @@ export function OrdersView({ orders }: { orders: AdminOrderRow[] }) {
                       <Button
                         size="sm"
                         asChild
-                        className="group bg-gradient-to-r from-red-600 to-red-700 text-white transition-all duration-300 hover:from-red-700 hover:to-red-800 hover:shadow-md hover:shadow-red-600/30"
+                        className="group bg-red-600 text-white transition-all duration-300 hover:bg-red-700"
                       >
                         <Link href={`/admin/orders/${order.id}`}>
                           Open

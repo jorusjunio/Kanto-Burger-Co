@@ -56,7 +56,7 @@ export function SignOutButton() {
         <DialogHeader className="space-y-4 border-b border-orange-900/8 bg-gradient-to-br from-red-50/60 to-white px-6 py-6 text-left">
           <div
             className={cn(
-              "flex size-12 items-center justify-center rounded-2xl bg-gradient-to-br from-red-600 to-red-700 text-white shadow-lg shadow-red-600/30 transition-shadow duration-300",
+              "flex size-12 items-center justify-center rounded-2xl bg-red-600 text-white transition-shadow duration-300",
               isPending && "animate-pulse shadow-red-600/50",
             )}
           >
@@ -90,10 +90,10 @@ export function SignOutButton() {
             onClick={handleConfirm}
             disabled={isPending}
             className={cn(
-              "group h-12 flex-1 rounded-xl font-black text-white shadow-lg shadow-red-600/30 transition-all duration-300 ease-out active:translate-y-0 active:scale-[0.97]",
+              "group h-12 flex-1 rounded-xl font-black text-white transition-all duration-300 ease-out active:translate-y-0 active:scale-[0.97]",
               isPending
-                ? "animate-gradient-xy bg-gradient-to-r from-red-600 via-amber-500 to-red-600 bg-[length:200%_100%]"
-                : "bg-gradient-to-br from-red-600 to-red-700 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-red-600/40",
+                ? "bg-red-600/80"
+                : "bg-red-600 hover:bg-red-700",
             )}
             style={isPending ? { animationDuration: "1.6s" } : undefined}
           >

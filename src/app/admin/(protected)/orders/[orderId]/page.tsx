@@ -61,7 +61,7 @@ export default async function AdminOrderPage({ params }: AdminOrderPageProps) {
       </Button>
 
       {/* Main Card */}
-      <div className="rounded-2xl border border-orange-900/10 bg-white p-5 shadow-[0_10px_30px_-12px_rgba(120,53,15,0.18)] animate-fade-in">
+      <div className="rounded-xl bg-white p-5 ring-1 ring-orange-900/10 animate-fade-in">
         {/* Header */}
         <div className="flex flex-col justify-between gap-4 border-b border-stone-200 pb-5 sm:flex-row sm:items-start">
           <div>

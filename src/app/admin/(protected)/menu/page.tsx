@@ -68,7 +68,7 @@ export default async function AdminMenuPage() {
             Manage products, availability, add-ons, and stock levels.
           </p>
         </div>
-        <Button asChild className="group bg-gradient-to-r from-red-600 to-red-700 text-white hover:from-red-700 hover:to-red-800 font-black transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-red-600/30">
+        <Button asChild className="group bg-red-600 text-white hover:bg-red-700 font-black transition-all duration-300 hover:-translate-y-0.5">
           <Link href="/admin/menu/new">
             <Plus aria-hidden="true" className="transition-transform duration-300 group-hover:rotate-90" />
             Add Product
@@ -77,7 +77,7 @@ export default async function AdminMenuPage() {
       </div>
 
       {products.length === 0 ? (
-        <div className="flex min-h-[360px] flex-col items-center justify-center rounded-2xl border border-orange-900/10 bg-white p-8 text-center shadow-[0_10px_30px_-12px_rgba(120,53,15,0.18)] animate-fade-in">
+        <div className="flex min-h-[360px] flex-col items-center justify-center rounded-2xl border border-orange-900/10 bg-white p-8 text-center  animate-fade-in">
           <div className="mb-4 flex size-12 items-center justify-center rounded-lg bg-zinc-950 text-amber-300">
             <Utensils aria-hidden="true" />
           </div>
@@ -92,7 +92,7 @@ export default async function AdminMenuPage() {
           </Button>
         </div>
       ) : (
-        <div className="overflow-hidden rounded-2xl border border-orange-900/10 bg-white shadow-[0_10px_30px_-12px_rgba(120,53,15,0.18)] animate-fade-in">
+        <div className="overflow-hidden rounded-xl bg-white ring-1 ring-orange-900/10 animate-fade-in">
           <Table className="admin-table">
             <TableHeader>
               <TableRow>
@@ -168,7 +168,7 @@ export default async function AdminMenuPage() {
                       <Button
                         size="sm"
                         asChild
-                        className="group bg-gradient-to-r from-red-600 to-red-700 text-white transition-all duration-300 hover:from-red-700 hover:to-red-800 hover:shadow-md hover:shadow-red-600/30"
+                        className="group bg-red-600 text-white transition-all duration-300 hover:bg-red-700"
                       >
                         <Link href={`/admin/menu/${product.id}/edit`}>
                           <Edit

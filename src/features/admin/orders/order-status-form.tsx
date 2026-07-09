@@ -37,7 +37,7 @@ const triggerClassName =
   "h-10 w-full flex-1 rounded-xl border-2 border-orange-900/10 bg-white px-3.5 text-sm font-bold text-[#25130b] shadow-sm transition-all duration-300 ease-out hover:border-orange-900/20 focus-visible:border-red-500/50 focus-visible:ring-4 focus-visible:ring-red-500/10 disabled:cursor-not-allowed disabled:opacity-60";
 
 const updateButtonClassName =
-  "h-10 rounded-xl bg-gradient-to-br from-red-600 to-red-700 px-5 font-black text-white shadow-lg shadow-red-600/30 transition-all duration-300 ease-out hover:-translate-y-0.5 hover:shadow-xl hover:shadow-red-600/40 active:translate-y-0 active:scale-[0.97] disabled:translate-y-0 disabled:opacity-50 disabled:shadow-none";
+  "h-10 rounded-xl bg-red-600 px-5 font-black text-white transition-all duration-300 ease-out hover:-translate-y-0.5 hover:shadow-xl hover:shadow-red-600/40 active:translate-y-0 active:scale-[0.97] disabled:translate-y-0 disabled:opacity-50 disabled:shadow-none";
 
 export function OrderStatusForm({
   orderId,
