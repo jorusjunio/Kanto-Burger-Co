@@ -50,7 +50,7 @@ function TrackedOrderRow({
   const router = useRouter();
 
   return (
-    <div className="flex items-center gap-2.5 rounded-xl border-2 border-red-600/15 bg-gradient-to-br from-red-50 to-orange-50/50 px-3 py-2.5 shadow-sm shadow-red-600/5">
+    <div className="flex items-center gap-2.5 rounded-xl bg-white px-3 py-2.5 ring-1 ring-orange-900/10">
       <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-red-600 to-red-700 text-sm font-black text-white shadow-sm">
         #{index + 1}
       </div>
@@ -91,8 +91,8 @@ function TrackedOrdersList({ orders }: { orders: TrackedOrder[] }) {
   if (orders.length === 0) return null;
 
   return (
-    <div className="mt-5">
-      <p className="mb-2 px-1 text-[10px] font-bold uppercase tracking-widest text-orange-950/30">
+    <div className="mt-6 border-t border-orange-900/8 pt-5">
+      <p className="mb-2 px-3 text-[10px] font-bold uppercase tracking-widest text-orange-950/30">
         Track Orders
         <span className="ml-1 font-black text-red-700">{orders.length}</span>
       </p>
@@ -116,16 +116,11 @@ function CartPreview() {
 
   if (items.length === 0) {
     return (
-      <div className="flex items-center gap-3 rounded-xl border border-dashed border-orange-900/10 bg-orange-50/40 px-4 py-3">
-        <div className="flex size-9 items-center justify-center rounded-lg bg-orange-100">
-          <ShoppingBag className="size-4 text-orange-400" aria-hidden="true" />
-        </div>
-        <div>
-          <p className="text-xs font-bold text-orange-950/40">Your cart</p>
-          <p className="text-[11px] font-medium text-orange-950/30">
-            No items yet
-          </p>
-        </div>
+      <div className="flex items-center gap-3 rounded-xl px-3 py-3.5">
+        <ShoppingBag className="size-[18px] text-orange-950/25" aria-hidden="true" />
+        <p className="text-[15px] font-bold text-orange-950/35">
+          Your cart is empty
+        </p>
       </div>
     );
   }
@@ -139,94 +134,67 @@ function CartPreview() {
     <SheetClose asChild>
       <Link
         href="/cart"
-        className="group relative overflow-hidden rounded-xl border border-orange-900/10 bg-gradient-to-br from-white to-orange-50/60 px-4 py-3 shadow-sm transition-all duration-300 hover:border-red-700/25 hover:shadow-md"
+        className="group flex items-center justify-between rounded-xl px-3 py-3.5 transition-colors duration-200 hover:bg-orange-950/[0.04]"
       >
-        {/* Shimmer on hover */}
-        <div className="pointer-events-none absolute inset-0 translate-x-[-100%] bg-gradient-to-r from-transparent via-white/40 to-transparent transition-transform duration-700 group-hover:translate-x-[100%]" />
-
-        <div className="relative z-10 flex items-center gap-3">
-          <div className="relative flex size-9 items-center justify-center rounded-lg bg-gradient-to-br from-red-600 to-red-700 shadow-sm">
-            <ShoppingBag className="size-4 text-amber-100" aria-hidden="true" />
-            <span className="absolute -top-1.5 -right-1.5 flex size-4 items-center justify-center rounded-full bg-amber-400 text-[9px] font-black text-red-950 shadow-xs">
+        <span className="flex items-center gap-3">
+          <span className="relative">
+            <ShoppingBag
+              className="size-[18px] text-red-700 transition-all duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] group-hover:-rotate-12 group-hover:scale-110"
+              aria-hidden="true"
+            />
+            <span className="absolute -right-2 -top-2 flex h-4 min-w-4 items-center justify-center rounded-full bg-red-600 px-1 text-[9px] font-black leading-none text-white">
               {itemCount}
             </span>
-          </div>
-          <div className="flex-1">
-            <p className="text-xs font-bold text-[#25130b]">
-              {itemCount} item{itemCount !== 1 ? "s" : ""} in cart
-            </p>
-            <p className="text-[11px] font-bold text-red-700">
-              {formatPeso(subtotal)}
-            </p>
-          </div>
-          <ChevronRight className="size-4 text-orange-950/30 transition-transform duration-300 group-hover:translate-x-0.5" aria-hidden="true" />
-        </div>
+          </span>
+          <span className="text-[15px] font-bold text-orange-950/70 transition-colors duration-200 group-hover:text-[#25130b]">
+            Your cart
+          </span>
+        </span>
+
+        <span className="flex items-center gap-1.5">
+          <span className="text-sm font-black text-red-700">
+            {formatPeso(subtotal)}
+          </span>
+          <ChevronRight
+            className="size-4 text-orange-950/20 transition-all duration-300 group-hover:translate-x-0.5 group-hover:text-orange-950/45"
+            aria-hidden="true"
+          />
+        </span>
       </Link>
     </SheetClose>
   );
 }
 
-/* ─── Nav link item ─── */
-function NavLink({
-  item,
-  index,
-}: {
-  item: (typeof navItems)[number];
-  index: number;
-}) {
+/* ─── Nav link item — quiet list row, springy icon, dot marks the active page ─── */
+function NavLink({ item }: { item: (typeof navItems)[number] }) {
   const pathname = usePathname();
   const Icon = item.icon;
-  const isActive =
-    item.href === "/"
-      ? pathname === "/"
-      : pathname.startsWith(item.href.replace(/#.*$/, ""));
+  // Exact-path match only. Anchor links (e.g. /menu#combos) never claim active,
+  // so "Menu" and "Combos" can't light up at the same time.
+  const isAnchor = item.href.includes("#");
+  const isActive = !isAnchor && pathname === item.href;
 
   return (
     <SheetClose asChild>
       <Link
         href={item.href}
-        className={cn(
-          "mobile-nav-link group relative flex h-13 items-center justify-between overflow-hidden rounded-xl border px-4 transition-all duration-300",
-          isActive
-            ? "border-red-700/20 bg-gradient-to-r from-red-50 to-amber-50 shadow-sm"
-            : "border-orange-900/8 bg-white shadow-sm hover:border-red-700/20 hover:bg-gradient-to-r hover:from-red-50/50 hover:to-amber-50/30 hover:shadow-md",
-        )}
-        style={{ "--nav-index": index } as React.CSSProperties}
+        className="group flex items-center justify-between rounded-xl px-3 py-3.5 transition-colors duration-200 hover:bg-orange-950/[0.04]"
       >
-        {/* Active indicator bar */}
-        <div
-          className={cn(
-            "absolute inset-y-2 left-0 w-1 rounded-full transition-all duration-300",
-            isActive
-              ? "bg-gradient-to-b from-red-600 to-amber-500 opacity-100"
-              : "bg-transparent opacity-0 group-hover:opacity-60 group-hover:bg-red-400",
-          )}
-        />
-
         <span className="flex items-center gap-3">
-          <span
+          <Icon
             className={cn(
-              "flex size-9 items-center justify-center rounded-lg transition-all duration-300",
+              "size-[18px] transition-all duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] group-hover:-rotate-12 group-hover:scale-110",
               isActive
-                ? "bg-gradient-to-br from-red-600 to-red-700 shadow-sm"
-                : "bg-orange-100/70 group-hover:bg-red-100/70",
+                ? "text-red-700"
+                : "text-orange-950/35 group-hover:text-amber-500",
             )}
-          >
-            <Icon
-              className={cn(
-                "size-4 transition-all duration-300",
-                isActive
-                  ? "text-amber-200"
-                  : "text-orange-950/40 group-hover:text-red-600",
-              )}
-              aria-hidden="true"
-            />
-          </span>
+            aria-hidden="true"
+          />
           <span
             className={cn(
-              "text-sm font-bold transition-colors duration-300",
+              "text-[15px] font-bold transition-colors duration-200",
               isActive
-                ? "text-[#25130b]"
+                ? "text-red-700"
                 : "text-orange-950/70 group-hover:text-[#25130b]",
             )}
           >
@@ -234,15 +202,14 @@ function NavLink({
           </span>
         </span>
 
-        <ChevronRight
-          className={cn(
-            "size-4 transition-all duration-300",
-            isActive
-              ? "text-red-700"
-              : "text-orange-950/20 group-hover:text-red-700 group-hover:translate-x-0.5",
-          )}
-          aria-hidden="true"
-        />
+        {isActive ? (
+          <span className="size-1.5 rounded-full bg-red-600" aria-hidden="true" />
+        ) : (
+          <ChevronRight
+            className="size-4 text-orange-950/20 transition-all duration-300 group-hover:translate-x-0.5 group-hover:text-orange-950/45"
+            aria-hidden="true"
+          />
+        )}
       </Link>
     </SheetClose>
   );
@@ -300,55 +267,32 @@ export function MobileNav({
         showCloseButton={false}
       >
         <div className="flex h-full flex-col">
-          {/* ── Premium Header ── */}
-          <SheetHeader className="relative overflow-hidden border-b border-orange-900/8 bg-gradient-to-b from-[#fff3e0] to-[#fffbf5] px-5 pb-5 pt-6">
-            {/* Decorative radial glow */}
-            <div className="pointer-events-none absolute -top-10 -right-10 size-40 rounded-full bg-gradient-to-br from-amber-200/30 to-transparent blur-2xl" />
-            <div className="pointer-events-none absolute -bottom-10 -left-10 size-32 rounded-full bg-gradient-to-tr from-red-200/20 to-transparent blur-xl" />
-
-            <div className="relative z-10 flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="flex size-10 items-center justify-center rounded-xl bg-gradient-to-br from-red-600 to-red-700 shadow-md shadow-red-700/20">
+          {/* ── Header — brand row, nothing else ── */}
+          <SheetHeader className="border-b border-orange-900/8 px-5 py-5">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2.5">
+                <span className="flex size-9 items-center justify-center rounded-full bg-[#1d0906] shadow-sm">
                   <Image
                     src="/assets/brand/J logo without bg.png"
                     alt=""
-                    width={22}
-                    height={22}
+                    width={18}
+                    height={18}
                     className="object-contain brightness-0 invert"
                     priority
                   />
-                </div>
-                <div>
-                  <SheetTitle className="text-left text-sm font-black uppercase tracking-tight text-[#25130b]">
-                    Kanto Burger Co.
-                  </SheetTitle>
-                  <p className="text-[10px] font-bold uppercase tracking-wider text-orange-950/40">
-                    Hot burgers • Fast pickup
-                  </p>
-                </div>
+                </span>
+                <SheetTitle className="text-left text-sm font-black uppercase tracking-tight text-[#25130b]">
+                  Kanto Burger Co.
+                </SheetTitle>
               </div>
 
-              {/* Close button */}
               <SheetClose asChild>
                 <button
                   type="button"
-                  className="flex size-8 items-center justify-center rounded-lg border border-orange-900/10 bg-white/80 text-orange-950/50 shadow-sm transition-all duration-200 hover:border-red-700/30 hover:bg-red-50 hover:text-red-700"
+                  className="flex size-8 items-center justify-center rounded-full text-orange-950/40 transition-colors duration-200 hover:bg-orange-950/5 hover:text-red-700"
                   aria-label="Close navigation"
                 >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="16"
-                    height="16"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <path d="M18 6 6 18" />
-                    <path d="m6 6 12 12" />
-                  </svg>
+                  <X className="size-4" aria-hidden="true" />
                 </button>
               </SheetClose>
             </div>
@@ -356,8 +300,8 @@ export function MobileNav({
 
           {/* ── Navigation Items ── */}
           <div className="flex-1 overflow-y-auto px-4 py-4">
-            <div className="space-y-1.5" key={animKey}>
-              <p className="mb-3 px-1 text-[10px] font-bold uppercase tracking-widest text-orange-950/30">
+            <div key={animKey}>
+              <p className="mb-2 px-3 text-[10px] font-bold uppercase tracking-widest text-orange-950/30">
                 Navigation
               </p>
               {navItems.map((item, index) => (
@@ -366,7 +310,7 @@ export function MobileNav({
                   className="mobile-nav-item"
                   style={{ "--nav-index": index } as React.CSSProperties}
                 >
-                  <NavLink item={item} index={index} />
+                  <NavLink item={item} />
                 </div>
               ))}
             </div>
@@ -375,34 +319,36 @@ export function MobileNav({
             <TrackedOrdersList orders={trackedOrders} />
 
             {/* ── Cart Section ── */}
-            <div className="mt-5">
-              <p className="mb-2 px-1 text-[10px] font-bold uppercase tracking-widest text-orange-950/30">
+            <div className="mt-6 border-t border-orange-900/8 pt-5">
+              <p className="mb-2 px-3 text-[10px] font-bold uppercase tracking-widest text-orange-950/30">
                 Order
               </p>
               <CartPreview />
             </div>
 
-            {/* ── Quick info ── */}
-            <div className="mt-5 rounded-xl border border-orange-900/8 bg-orange-50/40 px-4 py-3">
-              <div className="flex items-center gap-2 text-[11px] font-bold text-orange-950/50">
-                <span className="flex size-2 rounded-full bg-emerald-500 shadow-sm shadow-emerald-500/50" />
+            {/* ── Quick info — quiet single line, no box ── */}
+            <div className="mt-6 px-3">
+              <p className="flex items-center gap-2 text-[11px] font-semibold text-orange-950/45">
+                <span
+                  className="size-1.5 shrink-0 rounded-full bg-emerald-500"
+                  aria-hidden="true"
+                />
                 Open daily • 10:00 AM – 10:00 PM
-              </div>
-              <p className="mt-1 text-[10px] font-medium text-orange-950/30">
+              </p>
+              <p className="mt-1 pl-3.5 text-[11px] font-medium text-orange-950/30">
                 Quezon City, Philippines
               </p>
             </div>
           </div>
 
           {/* ── Footer ── */}
-          <SheetFooter className="border-t border-orange-900/8 bg-gradient-to-t from-[#fff3e0]/50 to-transparent px-4 py-4">
+          <SheetFooter className="border-t border-orange-900/8 px-4 py-4">
             <SheetClose asChild>
               <Button
-                className="mobile-nav-cta h-12 w-full rounded-xl font-black shadow-lg transition-all duration-300 hover:-translate-y-0.5 active:scale-[0.98]"
+                className="mobile-nav-cta h-12 w-full rounded-full font-black transition-all duration-300 hover:-translate-y-0.5 active:scale-[0.98]"
                 asChild
               >
                 <Link href="/menu">
-                  <Sparkles className="size-4" aria-hidden="true" />
                   Start your order
                   <ChevronRight className="size-4" aria-hidden="true" />
                 </Link>
