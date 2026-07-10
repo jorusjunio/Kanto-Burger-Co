@@ -16,7 +16,12 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 
-export function SignOutButton() {
+// Default trigger styling is tuned for the dark admin sidebar. Contexts on a
+// light background (e.g. the kitchen top bar) pass their own `className`.
+const defaultTriggerClassName =
+  "w-full justify-center border-white/15 bg-white/5 text-stone-200 hover:border-red-500/40 hover:bg-red-500/10 hover:text-white";
+
+export function SignOutButton({ className }: { className?: string }) {
   const [open, setOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
 
@@ -33,7 +38,10 @@ export function SignOutButton() {
           type="button"
           variant="outline"
           size="sm"
-          className="group w-full justify-center border-white/15 bg-white/5 text-stone-200 transition-all duration-300 ease-out hover:border-red-500/40 hover:bg-red-500/10 hover:text-white"
+          className={cn(
+            "group transition-all duration-300 ease-out",
+            className ?? defaultTriggerClassName,
+          )}
         >
           <LogOut
             aria-hidden="true"

@@ -42,7 +42,7 @@ export default async function KitchenLayout({
                 Admin
               </Link>
             ) : null}
-            <SignOutButton />
+            <SignOutButton className="border-orange-900/15 bg-white text-orange-950/70 hover:border-red-300 hover:bg-red-50 hover:text-red-700" />
           </div>
         </header>
 

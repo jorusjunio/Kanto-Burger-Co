@@ -1,4 +1,5 @@
-import { Clock, ShoppingCart, TrendingUp, Utensils } from "lucide-react";
+import Link from "next/link";
+import { ArrowRight, Clock, ShoppingCart, TrendingUp, Utensils } from "lucide-react";
 
 import { requireManagerPage } from "@/features/admin/auth/guards";
 import { formatPeso } from "@/lib/format";
@@ -78,26 +79,53 @@ async function getDashboardData() {
     .sort((a, b) => b.quantity - a.quantity || b.revenue - a.revenue)
     .slice(0, 3);
 
-  const salesByHour = Array.from({ length: 7 }, (_, index) => {
-    const hour = 6 + index * 2;
-    const bucketStart = new Date(todayStart);
-    bucketStart.setHours(hour, 0, 0, 0);
-    const bucketEnd = new Date(todayStart);
-    bucketEnd.setHours(hour + 2, 0, 0, 0);
-
+  // One point per bucket with both metrics, so the chart can switch between
+  // revenue and order count without refetching.
+  const bucketize = (start: Date, end: Date, label: string) => {
+    const bucket = activeOrders.filter(
+      (order) => order.createdAt >= start && order.createdAt < end,
+    );
     return {
-      time: new Intl.DateTimeFormat("en-PH", {
-        hour: "numeric",
-        hour12: true,
-      }).format(bucketStart),
-      sales: todayOrders
-        .filter(
-          (order) =>
-            order.createdAt >= bucketStart && order.createdAt < bucketEnd,
-        )
-        .reduce((total, order) => total + moneyValue(order.total), 0),
+      label,
+      revenue: bucket.reduce(
+        (total, order) => total + moneyValue(order.total),
+        0,
+      ),
+      orders: bucket.length,
     };
+  };
+
+  const hourFormat = new Intl.DateTimeFormat("en-PH", {
+    hour: "numeric",
+    hour12: true,
   });
+  const dayFormat = new Intl.DateTimeFormat("en-PH", {
+    month: "short",
+    day: "numeric",
+  });
+  const weekdayFormat = new Intl.DateTimeFormat("en-PH", { weekday: "short" });
+
+  const salesSeries = {
+    // Full day in 3h buckets so no order ever falls outside the chart and the
+    // chart total always matches the stat cards.
+    today: Array.from({ length: 8 }, (_, index) => {
+      const start = new Date(todayStart);
+      start.setHours(index * 3, 0, 0, 0);
+      const end = new Date(todayStart);
+      end.setHours(index * 3 + 3, 0, 0, 0);
+      return bucketize(start, end, hourFormat.format(start));
+    }),
+    week: Array.from({ length: 7 }, (_, index) => {
+      const start = new Date(todayStart.getTime() - (6 - index) * DAY_MS);
+      const end = new Date(start.getTime() + DAY_MS);
+      return bucketize(start, end, weekdayFormat.format(start));
+    }),
+    month: Array.from({ length: 30 }, (_, index) => {
+      const start = new Date(todayStart.getTime() - (29 - index) * DAY_MS);
+      const end = new Date(start.getTime() + DAY_MS);
+      return bucketize(start, end, dayFormat.format(start));
+    }),
+  };
 
   const orderTypeCounts = activeOrders.reduce<Record<string, number>>(
     (totals, order) => {
@@ -125,7 +153,7 @@ async function getDashboardData() {
       topSellingProducts.length > 0
         ? topSellingProducts
         : [{ name: "No sales yet", quantity: 0 }],
-    salesByHour,
+    salesSeries,
     recentOrders: orders.slice(0, 5).map((order) => ({
       orderNo: order.orderNumber,
       customer: order.customerName,
@@ -179,6 +207,7 @@ export default async function AdminDashboardPage() {
       value: formatPeso(metrics.totalSalesToday),
       Icon: TrendingUp,
       iconClass: "bg-red-700/8 text-red-700",
+      href: "/admin/reports",
     },
     {
       label: "Pending Orders",
@@ -186,12 +215,14 @@ export default async function AdminDashboardPage() {
       Icon: Clock,
       iconClass: "bg-amber-500/10 text-amber-600",
       valueClass: metrics.pendingOrders > 0 ? "text-red-700" : undefined,
+      href: "/admin/orders",
     },
     {
       label: "Completed Today",
       value: String(metrics.completedOrdersToday),
       Icon: ShoppingCart,
       iconClass: "bg-emerald-600/8 text-emerald-700",
+      href: "/admin/orders",
     },
     {
       label: "Top Product",
@@ -200,8 +231,15 @@ export default async function AdminDashboardPage() {
       Icon: Utensils,
       iconClass: "bg-orange-950/5 text-orange-950/60",
       valueClass: "text-sm leading-snug",
+      href: "/admin/menu",
     },
   ];
+
+  const todayLabel = new Intl.DateTimeFormat("en-PH", {
+    weekday: "long",
+    month: "long",
+    day: "numeric",
+  }).format(new Date());
 
   return (
     <div className="space-y-6">
@@ -211,50 +249,53 @@ export default async function AdminDashboardPage() {
           Admin
         </p>
         <h1 className="mt-1 text-2xl font-black text-[#25130b]">Dashboard</h1>
+        <p className="mt-1 text-sm font-medium text-orange-950/40">
+          {todayLabel}
+        </p>
       </div>
 
-      {/* Metrics Grid */}
+      {/* Metrics Grid — each card links to where you act on it */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {stats.map(({ label, value, sub, Icon, iconClass, valueClass }, index) => (
-          <div
-            key={label}
-            className="admin-card rounded-xl bg-white p-5 ring-1 ring-orange-900/10 animate-fade-in"
-            style={{ animationDelay: `${index * 100}ms` }}
-          >
-            <div className="flex items-start justify-between gap-3">
-              <div className="min-w-0 flex-1">
-                <p className="text-[10px] font-bold uppercase tracking-widest text-orange-950/40">
-                  {label}
-                </p>
-                <p
-                  className={`mt-2 truncate text-2xl font-black text-[#25130b] tabular-nums ${valueClass ?? ""}`}
-                >
-                  {value}
-                </p>
-                {sub ? (
-                  <p className="mt-0.5 text-xs font-medium text-orange-950/40">
-                    {sub}
+        {stats.map(
+          ({ label, value, sub, Icon, iconClass, valueClass, href }, index) => (
+            <Link
+              key={label}
+              href={href}
+              className="admin-card group rounded-xl bg-white p-5 ring-1 ring-orange-900/10 transition-all duration-200 hover:-translate-y-0.5 hover:ring-orange-900/25 animate-fade-in"
+              style={{ animationDelay: `${index * 100}ms` }}
+            >
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0 flex-1">
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-orange-950/40">
+                    {label}
                   </p>
-                ) : null}
+                  <p
+                    className={`mt-2 truncate text-2xl font-black text-[#25130b] tabular-nums ${valueClass ?? ""}`}
+                  >
+                    {value}
+                  </p>
+                  {sub ? (
+                    <p className="mt-0.5 text-xs font-medium text-orange-950/40">
+                      {sub}
+                    </p>
+                  ) : null}
+                </div>
+                <span
+                  className={`flex size-9 shrink-0 items-center justify-center rounded-lg transition-transform duration-200 group-hover:scale-110 ${iconClass}`}
+                >
+                  <Icon className="size-4" />
+                </span>
               </div>
-              <span
-                className={`flex size-9 shrink-0 items-center justify-center rounded-lg ${iconClass}`}
-              >
-                <Icon className="size-4" />
-              </span>
-            </div>
-          </div>
-        ))}
+            </Link>
+          ),
+        )}
       </div>
 
       {/* Split Layout: Sales Analytics Chart + Top Products */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Column 1: Sales Analytics Chart (2/3 space) */}
         <div className="admin-card lg:col-span-2 rounded-xl bg-white p-6 ring-1 ring-orange-900/10 animate-fade-in" style={{ animationDelay: '400ms' }}>
-          <h2 className="text-[13px] font-black uppercase tracking-wide text-[#25130b] mb-4">
-            Sales Analytics Today
-          </h2>
-          <SalesAnalyticsChart data={metrics.salesByHour} />
+          <SalesAnalyticsChart series={metrics.salesSeries} />
         </div>
 
         {/* Column 2: Top Selling Products (1/3 space) */}
@@ -287,9 +328,21 @@ export default async function AdminDashboardPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Column 1: Recent Orders Table (2/3 space) */}
         <div className="admin-card lg:col-span-2 rounded-xl bg-white p-6 ring-1 ring-orange-900/10 animate-fade-in" style={{ animationDelay: '600ms' }}>
-          <h2 className="text-[13px] font-black uppercase tracking-wide text-[#25130b] mb-4">
-            Recent Orders
-          </h2>
+          <div className="mb-4 flex items-center justify-between gap-3">
+            <h2 className="text-[13px] font-black uppercase tracking-wide text-[#25130b]">
+              Recent Orders
+            </h2>
+            <Link
+              href="/admin/orders"
+              className="group inline-flex items-center gap-1 text-xs font-bold text-orange-950/45 transition-colors hover:text-red-700"
+            >
+              View all
+              <ArrowRight
+                className="size-3.5 transition-transform duration-200 group-hover:translate-x-0.5"
+                aria-hidden="true"
+              />
+            </Link>
+          </div>
           <RecentOrdersTable data={metrics.recentOrders} />
         </div>
 

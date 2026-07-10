@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { Clock, UtensilsCrossed } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { Clock, Search, UtensilsCrossed } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { OrderStatus, OrderType } from "@/generated/prisma/enums";
@@ -178,16 +178,72 @@ function KitchenCard({ order }: { order: KitchenOrder }) {
   );
 }
 
+const ALL = "ALL";
+
+const typeFilters = [
+  [ALL, "All"],
+  [OrderType.PICKUP, "Pickup"],
+  [OrderType.DELIVERY, "Delivery"],
+] as const;
+
+const LATE_MS = 15 * 60000;
+
 export function KitchenBoard({ orders }: { orders: KitchenOrder[] }) {
+  const [stageFilter, setStageFilter] = useState<string>(ALL);
+  const [typeFilter, setTypeFilter] = useState<string>(ALL);
+  const [lateOnly, setLateOnly] = useState(false);
+  const [query, setQuery] = useState("");
+
+  // Client clock for the "late" cut-off — null until mounted (avoids an
+  // SSR/client hydration mismatch), refreshed on the same cadence as the
+  // per-card timers so chip counts and card tints agree.
+  const [now, setNow] = useState<number | null>(null);
+  useEffect(() => {
+    setNow(Date.now());
+    const interval = setInterval(() => setNow(Date.now()), 30000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const lateCount = useMemo(
+    () =>
+      now === null
+        ? 0
+        : orders.filter((order) => now - order.createdAt.getTime() >= LATE_MS)
+            .length,
+    [orders, now],
+  );
+
+  // Type + late + search narrow the pool; stage counts are computed against
+  // this pool so the tally chips stay truthful while you toggle filters.
+  const pool = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    return orders.filter(
+      (order) =>
+        (typeFilter === ALL || order.orderType === typeFilter) &&
+        (!lateOnly ||
+          (now !== null && now - order.createdAt.getTime() >= LATE_MS)) &&
+        (q === "" ||
+          order.orderNumber.toLowerCase().includes(q) ||
+          order.customerName.toLowerCase().includes(q)),
+    );
+  }, [orders, typeFilter, lateOnly, now, query]);
+
   const grouped = stages
+    .filter((stage) => stageFilter === ALL || stage.status === stageFilter)
     .map((stage) => ({
       ...stage,
-      orders: orders.filter((order) => order.status === stage.status),
+      orders: pool.filter((order) => order.status === stage.status),
     }))
     .filter((stage) => stage.orders.length > 0);
 
+  const stageCounts = stages.map((stage) => ({
+    ...stage,
+    count: pool.filter((order) => order.status === stage.status).length,
+  }));
+  const hasMatches = grouped.length > 0;
+
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       {/* Header */}
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
@@ -199,21 +255,100 @@ export function KitchenBoard({ orders }: { orders: KitchenOrder[] }) {
           </h1>
         </div>
 
-        {/* Stage tally — one glance tells the crew where the load is. */}
+        {/* Type toggle + quick search */}
         {orders.length > 0 ? (
           <div className="flex flex-wrap items-center gap-2">
-            {grouped.map((stage) => (
-              <span
-                key={stage.status}
-                className="inline-flex items-center gap-1.5 rounded-full bg-white px-3 py-1.5 text-xs font-bold text-orange-950/60 ring-1 ring-orange-900/10"
-              >
-                <span className={cn("size-1.5 rounded-full", stage.dot)} />
-                {stage.orders.length} {stage.label.toLowerCase()}
-              </span>
-            ))}
+            <div className="flex items-center rounded-full bg-white p-1 ring-1 ring-orange-900/10">
+              {typeFilters.map(([value, label]) => (
+                <button
+                  key={value}
+                  type="button"
+                  onClick={() => setTypeFilter(value)}
+                  className={cn(
+                    "rounded-full px-3 py-1.5 text-xs font-bold transition-colors",
+                    typeFilter === value
+                      ? "bg-red-600 text-white"
+                      : "text-orange-950/55 hover:text-red-700",
+                  )}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+            <div className="relative">
+              <Search
+                aria-hidden="true"
+                className="pointer-events-none absolute left-3 top-1/2 size-3.5 -translate-y-1/2 text-orange-950/35"
+              />
+              <input
+                type="search"
+                value={query}
+                onChange={(event) => setQuery(event.target.value)}
+                placeholder="Search code or name"
+                className="h-9 w-48 rounded-full bg-white pl-8 pr-3 text-xs font-semibold text-[#25130b] ring-1 ring-orange-900/10 transition-shadow placeholder:text-orange-950/35 focus:outline-none focus:ring-2 focus:ring-red-500/40"
+              />
+            </div>
           </div>
         ) : null}
       </div>
+
+      {/* Stage filter chips — click to focus one stage; counts reflect type/search. */}
+      {orders.length > 0 ? (
+        <div className="flex flex-wrap items-center gap-2">
+          <button
+            type="button"
+            onClick={() => setStageFilter(ALL)}
+            className={cn(
+              "inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-bold ring-1 transition-colors",
+              stageFilter === ALL
+                ? "bg-[#25130b] text-white ring-[#25130b]"
+                : "bg-white text-orange-950/60 ring-orange-900/10 hover:text-red-700",
+            )}
+          >
+            All
+            <span className="tabular-nums opacity-70">{pool.length}</span>
+          </button>
+          {stageCounts.map((stage) => (
+            <button
+              key={stage.status}
+              type="button"
+              onClick={() =>
+                setStageFilter((current) =>
+                  current === stage.status ? ALL : stage.status,
+                )
+              }
+              className={cn(
+                "inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-bold ring-1 transition-colors",
+                stageFilter === stage.status
+                  ? "bg-[#25130b] text-white ring-[#25130b]"
+                  : "bg-white text-orange-950/60 ring-orange-900/10 hover:text-red-700",
+              )}
+            >
+              <span className={cn("size-1.5 rounded-full", stage.dot)} />
+              {stage.label}
+              <span className="tabular-nums opacity-70">{stage.count}</span>
+            </button>
+          ))}
+
+          {/* Urgency — orders waiting 15+ minutes. Hidden while nothing is late. */}
+          {lateCount > 0 ? (
+            <button
+              type="button"
+              onClick={() => setLateOnly((current) => !current)}
+              className={cn(
+                "inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-bold ring-1 transition-colors",
+                lateOnly
+                  ? "bg-red-600 text-white ring-red-600"
+                  : "bg-red-50 text-red-700 ring-red-200 hover:bg-red-100",
+              )}
+            >
+              <Clock className="size-3.5" aria-hidden="true" />
+              Late 15m+
+              <span className="tabular-nums opacity-80">{lateCount}</span>
+            </button>
+          ) : null}
+        </div>
+      ) : null}
 
       {orders.length === 0 ? (
         <div className="flex min-h-[420px] flex-col items-center justify-center rounded-xl bg-white p-8 text-center ring-1 ring-orange-900/10">
@@ -223,6 +358,16 @@ export function KitchenBoard({ orders }: { orders: KitchenOrder[] }) {
           <h2 className="text-xl font-black text-[#25130b]">All caught up</h2>
           <p className="mt-2 max-w-md text-orange-950/45">
             No active orders right now. New orders appear here automatically.
+          </p>
+        </div>
+      ) : !hasMatches ? (
+        <div className="flex min-h-[280px] flex-col items-center justify-center rounded-xl bg-white p-8 text-center ring-1 ring-orange-900/10">
+          <div className="mb-4 flex size-12 items-center justify-center rounded-full bg-orange-950/5 text-orange-950/40">
+            <Search aria-hidden="true" />
+          </div>
+          <h2 className="text-lg font-black text-[#25130b]">No matching orders</h2>
+          <p className="mt-1 max-w-md text-sm text-orange-950/45">
+            Try clearing the search or switching filters.
           </p>
         </div>
       ) : (

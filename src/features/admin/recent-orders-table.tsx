@@ -30,19 +30,19 @@ export function RecentOrdersTable({ data }: RecentOrdersTableProps) {
   const getStatusColor = (status: RecentOrder["status"]) => {
     switch (status) {
       case "PENDING":
-        return "bg-amber-100 text-amber-700 border-amber-200";
+        return "bg-red-700/8 text-red-700";
       case "PREPARING":
-        return "bg-blue-100 text-blue-700 border-blue-200";
+        return "bg-amber-500/10 text-amber-700";
       case "READY":
-        return "bg-green-100 text-green-700 border-green-200";
+        return "bg-emerald-600/8 text-emerald-700";
       case "OUT_FOR_DELIVERY":
-        return "bg-purple-100 text-purple-700 border-purple-200";
+        return "bg-sky-500/10 text-sky-700";
       case "COMPLETED":
-        return "bg-stone-100 text-stone-700 border-stone-200";
+        return "bg-orange-950/5 text-orange-950/55";
       case "CANCELLED":
-        return "bg-red-100 text-red-700 border-red-200";
+        return "bg-orange-950/5 text-orange-950/40 line-through";
       default:
-        return "bg-stone-100 text-stone-700 border-stone-200";
+        return "bg-orange-950/5 text-orange-950/55";
     }
   };
 
@@ -85,7 +85,7 @@ export function RecentOrdersTable({ data }: RecentOrdersTableProps) {
               </td>
               <td className="py-3 text-right">
                 <span
-                  className={`inline-flex items-center rounded-full border px-2.5 py-1 text-[10px] font-black uppercase tracking-wide ${getStatusColor(order.status)}`}
+                  className={`inline-flex items-center rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide ${getStatusColor(order.status)}`}
                 >
                   {order.status}
                 </span>
