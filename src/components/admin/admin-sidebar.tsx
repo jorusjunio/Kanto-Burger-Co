@@ -7,7 +7,6 @@ import { useState } from "react";
 import {
   LayoutDashboard,
   ShoppingCart,
-  ChefHat,
   Utensils,
   Folder,
   Menu,
@@ -18,11 +17,10 @@ import { cn } from "@/lib/utils";
 import { SignOutButton } from "@/features/admin/auth/sign-out-button";
 
 const navItems = [
-  { label: "Dashboard", href: "/admin", icon: LayoutDashboard },
-  { label: "Kitchen", href: "/admin/kitchen", icon: ChefHat },
-  { label: "Orders", href: "/admin/orders", icon: ShoppingCart },
-  { label: "Menu", href: "/admin/menu", icon: Utensils },
-  { label: "Categories", href: "/admin/categories", icon: Folder },
+  { label: "Dashboard", href: "/admin", icon: LayoutDashboard, managerOnly: true },
+  { label: "Orders", href: "/admin/orders", icon: ShoppingCart, managerOnly: true },
+  { label: "Menu", href: "/admin/menu", icon: Utensils, managerOnly: true },
+  { label: "Categories", href: "/admin/categories", icon: Folder, managerOnly: true },
 ];
 
 function isItemActive(href: string, pathname: string) {
@@ -31,8 +29,17 @@ function isItemActive(href: string, pathname: string) {
     : pathname === href || pathname.startsWith(href + "/");
 }
 
-function SidebarBody({ onNavigate }: { onNavigate?: () => void }) {
+function SidebarBody({
+  isManager,
+  onNavigate,
+}: {
+  isManager: boolean;
+  onNavigate?: () => void;
+}) {
   const pathname = usePathname();
+  const visibleNavItems = navItems.filter(
+    (item) => isManager || !item.managerOnly,
+  );
 
   return (
     <div className="flex h-full flex-col bg-stone-950">
@@ -70,7 +77,7 @@ function SidebarBody({ onNavigate }: { onNavigate?: () => void }) {
         <p className="mb-2 px-3 text-[10px] font-bold uppercase tracking-widest text-stone-500">
           Menu
         </p>
-        {navItems.map((item) => {
+        {visibleNavItems.map((item) => {
           const isActive = isItemActive(item.href, pathname);
           const Icon = item.icon;
           return (
@@ -129,14 +136,14 @@ function SidebarBody({ onNavigate }: { onNavigate?: () => void }) {
   );
 }
 
-export function AdminSidebar() {
+export function AdminSidebar({ isManager }: { isManager: boolean }) {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
     <>
       {/* Desktop sidebar (fixed) */}
       <aside className="fixed inset-y-0 left-0 z-20 hidden w-64 lg:block">
-        <SidebarBody />
+        <SidebarBody isManager={isManager} />
       </aside>
 
       {/* Mobile trigger */}
@@ -165,7 +172,7 @@ export function AdminSidebar() {
           isOpen ? "translate-x-0" : "-translate-x-full",
         )}
       >
-        <SidebarBody onNavigate={() => setIsOpen(false)} />
+        <SidebarBody isManager={isManager} onNavigate={() => setIsOpen(false)} />
       </aside>
     </>
   );

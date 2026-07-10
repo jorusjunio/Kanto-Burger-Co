@@ -89,7 +89,7 @@ function revalidateOrderViews(
   orderNumber: string,
 ) {
   revalidatePath("/admin/orders");
-  revalidatePath("/admin/kitchen");
+  revalidatePath("/kitchen");
   revalidatePath("/admin/reports");
   revalidatePath(`/order/${orderNumber}`);
 }

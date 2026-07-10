@@ -52,7 +52,7 @@ const statusOptions = [
 const paymentOptions = [
   [ALL, "All payments"],
   ["UNPAID", "Unpaid"],
-  ["PENDING", "Pending"],
+  ["PENDING", "Awaiting GCash"],
   ["PAID", "Paid"],
 ];
 

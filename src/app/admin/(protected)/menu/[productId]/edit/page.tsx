@@ -24,7 +24,7 @@ export default async function EditProductPage({
   const session = await getCurrentSession();
 
   if (session?.user.role !== UserRole.ADMIN) {
-    redirect("/admin/orders");
+    redirect("/kitchen");
   }
 
   const { productId } = await params;

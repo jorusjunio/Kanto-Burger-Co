@@ -43,7 +43,7 @@ export default async function AdminMenuPage() {
   const session = await getCurrentSession();
 
   if (session?.user.role !== UserRole.ADMIN) {
-    redirect("/admin/orders");
+    redirect("/kitchen");
   }
 
   const products = await getAdminMenuProducts();

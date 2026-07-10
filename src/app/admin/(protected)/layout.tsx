@@ -26,7 +26,7 @@ export default async function ProtectedAdminLayout({
       />
       <div className="flex min-h-screen bg-[#f7f3ea]">
         {/* Sidebar owns its own desktop (fixed) + mobile (drawer) positioning */}
-        <AdminSidebar />
+        <AdminSidebar isManager={isAdmin} />
 
         {/* Main body — pl-64 on desktop so the fixed sidebar doesn't overlap */}
         <div className="flex-1 lg:pl-64 flex flex-col min-w-0">

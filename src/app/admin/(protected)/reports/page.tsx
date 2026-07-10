@@ -16,7 +16,7 @@ export default async function AdminReportsPage() {
   const session = await getCurrentSession();
 
   if (session?.user.role !== UserRole.ADMIN) {
-    redirect("/admin/orders");
+    redirect("/kitchen");
   }
 
   const reports = await getAdminReports();

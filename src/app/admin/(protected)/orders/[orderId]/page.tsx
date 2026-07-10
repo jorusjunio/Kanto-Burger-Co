@@ -2,6 +2,7 @@ import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { requireManagerPage } from "@/features/admin/auth/guards";
 import { OrderStatusBadge, PaymentStatusBadge } from "@/features/admin/orders/order-badges";
 import { OrderStatusForm } from "@/features/admin/orders/order-status-form";
 import { getAdminOrder } from "@/features/admin/orders/queries";
@@ -39,6 +40,7 @@ function getAddOnNames(value: unknown) {
 }
 
 export default async function AdminOrderPage({ params }: AdminOrderPageProps) {
+  await requireManagerPage();
   const { orderId } = await params;
   const order = await getAdminOrder(orderId);
 

@@ -1,7 +1,9 @@
+import { requireManagerPage } from "@/features/admin/auth/guards";
 import { OrdersView } from "@/features/admin/orders/orders-table";
 import { getAdminOrders } from "@/features/admin/orders/queries";
 
 export default async function AdminOrdersPage() {
+  await requireManagerPage();
   const orders = await getAdminOrders();
   const rows = orders.map((order) => ({
     id: order.id,

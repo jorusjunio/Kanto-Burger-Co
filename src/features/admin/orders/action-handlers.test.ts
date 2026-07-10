@@ -147,7 +147,7 @@ test("cancelling an active order restores tracked product stock once per tracked
   ]);
   assert.deepEqual(revalidatedPaths, [
     "/admin/orders",
-    "/admin/kitchen",
+    "/kitchen",
     "/admin/reports",
     "/order/KBC-1001",
   ]);
@@ -298,7 +298,7 @@ test("payment status updates validate input and refresh order views", async () =
   ]);
   assert.deepEqual(revalidatedPaths, [
     "/admin/orders",
-    "/admin/kitchen",
+    "/kitchen",
     "/admin/reports",
     "/order/KBC-1001",
   ]);

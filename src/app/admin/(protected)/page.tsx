@@ -1,5 +1,6 @@
 import { Clock, ShoppingCart, TrendingUp, Utensils } from "lucide-react";
 
+import { requireManagerPage } from "@/features/admin/auth/guards";
 import { formatPeso } from "@/lib/format";
 import { prisma } from "@/server/db/prisma";
 import { SalesAnalyticsChart } from "@/features/admin/sales-analytics-chart";
@@ -169,6 +170,7 @@ async function getDashboardData() {
 }
 
 export default async function AdminDashboardPage() {
+  await requireManagerPage();
   const metrics = await getDashboardData();
 
   const stats = [
