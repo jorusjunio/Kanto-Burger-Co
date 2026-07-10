@@ -28,6 +28,24 @@ export async function getKitchenOrders() {
   }
 }
 
+/** How many orders the crew has closed out since midnight — header tally. */
+export async function getKitchenCompletedTodayCount() {
+  const todayStart = new Date();
+  todayStart.setHours(0, 0, 0, 0);
+
+  try {
+    return await prisma.order.count({
+      where: {
+        status: OrderStatus.COMPLETED,
+        updatedAt: { gte: todayStart },
+      },
+    });
+  } catch (error) {
+    logger.error("Failed to count completed kitchen orders", error);
+    return 0;
+  }
+}
+
 export async function getAdminOrders() {
   try {
     return await prisma.order.findMany({

@@ -15,7 +15,13 @@ export type KitchenOrder = {
   customerName: string;
   status: string;
   orderType: string;
-  items: Array<{ id: string; name: string; quantity: number }>;
+  items: Array<{
+    id: string;
+    name: string;
+    quantity: number;
+    addOns: string[];
+    notes: string | null;
+  }>;
   createdAt: Date;
 };
 
@@ -78,6 +84,15 @@ function KitchenCard({ order }: { order: KitchenOrder }) {
   const step = nextStep(order.status, order.orderType);
   const minutes = useMinutesAgo(order.createdAt);
 
+  // Cancelling is destructive (it also restocks items), so it takes two taps:
+  // the first arms the button, the second submits. Disarms itself after 4s.
+  const [confirmingCancel, setConfirmingCancel] = useState(false);
+  useEffect(() => {
+    if (!confirmingCancel) return;
+    const timeout = setTimeout(() => setConfirmingCancel(false), 4000);
+    return () => clearTimeout(timeout);
+  }, [confirmingCancel]);
+
   // Waiting orders escalate visually: quiet → amber (8m) → red (15m).
   const urgency =
     minutes === null || minutes < 8
@@ -87,7 +102,16 @@ function KitchenCard({ order }: { order: KitchenOrder }) {
         : "late";
 
   return (
-    <div className="relative flex flex-col overflow-hidden rounded-xl bg-white ring-1 ring-orange-900/10">
+    <div
+      className={cn(
+        "relative flex flex-col overflow-hidden rounded-xl bg-white",
+        // Late orders shout: red ring + tinted wash so the crew spots them
+        // across the kitchen. Warn stage nudges with an amber rail only.
+        urgency === "late"
+          ? "bg-red-50/40 ring-2 ring-red-500/70"
+          : "ring-1 ring-orange-900/10",
+      )}
+    >
       {/* Urgency rail */}
       <span
         aria-hidden="true"
@@ -101,9 +125,16 @@ function KitchenCard({ order }: { order: KitchenOrder }) {
       <div className="flex items-start justify-between gap-3 p-5 pb-0">
         <div className="min-w-0">
           {/* Big glanceable code; the full number stays for receipts/lookup. */}
-          <p className="font-mono text-2xl font-black leading-none tracking-wide text-[#25130b]">
-            {shortCode(order.orderNumber)}
-          </p>
+          <div className="flex items-center gap-2">
+            <p className="font-mono text-2xl font-black leading-none tracking-wide text-[#25130b]">
+              {shortCode(order.orderNumber)}
+            </p>
+            {urgency === "late" ? (
+              <span className="inline-flex animate-pulse items-center rounded-full bg-red-600 px-2 py-0.5 text-[10px] font-black uppercase tracking-wider text-white">
+                Late
+              </span>
+            ) : null}
+          </div>
           <p className="mt-1.5 truncate text-[11px] font-medium text-orange-950/40">
             {order.orderNumber} · {order.customerName}
           </p>
@@ -135,15 +166,28 @@ function KitchenCard({ order }: { order: KitchenOrder }) {
         </div>
       </div>
 
-      <ul className="mt-4 flex-1 space-y-2 border-t border-orange-900/6 px-5 pt-4">
+      <ul className="mt-4 flex-1 space-y-2.5 border-t border-orange-900/6 px-5 pt-4">
         {order.items.map((item) => (
           <li key={item.id} className="flex items-baseline gap-2.5">
             <span className="min-w-7 font-mono text-base font-black text-red-700">
               {item.quantity}&times;
             </span>
-            <span className="text-[15px] font-semibold leading-snug text-[#25130b]">
-              {item.name}
-            </span>
+            <div className="min-w-0">
+              <p className="text-[15px] font-semibold leading-snug text-[#25130b]">
+                {item.name}
+              </p>
+              {/* What the crew must not miss: add-ons and per-item requests. */}
+              {item.addOns.length > 0 ? (
+                <p className="mt-0.5 text-xs font-bold text-amber-700">
+                  + {item.addOns.join(" · ")}
+                </p>
+              ) : null}
+              {item.notes ? (
+                <p className="mt-0.5 text-xs font-bold italic text-sky-700">
+                  “{item.notes}”
+                </p>
+              ) : null}
+            </div>
           </li>
         ))}
       </ul>
@@ -164,13 +208,23 @@ function KitchenCard({ order }: { order: KitchenOrder }) {
         <form action={updateOrderStatus}>
           <input type="hidden" name="orderId" value={order.id} />
           <input type="hidden" name="status" value={OrderStatus.CANCELLED} />
-          <Button
-            type="submit"
-            variant="ghost"
-            className="h-11 rounded-full px-3.5 text-xs font-bold text-orange-950/40 transition-colors hover:bg-red-50 hover:text-red-700"
-          >
-            Cancel
-          </Button>
+          {confirmingCancel ? (
+            <Button
+              type="submit"
+              className="h-11 animate-pulse rounded-full bg-red-600 px-3.5 text-xs font-bold text-white transition-colors hover:bg-red-700"
+            >
+              Tap to confirm
+            </Button>
+          ) : (
+            <Button
+              type="button"
+              variant="ghost"
+              onClick={() => setConfirmingCancel(true)}
+              className="h-11 rounded-full px-3.5 text-xs font-bold text-orange-950/40 transition-colors hover:bg-red-50 hover:text-red-700"
+            >
+              Cancel
+            </Button>
+          )}
         </form>
       </div>
 
@@ -188,7 +242,13 @@ const typeFilters = [
 
 const LATE_MS = 15 * 60000;
 
-export function KitchenBoard({ orders }: { orders: KitchenOrder[] }) {
+export function KitchenBoard({
+  orders,
+  completedToday,
+}: {
+  orders: KitchenOrder[];
+  completedToday: number;
+}) {
   const [stageFilter, setStageFilter] = useState<string>(ALL);
   const [typeFilter, setTypeFilter] = useState<string>(ALL);
   const [lateOnly, setLateOnly] = useState(false);
@@ -250,9 +310,15 @@ export function KitchenBoard({ orders }: { orders: KitchenOrder[] }) {
           <p className="text-xs font-black uppercase tracking-wide text-red-700">
             Kitchen
           </p>
-          <h1 className="mt-1 text-2xl font-black text-[#25130b]">
-            Live Orders
-          </h1>
+          <div className="mt-1 flex items-baseline gap-3">
+            <h1 className="text-2xl font-black text-[#25130b]">Live Orders</h1>
+            {completedToday > 0 ? (
+              <span className="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-700">
+                <span className="size-1.5 rounded-full bg-emerald-500" />
+                {completedToday} done today
+              </span>
+            ) : null}
+          </div>
         </div>
 
         {/* Type toggle + quick search */}

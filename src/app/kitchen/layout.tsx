@@ -1,8 +1,5 @@
-import Link from "next/link";
-import { LayoutDashboard } from "lucide-react";
-
-import { UserRole } from "@/generated/prisma/enums";
 import { RealtimeOrderListener } from "@/features/orders/realtime-order-listener";
+import { ConnectionIndicator } from "@/features/admin/kitchen/connection-indicator";
 import { SignOutButton } from "@/features/admin/auth/sign-out-button";
 import { requireStaffPage } from "@/features/admin/auth/guards";
 
@@ -11,8 +8,7 @@ export default async function KitchenLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const session = await requireStaffPage();
-  const isManager = session.user.role === UserRole.ADMIN;
+  await requireStaffPage();
 
   return (
     <>
@@ -33,15 +29,7 @@ export default async function KitchenLayout({
             </span>
           </div>
           <div className="flex items-center gap-2">
-            {isManager ? (
-              <Link
-                href="/admin"
-                className="flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-bold text-orange-950/60 transition-colors hover:bg-orange-950/5 hover:text-red-700"
-              >
-                <LayoutDashboard className="size-3.5" aria-hidden="true" />
-                Admin
-              </Link>
-            ) : null}
+            <ConnectionIndicator />
             <SignOutButton className="border-orange-900/15 bg-white text-orange-950/70 hover:border-red-300 hover:bg-red-50 hover:text-red-700" />
           </div>
         </header>

@@ -1,8 +1,31 @@
 import { KitchenBoard } from "@/features/admin/kitchen/kitchen-board";
-import { getKitchenOrders } from "@/features/admin/orders/queries";
+import {
+  getKitchenCompletedTodayCount,
+  getKitchenOrders,
+} from "@/features/admin/orders/queries";
+
+type SelectedAddOn = {
+  name?: string;
+};
+
+/** selectedAddOns is a JSON column — pull out just the names for the card. */
+function getAddOnNames(value: unknown) {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+
+  return value
+    .map((addOn: SelectedAddOn) =>
+      typeof addOn.name === "string" ? addOn.name : "",
+    )
+    .filter(Boolean);
+}
 
 export default async function KitchenPage() {
-  const orders = await getKitchenOrders();
+  const [orders, completedToday] = await Promise.all([
+    getKitchenOrders(),
+    getKitchenCompletedTodayCount(),
+  ]);
   const cards = orders.map((order) => ({
     id: order.id,
     orderNumber: order.orderNumber,
@@ -13,9 +36,11 @@ export default async function KitchenPage() {
       id: item.id,
       name: item.productName,
       quantity: item.quantity,
+      addOns: getAddOnNames(item.selectedAddOns),
+      notes: item.notes,
     })),
     createdAt: order.createdAt,
   }));
 
-  return <KitchenBoard orders={cards} />;
+  return <KitchenBoard orders={cards} completedToday={completedToday} />;
 }
