@@ -205,42 +205,41 @@ export function OrdersView({ orders }: { orders: AdminOrderRow[] }) {
         </div>
       ) : (
         <>
-          {/* ── Status tabs ── */}
-          <div className="overflow-x-auto [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-            <div className="flex w-max min-w-full items-center gap-0.5 rounded-full bg-orange-950/[0.05] p-1">
-              {statusTabs.map(([value, label]) => {
-                const active = status === value;
-                const count = countsByStatus[value] ?? 0;
-                return (
-                  <button
-                    key={value}
-                    type="button"
-                    onClick={() => setStatus(value)}
-                    aria-pressed={active}
-                    className={cn(
-                      "flex shrink-0 items-center gap-1.5 rounded-full px-3.5 py-2 text-xs font-bold whitespace-nowrap transition-colors duration-200",
-                      active
-                        ? "bg-white text-[#25130b] shadow-sm"
-                        : "text-orange-950/45 hover:text-[#25130b]",
-                    )}
-                  >
-                    {label}
-                    <span
+          {/* ── Status tabs (hug content) + clear + summary, one line ── */}
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
+            <div className="max-w-full overflow-x-auto [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+              <div className="flex w-max items-center gap-0.5 rounded-full bg-orange-950/[0.05] p-1">
+                {statusTabs.map(([value, label]) => {
+                  const active = status === value;
+                  const count = countsByStatus[value] ?? 0;
+                  return (
+                    <button
+                      key={value}
+                      type="button"
+                      onClick={() => setStatus(value)}
+                      aria-pressed={active}
                       className={cn(
-                        "tabular-nums",
-                        active ? "text-red-700" : "text-orange-950/30",
+                        "flex shrink-0 items-center gap-1.5 rounded-full px-3.5 py-2 text-xs font-bold whitespace-nowrap transition-colors duration-200",
+                        active
+                          ? "bg-white text-[#25130b] shadow-sm"
+                          : "text-orange-950/45 hover:text-[#25130b]",
                       )}
                     >
-                      {count}
-                    </span>
-                  </button>
-                );
-              })}
+                      {label}
+                      <span
+                        className={cn(
+                          "tabular-nums",
+                          active ? "text-red-700" : "text-orange-950/30",
+                        )}
+                      >
+                        {count}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
             </div>
-          </div>
 
-          {/* ── Summary line: clear (when filtering) + count/revenue ── */}
-          <div className="flex items-center justify-between gap-2">
             {hasActiveFilters ? (
               <Button
                 type="button"
@@ -249,13 +248,11 @@ export function OrdersView({ orders }: { orders: AdminOrderRow[] }) {
                 className="h-8 rounded-full px-3 text-xs font-bold text-orange-950/45 transition-colors hover:bg-red-50 hover:text-red-700"
               >
                 <FilterX className="size-3.5" aria-hidden="true" />
-                Clear filters
+                Clear
               </Button>
-            ) : (
-              <span />
-            )}
+            ) : null}
 
-            <p className="text-xs font-bold text-orange-950/45 tabular-nums">
+            <p className="ml-auto text-xs font-bold text-orange-950/45 tabular-nums">
               {filtered.length} order{filtered.length !== 1 ? "s" : ""}
               <span className="mx-1.5 text-orange-950/20">·</span>
               {formatPeso(filteredRevenue)}
