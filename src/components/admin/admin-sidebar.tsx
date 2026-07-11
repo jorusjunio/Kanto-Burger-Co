@@ -8,19 +8,23 @@ import {
   LayoutDashboard,
   ShoppingCart,
   Utensils,
-  Folder,
   Menu,
   X,
-  User,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { SignOutButton } from "@/features/admin/auth/sign-out-button";
+
+export type SidebarUser = {
+  name: string | null;
+  email: string | null;
+  image: string | null;
+  role: string;
+};
 
 const navItems = [
   { label: "Dashboard", href: "/admin", icon: LayoutDashboard, managerOnly: true },
   { label: "Orders", href: "/admin/orders", icon: ShoppingCart, managerOnly: true },
   { label: "Menu", href: "/admin/menu", icon: Utensils, managerOnly: true },
-  { label: "Categories", href: "/admin/categories", icon: Folder, managerOnly: true },
 ];
 
 function isItemActive(href: string, pathname: string) {
@@ -31,9 +35,11 @@ function isItemActive(href: string, pathname: string) {
 
 function SidebarBody({
   isManager,
+  user,
   onNavigate,
 }: {
   isManager: boolean;
+  user: SidebarUser;
   onNavigate?: () => void;
 }) {
   const pathname = usePathname();
@@ -113,37 +119,64 @@ function SidebarBody({
         })}
       </nav>
 
-      {/* Account + sign out */}
-      <div className="border-t border-white/8 px-5 py-5">
+      {/* Account + sign out — single quiet row; who's signed in lives here,
+          not in every page header. */}
+      <div className="border-t border-white/8 px-4 py-4">
         <div className="flex items-center gap-3">
-          <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-white/10">
-            <User className="size-3.5 text-stone-300" />
+          <span className="relative shrink-0">
+            {user.image ? (
+              /* Plain <img>: OAuth avatars come from arbitrary hosts not in
+                 next/image remotePatterns. */
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={user.image}
+                alt=""
+                referrerPolicy="no-referrer"
+                className="size-9 rounded-full object-cover"
+              />
+            ) : (
+              <span className="flex size-9 items-center justify-center rounded-full bg-white/10 text-sm font-black text-white">
+                {(user.name ?? user.email ?? "?").charAt(0).toUpperCase()}
+              </span>
+            )}
+            {/* Role dot — red = admin, amber = staff */}
+            <span
+              title={user.role}
+              className={cn(
+                "absolute -bottom-0.5 -right-0.5 size-2.5 rounded-full ring-2 ring-stone-950",
+                user.role === "ADMIN" ? "bg-red-500" : "bg-amber-400",
+              )}
+            />
           </span>
           <div className="min-w-0 flex-1">
             <p className="truncate text-xs font-bold text-white">
-              Admin Account
+              {user.name ?? "Staff"}
             </p>
-            <p className="text-[10px] font-medium text-stone-500">
-              Staff workspace
+            <p className="truncate text-[10px] font-medium text-stone-500">
+              {user.email}
             </p>
           </div>
-        </div>
-        <div className="mt-3">
-          <SignOutButton />
+          <SignOutButton iconOnly />
         </div>
       </div>
     </div>
   );
 }
 
-export function AdminSidebar({ isManager }: { isManager: boolean }) {
+export function AdminSidebar({
+  isManager,
+  user,
+}: {
+  isManager: boolean;
+  user: SidebarUser;
+}) {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
     <>
       {/* Desktop sidebar (fixed) */}
       <aside className="fixed inset-y-0 left-0 z-20 hidden w-64 lg:block">
-        <SidebarBody isManager={isManager} />
+        <SidebarBody isManager={isManager} user={user} />
       </aside>
 
       {/* Mobile trigger */}
@@ -172,7 +205,11 @@ export function AdminSidebar({ isManager }: { isManager: boolean }) {
           isOpen ? "translate-x-0" : "-translate-x-full",
         )}
       >
-        <SidebarBody isManager={isManager} onNavigate={() => setIsOpen(false)} />
+        <SidebarBody
+          isManager={isManager}
+          user={user}
+          onNavigate={() => setIsOpen(false)}
+        />
       </aside>
     </>
   );

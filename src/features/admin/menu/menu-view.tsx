@@ -140,7 +140,14 @@ function AvailabilityToggle({ row }: { row: AdminMenuRow }) {
   );
 }
 
-export function MenuView({ products }: { products: AdminMenuRow[] }) {
+export function MenuView({
+  products,
+  tabs,
+}: {
+  products: AdminMenuRow[];
+  /** Optional view-switcher (Products | Categories) rendered under the header. */
+  tabs?: React.ReactNode;
+}) {
   const [tab, setTab] = useState<string>(ALL);
   const [category, setCategory] = useState<string>(ALL);
   const [attentionOnly, setAttentionOnly] = useState(false);
@@ -233,6 +240,8 @@ export function MenuView({ products }: { products: AdminMenuRow[] }) {
           </Button>
         </div>
       </div>
+
+      {tabs}
 
       {products.length > 0 ? (
         <>
