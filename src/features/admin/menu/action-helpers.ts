@@ -162,6 +162,12 @@ export function parseAddOns(value?: string) {
     });
 }
 
+export function readCategoryMove(formData: FormData) {
+  const categoryId = z.string().min(1).parse(formData.get("categoryId"));
+  const direction = z.enum(["up", "down"]).parse(formData.get("direction"));
+  return { categoryId, direction };
+}
+
 export function readProductId(formData: FormData) {
   return z.string().min(1, "Product is required.").parse(formData.get("productId"));
 }

@@ -3,16 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useEffect, useState } from "react";
-import {
-  Boxes,
-  ImageUp,
-  Layers,
-  Save,
-  Store,
-  Tag,
-  UploadCloud,
-  X,
-} from "lucide-react";
+import { ImageUp, Layers, Save, Tag, UploadCloud, X } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -58,10 +49,15 @@ type ProductFormProps = {
 };
 
 const fieldClassName =
-  "h-11 rounded-xl border-2 border-orange-900/10 bg-white px-3.5 text-sm shadow-sm transition-all duration-300 ease-out focus-visible:border-red-500/50 focus-visible:ring-4 focus-visible:ring-red-500/10";
+  "h-10 rounded-lg border-0 bg-white px-3.5 text-sm shadow-none ring-1 ring-orange-900/10 transition-shadow duration-200 focus-visible:ring-2 focus-visible:ring-red-500/30";
 
 const areaClassName =
-  "rounded-xl border-2 border-orange-900/10 bg-white px-3.5 py-2.5 text-sm shadow-sm transition-all duration-300 ease-out focus-visible:border-red-500/50 focus-visible:ring-4 focus-visible:ring-red-500/10";
+  "rounded-lg border-0 bg-white px-3.5 py-2.5 text-sm shadow-none ring-1 ring-orange-900/10 transition-shadow duration-200 focus-visible:ring-2 focus-visible:ring-red-500/30";
+
+const cardClassName = "rounded-xl bg-white p-6 ring-1 ring-orange-900/10";
+
+const cardTitleClassName =
+  "text-[13px] font-black uppercase tracking-wide text-[#25130b]";
 
 function SectionLabel({
   icon: Icon,
@@ -71,14 +67,59 @@ function SectionLabel({
   children: React.ReactNode;
 }) {
   return (
-    <div className="flex items-center gap-2">
-      <span className="flex size-6 items-center justify-center rounded-lg bg-red-100 text-red-700">
-        <Icon className="size-3.5" aria-hidden="true" />
-      </span>
-      <span className="text-[11px] font-black uppercase tracking-wider text-orange-950/55">
+    <div className="flex items-center gap-2 text-orange-950/45">
+      <Icon className="size-3.5" aria-hidden="true" />
+      <span className="text-[11px] font-black uppercase tracking-wider">
         {children}
       </span>
     </div>
+  );
+}
+
+/** Switch-styled checkbox row, matching the Live toggle on the menu table. */
+function ToggleRow({
+  name,
+  label,
+  hint,
+  defaultChecked,
+}: {
+  name: string;
+  label: string;
+  hint?: string;
+  defaultChecked: boolean;
+}) {
+  const [checked, setChecked] = useState(defaultChecked);
+
+  return (
+    <label className="flex cursor-pointer items-center justify-between gap-3 py-1">
+      <span className="min-w-0">
+        <span className="block text-sm font-bold text-[#25130b]">{label}</span>
+        {hint ? (
+          <span className="mt-0.5 block text-xs text-orange-950/40">
+            {hint}
+          </span>
+        ) : null}
+      </span>
+      <input
+        type="checkbox"
+        name={name}
+        checked={checked}
+        onChange={(event) => setChecked(event.target.checked)}
+        className="sr-only"
+      />
+      <span
+        aria-hidden="true"
+        className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors duration-200 ${
+          checked ? "bg-emerald-500" : "bg-orange-950/15"
+        }`}
+      >
+        <span
+          className={`inline-block size-4.5 rounded-full bg-white shadow-sm transition-transform duration-200 ${
+            checked ? "translate-x-6" : "translate-x-0.75"
+          }`}
+        />
+      </span>
+    </label>
   );
 }
 
@@ -126,12 +167,12 @@ export function ProductForm({
   return (
     <form
       action={action}
-      className="grid gap-6 lg:grid-cols-[1fr_340px] animate-fade-in"
+      className="grid gap-5 lg:grid-cols-[1fr_340px] lg:items-start animate-fade-in"
     >
-      {/* Main panel */}
-      <div className="space-y-7 rounded-xl bg-white p-6 ring-1 ring-orange-900/10">
+      {/* ── Main column ── */}
+      <div className="space-y-5">
         {/* Details */}
-        <section className="space-y-4">
+        <section className={`${cardClassName} space-y-4`}>
           <SectionLabel icon={Tag}>Product details</SectionLabel>
 
           <div className="grid gap-4 sm:grid-cols-2">
@@ -191,7 +232,7 @@ export function ProductForm({
               </Select>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="price">Price</Label>
+              <Label htmlFor="price">Price (₱)</Label>
               <Input
                 id="price"
                 name="price"
@@ -206,90 +247,88 @@ export function ProductForm({
           </div>
         </section>
 
-        <div className="h-px bg-orange-900/10" />
-
         {/* Image */}
-        <section className="space-y-4">
+        <section className={`${cardClassName} space-y-4`}>
           <SectionLabel icon={ImageUp}>Image</SectionLabel>
 
-          <div className="space-y-2">
-            <Label htmlFor="imageUrl">Image URL</Label>
-            <Input
-              id="imageUrl"
-              name="imageUrl"
-              type="text"
-              defaultValue={product?.imageUrl ?? ""}
-              placeholder="https://... or /assets/products/item.jpg"
-              className={fieldClassName}
-            />
-          </div>
+          <div className="grid gap-4 sm:grid-cols-[1fr_auto] sm:items-start">
+            {/* Dropzone */}
+            <label
+              htmlFor="imageFile"
+              className="group flex cursor-pointer flex-col items-center justify-center gap-2.5 rounded-lg border border-dashed border-orange-900/20 bg-orange-950/2 px-4 py-8 text-center transition-colors duration-200 hover:border-red-400/60 hover:bg-red-50/40"
+            >
+              <UploadCloud
+                className="size-6 text-orange-950/30 transition-colors duration-200 group-hover:text-red-600"
+                aria-hidden="true"
+              />
+              <span>
+                <span className="block text-sm font-bold text-[#25130b]">
+                  {fileName ?? "Click to upload"}
+                </span>
+                <span className="mt-0.5 block text-xs text-orange-950/40">
+                  PNG or JPG, up to 5MB
+                </span>
+              </span>
+              <input
+                id="imageFile"
+                name="imageFile"
+                type="file"
+                accept="image/*"
+                onChange={handleFileChange}
+                className="sr-only"
+              />
+            </label>
 
-          <div className="space-y-3">
-            <Label htmlFor="imageFile">Upload image</Label>
-            <div className="grid gap-4 sm:grid-cols-[1fr_auto] sm:items-start">
-              {/* Dropzone */}
-              <label
-                htmlFor="imageFile"
-                className="group flex cursor-pointer flex-col items-center justify-center gap-3 rounded-2xl border-2 border-dashed border-orange-900/15 bg-stone-50/70 px-4 py-8 text-center transition-all duration-300 ease-out hover:-translate-y-0.5 hover:border-red-400/60 hover:bg-red-50/40"
-              >
-                <span className="flex size-12 items-center justify-center rounded-xl bg-red-600 text-white transition-transform duration-300 group-hover:scale-110">
-                  <UploadCloud className="size-6" aria-hidden="true" />
-                </span>
-                <span>
-                  <span className="block text-sm font-black text-[#25130b]">
-                    {fileName ?? "Click to upload an image"}
-                  </span>
-                  <span className="mt-0.5 block text-xs text-stone-500">
-                    PNG or JPG, up to 5MB
-                  </span>
-                </span>
-                <input
-                  id="imageFile"
-                  name="imageFile"
-                  type="file"
-                  accept="image/*"
-                  onChange={handleFileChange}
-                  className="sr-only"
+            {/* Live preview */}
+            {preview ? (
+              <div className="relative aspect-square w-full overflow-hidden rounded-lg ring-1 ring-orange-900/10 sm:w-36">
+                <Image
+                  src={preview}
+                  alt={fileName ?? product?.name ?? "Preview"}
+                  fill
+                  sizes="144px"
+                  unoptimized
+                  className="object-cover"
                 />
-              </label>
-
-              {/* Live preview */}
-              {preview ? (
-                <div className="relative aspect-square w-full overflow-hidden rounded-2xl border-2 border-orange-900/10 shadow-sm sm:w-40">
-                  <Image
-                    src={preview}
-                    alt={fileName ?? product?.name ?? "Preview"}
-                    fill
-                    sizes="160px"
-                    unoptimized
-                    className="object-cover"
-                  />
-                  {fileName ? (
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setPreview(product?.imageUrl ?? null);
-                        setFileName(null);
-                      }}
-                      aria-label="Remove selected image"
-                      className="absolute right-2 top-2 flex size-7 items-center justify-center rounded-full bg-black/50 text-white backdrop-blur-sm transition-colors duration-200 hover:bg-red-600"
-                    >
-                      <X className="size-4" />
-                    </button>
-                  ) : null}
-                </div>
-              ) : null}
-            </div>
-            <p className="text-xs leading-5 text-stone-500">
-              Optional. Uploading a file replaces the URL above after save.
-            </p>
+                {fileName ? (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setPreview(product?.imageUrl ?? null);
+                      setFileName(null);
+                    }}
+                    aria-label="Remove selected image"
+                    className="absolute right-2 top-2 flex size-7 items-center justify-center rounded-full bg-black/50 text-white backdrop-blur-sm transition-colors duration-200 hover:bg-red-600"
+                  >
+                    <X className="size-4" />
+                  </button>
+                ) : null}
+              </div>
+            ) : null}
           </div>
+
+          <details className="group">
+            <summary className="cursor-pointer list-none text-xs font-bold text-orange-950/40 transition-colors hover:text-red-700">
+              Or paste an image URL
+            </summary>
+            <div className="mt-3 space-y-2">
+              <Input
+                id="imageUrl"
+                name="imageUrl"
+                type="text"
+                defaultValue={product?.imageUrl ?? ""}
+                placeholder="https://... or /assets/products/item.jpg"
+                className={fieldClassName}
+              />
+              <p className="text-xs leading-5 text-orange-950/40">
+                Uploading a file replaces this URL after save.
+              </p>
+            </div>
+          </details>
         </section>
 
-        <div className="h-px bg-orange-900/10" />
-
         {/* Add-ons */}
-        <section className="space-y-4">
+        <section className={`${cardClassName} space-y-4`}>
           <SectionLabel icon={Layers}>Add-ons</SectionLabel>
           <div className="space-y-2">
             <Textarea
@@ -299,34 +338,46 @@ export function ProductForm({
               placeholder="Extra Cheese | 20.00 | available"
               className={`max-h-[228px] font-mono ${areaClassName}`}
             />
-            <p className="text-xs leading-5 text-stone-500">
+            <p className="text-xs leading-5 text-orange-950/40">
               One add-on per line: name | price | available/unavailable.
             </p>
           </div>
         </section>
       </div>
 
-      {/* Sidebar */}
+      {/* ── Sidebar ── */}
       <aside className="space-y-5">
-        <div className="admin-card rounded-xl bg-white p-5 ring-1 ring-orange-900/10">
-          <div className="flex items-center gap-2">
-            <span className="flex size-8 items-center justify-center rounded-xl bg-gradient-to-br from-amber-500 to-amber-600 text-white shadow-md shadow-amber-500/30">
-              <Boxes className="size-4" aria-hidden="true" />
-            </span>
-            <h2 className="font-black text-[#25130b]">Inventory</h2>
+        <div className={cardClassName}>
+          <h2 className={cardTitleClassName}>Storefront</h2>
+          <div className="mt-3 divide-y divide-orange-900/6">
+            <ToggleRow
+              name="isAvailable"
+              label="Live on storefront"
+              hint="Customers can see and order this"
+              defaultChecked={product?.isAvailable ?? true}
+            />
+            <ToggleRow
+              name="isFeatured"
+              label="Featured"
+              hint="Highlighted on the menu hero"
+              defaultChecked={product?.isFeatured ?? false}
+            />
           </div>
-          <div className="mt-4 space-y-4">
-            <label className="flex items-center gap-3 text-sm font-bold text-[#25130b]">
-              <input
-                type="checkbox"
-                name="trackStock"
-                defaultChecked={product?.trackStock ?? true}
-                className="size-4 accent-red-600"
-              />
-              Track stock
-            </label>
+        </div>
+
+        <div className={cardClassName}>
+          <h2 className={cardTitleClassName}>Inventory</h2>
+          <div className="mt-3">
+            <ToggleRow
+              name="trackStock"
+              label="Track stock"
+              hint="Auto sold-out at zero; restocks on cancel"
+              defaultChecked={product?.trackStock ?? true}
+            />
+          </div>
+          <div className="mt-3 grid grid-cols-2 gap-3 border-t border-orange-900/6 pt-4">
             <div className="space-y-2">
-              <Label htmlFor="stockQuantity">Stock quantity</Label>
+              <Label htmlFor="stockQuantity">Quantity</Label>
               <Input
                 id="stockQuantity"
                 name="stockQuantity"
@@ -338,7 +389,7 @@ export function ProductForm({
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="lowStockThreshold">Low stock alert</Label>
+              <Label htmlFor="lowStockThreshold">Low-stock alert</Label>
               <Input
                 id="lowStockThreshold"
                 name="lowStockThreshold"
@@ -352,51 +403,19 @@ export function ProductForm({
           </div>
         </div>
 
-        <div className="admin-card rounded-xl bg-white p-5 ring-1 ring-orange-900/10">
-          <div className="flex items-center gap-2">
-            <span className="flex size-8 items-center justify-center rounded-xl bg-red-600 text-white shadow-md shadow-red-600/30">
-              <Store className="size-4" aria-hidden="true" />
-            </span>
-            <h2 className="font-black text-[#25130b]">Storefront</h2>
-          </div>
-          <div className="mt-4 space-y-3">
-            <label className="flex items-center gap-3 text-sm font-bold text-[#25130b]">
-              <input
-                type="checkbox"
-                name="isAvailable"
-                defaultChecked={product?.isAvailable ?? true}
-                className="size-4 accent-red-600"
-              />
-              Available to order
-            </label>
-            <label className="flex items-center gap-3 text-sm font-bold text-[#25130b]">
-              <input
-                type="checkbox"
-                name="isFeatured"
-                defaultChecked={product?.isFeatured ?? false}
-                className="size-4 accent-red-600"
-              />
-              Featured product
-            </label>
-          </div>
-        </div>
-
         <div className="flex flex-col gap-2">
           <Button
             type="submit"
-            className="group h-11 rounded-xl bg-red-600 font-black text-white transition-all duration-300 ease-out hover:-translate-y-0.5 hover:shadow-xl hover:shadow-red-600/40 active:translate-y-0 active:scale-[0.98]"
+            className="h-11 rounded-full bg-red-600 text-sm font-bold text-white transition-colors duration-200 hover:bg-red-700 active:scale-[0.99]"
           >
-            <Save
-              aria-hidden="true"
-              className="transition-transform duration-300 group-hover:scale-110"
-            />
+            <Save className="size-4" aria-hidden="true" />
             {submitLabel}
           </Button>
           <Button
             type="button"
-            variant="outline"
+            variant="ghost"
             asChild
-            className="h-11 rounded-xl border-2 border-orange-900/10 font-bold text-orange-950/70 transition-all duration-300 ease-out hover:-translate-y-0.5 hover:bg-orange-50 hover:text-[#25130b]"
+            className="h-11 rounded-full text-sm font-bold text-orange-950/50 transition-colors hover:bg-orange-950/5 hover:text-[#25130b]"
           >
             <Link href="/admin/menu">Cancel</Link>
           </Button>

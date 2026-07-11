@@ -13,6 +13,7 @@ import {
   parseAddOns,
   readAvailabilityToggle,
   readCategoryForm,
+  readCategoryMove,
   readProductForm,
   readProductId,
   resolveSlug,
@@ -69,6 +70,46 @@ export async function updateCategory(categoryId: string, formData: FormData) {
 
   revalidateAdminMenu();
 }
+/**
+ * Move a category one slot up/down in the storefront ordering. The whole list
+ * is re-indexed 0..n-1 inside a transaction, so duplicate/stale sortOrder
+ * values self-heal and the swap is always well-defined.
+ */
+export async function moveCategory(formData: FormData) {
+  await requireAdminRoleSession();
+
+  const { categoryId, direction } = readCategoryMove(formData);
+
+  const all = await prisma.category.findMany({
+    orderBy: [{ sortOrder: "asc" }, { name: "asc" }],
+    select: { id: true },
+  });
+
+  const index = all.findIndex((category) => category.id === categoryId);
+  if (index === -1) {
+    throw new Error("Category not found.");
+  }
+
+  const target = direction === "up" ? index - 1 : index + 1;
+  if (target < 0 || target >= all.length) {
+    return; // already at the edge — nothing to do
+  }
+
+  const reordered = [...all];
+  [reordered[index], reordered[target]] = [reordered[target], reordered[index]];
+
+  await prisma.$transaction(
+    reordered.map((category, sortOrder) =>
+      prisma.category.update({
+        where: { id: category.id },
+        data: { sortOrder },
+      }),
+    ),
+  );
+
+  revalidateAdminMenu();
+}
+
 export async function createProduct(formData: FormData) {
   await requireAdminRoleSession();
 
