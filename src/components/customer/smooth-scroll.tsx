@@ -89,6 +89,11 @@ export function SmoothScroll() {
       touchMultiplier: 1.05,
       anchors: true,
       prevent: canElementScroll,
+      // Measure the BODY, not <html>: html has `h-full`, so its box never grows
+      // with content and Lenis's ResizeObserver never fires — leaving a stale
+      // scroll limit (e.g. frozen scrolling after checkout → menu navigation).
+      // The body grows with content, so auto-resize works as intended.
+      content: document.body,
     });
 
     // Expose the instance so components (e.g. category nav "All") can drive
