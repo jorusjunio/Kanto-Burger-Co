@@ -3,7 +3,7 @@
 import { useSearchParams } from "next/navigation";
 import { signIn } from "next-auth/react";
 import { FormEvent, useState, useTransition } from "react";
-import { AlertCircle, Loader2 } from "lucide-react";
+import { AlertCircle, Eye, EyeOff, Loader2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,7 +13,7 @@ import { sanitizeAdminCallbackUrl } from "./routing";
 
 function GoogleGlyph() {
   return (
-    <svg viewBox="0 0 24 24" className="size-5" aria-hidden="true">
+    <svg viewBox="0 0 24 24" className="size-4.5" aria-hidden="true">
       <path
         fill="#4285F4"
         d="M23.52 12.27c0-.79-.07-1.54-.2-2.27H12v4.51h6.47a5.53 5.53 0 0 1-2.4 3.63v3h3.88c2.27-2.09 3.57-5.17 3.57-8.87Z"
@@ -34,6 +34,9 @@ function GoogleGlyph() {
   );
 }
 
+const inputClassName =
+  "h-11 rounded-xl border-0 bg-white ring-1 ring-orange-900/10 transition-shadow duration-200 focus-visible:ring-2 focus-visible:ring-red-500/40";
+
 export function LoginForm({ googleEnabled = false }: { googleEnabled?: boolean }) {
   const searchParams = useSearchParams();
   const callbackUrl = sanitizeAdminCallbackUrl(searchParams.get("callbackUrl"));
@@ -44,9 +47,15 @@ export function LoginForm({ googleEnabled = false }: { googleEnabled?: boolean }
     : "";
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState(oauthError);
   const [isPending, startTransition] = useTransition();
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
+  // Stay in the loading state after a successful sign-in until the browser
+  // actually navigates — otherwise the button flickers back to "Sign In".
+  const [isRedirecting, setIsRedirecting] = useState(false);
+
+  const busy = isPending || isGoogleLoading || isRedirecting;
 
   function handleGoogleSignIn() {
     setError("");
@@ -77,103 +86,135 @@ export function LoginForm({ googleEnabled = false }: { googleEnabled?: boolean }
         return;
       }
 
+      setIsRedirecting(true);
       window.location.assign(result.url ?? callbackUrl);
     });
   }
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="w-full max-w-md rounded-3xl border border-white/20 bg-white/80 backdrop-blur-md p-8 shadow-2xl"
-    >
-      <div>
-        <p className="text-sm font-black uppercase tracking-wide text-red-700">
-          Staff access
-        </p>
-        <h1 className="mt-2 text-3xl font-black text-zinc-950">
-          Admin Login
-        </h1>
-        <p className="mt-2 text-sm leading-6 text-zinc-600">
-          Sign in to manage orders, payments, inventory, and reports.
-        </p>
-      </div>
+    <form onSubmit={handleSubmit} className="w-full max-w-sm">
+      {/* Heading */}
+      <p className="text-xs font-black uppercase tracking-wide text-red-700">
+        Staff access
+      </p>
+      <h1 className="mt-1 text-3xl font-black text-[#25130b]">Sign in</h1>
+      <p className="mt-1.5 text-sm text-orange-950/45">
+        Use your staff account to open the workspace.
+      </p>
 
       {error ? (
-        <div className="mt-5 flex gap-3 rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-800 animate-fade-in">
+        <div className="mt-6 flex gap-2.5 rounded-xl bg-red-50 p-3.5 text-sm font-medium text-red-800 ring-1 ring-red-200 animate-fade-in">
           <AlertCircle className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
           {error}
         </div>
       ) : null}
 
-      <div className="mt-5 space-y-4">
-        <div className="space-y-2">
-          <Label htmlFor="email">Email</Label>
+      {/* Fields */}
+      <div className="mt-6 space-y-4">
+        <div className="space-y-1.5">
+          <Label
+            htmlFor="email"
+            className="text-xs font-bold uppercase tracking-wide text-orange-950/50"
+          >
+            Email
+          </Label>
           <Input
             id="email"
             type="email"
             value={email}
             onChange={(event) => setEmail(event.target.value)}
             autoComplete="email"
+            autoFocus
             required
-            className="rounded-xl transition-all duration-300 focus:border-red-500/50 focus:ring-4 focus:ring-red-500/10"
+            placeholder="you@kantoburger.co"
+            className={inputClassName}
           />
         </div>
-        <div className="space-y-2">
-          <Label htmlFor="password">Password</Label>
-          <Input
-            id="password"
-            type="password"
-            value={password}
-            onChange={(event) => setPassword(event.target.value)}
-            autoComplete="current-password"
-            required
-            className="rounded-xl transition-all duration-300 focus:border-red-500/50 focus:ring-4 focus:ring-red-500/10"
-          />
+
+        <div className="space-y-1.5">
+          <Label
+            htmlFor="password"
+            className="text-xs font-bold uppercase tracking-wide text-orange-950/50"
+          >
+            Password
+          </Label>
+          <div className="relative">
+            <Input
+              id="password"
+              type={showPassword ? "text" : "password"}
+              value={password}
+              onChange={(event) => setPassword(event.target.value)}
+              autoComplete="current-password"
+              required
+              placeholder="••••••••"
+              className={`${inputClassName} pr-11`}
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword((value) => !value)}
+              aria-label={showPassword ? "Hide password" : "Show password"}
+              className="absolute right-1.5 top-1/2 flex size-8 -translate-y-1/2 items-center justify-center rounded-full text-orange-950/35 transition-colors duration-200 hover:bg-orange-950/5 hover:text-[#25130b]"
+            >
+              {showPassword ? (
+                <EyeOff className="size-4" aria-hidden="true" />
+              ) : (
+                <Eye className="size-4" aria-hidden="true" />
+              )}
+            </button>
+          </div>
         </div>
       </div>
 
-      <div className="mt-6 flex gap-3">
-        <Button
-          type="submit"
-          disabled={isPending || isGoogleLoading}
-          className={`h-12 rounded-xl bg-red-600 text-white hover:bg-red-700 font-black text-base group ${
-            googleEnabled ? "flex-1" : "w-full"
-          }`}
-        >
-          {isPending ? (
-            <>
-              <Loader2 className="size-4 animate-spin" aria-hidden="true" />
-              Signing in…
-            </>
-          ) : (
-            "Sign In"
-          )}
-        </Button>
+      {/* Actions */}
+      <Button
+        type="submit"
+        disabled={busy}
+        className="mt-6 h-11 w-full rounded-full bg-red-600 text-sm font-bold text-white transition-colors duration-200 hover:bg-red-700 active:scale-[0.99]"
+      >
+        {isRedirecting ? (
+          <>
+            <Loader2 className="size-4 animate-spin" aria-hidden="true" />
+            Opening workspace…
+          </>
+        ) : isPending ? (
+          <>
+            <Loader2 className="size-4 animate-spin" aria-hidden="true" />
+            Signing in…
+          </>
+        ) : (
+          "Sign In"
+        )}
+      </Button>
 
-        {googleEnabled ? (
+      {googleEnabled ? (
+        <>
+          <div className="my-5 flex items-center gap-3">
+            <span className="h-px flex-1 bg-orange-900/10" />
+            <span className="text-[11px] font-bold uppercase tracking-wider text-orange-950/35">
+              or
+            </span>
+            <span className="h-px flex-1 bg-orange-900/10" />
+          </div>
+
           <button
             type="button"
             onClick={handleGoogleSignIn}
-            disabled={isPending || isGoogleLoading}
-            aria-label="Continue with Google"
-            title="Continue with Google"
+            disabled={busy}
             aria-busy={isGoogleLoading}
-            className="group flex h-12 flex-1 items-center justify-center gap-2 rounded-xl border border-stone-200 bg-white px-4 text-sm font-black text-zinc-800 shadow-sm transition-all duration-300 ease-out hover:-translate-y-0.5 hover:border-stone-300 hover:shadow-md active:translate-y-0 active:scale-[0.98] disabled:pointer-events-none disabled:opacity-60"
+            className="flex h-11 w-full items-center justify-center gap-2.5 rounded-full bg-white text-sm font-bold text-[#25130b] ring-1 ring-orange-900/10 transition-all duration-200 hover:ring-orange-900/25 active:scale-[0.99] disabled:pointer-events-none disabled:opacity-60"
           >
             {isGoogleLoading ? (
               <Loader2
-                className="size-5 animate-spin text-red-600"
+                className="size-4 animate-spin text-red-600"
                 aria-hidden="true"
               />
             ) : (
-              <span className="transition-transform duration-300 ease-out group-hover:scale-110 group-hover:-rotate-3">
-                <GoogleGlyph />
-              </span>
+              <GoogleGlyph />
             )}
-            <span>{isGoogleLoading ? "Connecting…" : "Google"}</span>
+            {isGoogleLoading ? "Connecting…" : "Continue with Google"}
           </button>
-        ) : null}
-      </div>
+        </>
+      ) : null}
     </form>
   );
 }
