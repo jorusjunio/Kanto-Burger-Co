@@ -25,7 +25,7 @@ import {
 import { formatPeso } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
-import { toggleProductAvailability } from "./actions";
+import { adjustStock, toggleProductAvailability } from "./actions";
 import { DeleteProductDialog } from "./delete-product-dialog";
 
 export type AdminMenuRow = {
@@ -62,6 +62,37 @@ function stockState(row: AdminMenuRow): StockState {
   return "ok";
 }
 
+/** One-tap restock/deduct — submits the shared adjustStock action. */
+function StockNudge({
+  productId,
+  delta,
+  disabled,
+}: {
+  productId: string;
+  delta: number;
+  disabled?: boolean;
+}) {
+  return (
+    <form action={adjustStock}>
+      <input type="hidden" name="productId" value={productId} />
+      <input type="hidden" name="delta" value={delta} />
+      <button
+        type="submit"
+        disabled={disabled}
+        aria-label={delta > 0 ? "Add 1 stock" : "Remove 1 stock"}
+        className={cn(
+          "flex size-5 items-center justify-center rounded-full text-sm font-black leading-none transition-colors duration-200",
+          disabled
+            ? "cursor-default text-orange-950/15"
+            : "text-orange-950/40 hover:bg-orange-950/8 hover:text-red-700",
+        )}
+      >
+        {delta > 0 ? "+" : "−"}
+      </button>
+    </form>
+  );
+}
+
 function StockCell({ row }: { row: AdminMenuRow }) {
   const state = stockState(row);
 
@@ -73,10 +104,15 @@ function StockCell({ row }: { row: AdminMenuRow }) {
 
   return (
     <div className="min-w-24">
-      <div className="flex items-baseline gap-1.5">
+      <div className="flex items-center gap-1.5">
+        <StockNudge
+          productId={row.id}
+          delta={-1}
+          disabled={row.stockQuantity <= 0}
+        />
         <span
           className={cn(
-            "text-sm font-black tabular-nums",
+            "min-w-6 text-center text-sm font-black tabular-nums",
             state === "out" && "text-red-700",
             state === "low" && "text-amber-600",
             state === "ok" && "text-[#25130b]",
@@ -84,6 +120,7 @@ function StockCell({ row }: { row: AdminMenuRow }) {
         >
           {row.stockQuantity}
         </span>
+        <StockNudge productId={row.id} delta={1} />
         <span className="text-[10px] font-bold uppercase tracking-wider text-orange-950/35">
           {state === "out" ? "sold out" : state === "low" ? "low" : "in stock"}
         </span>

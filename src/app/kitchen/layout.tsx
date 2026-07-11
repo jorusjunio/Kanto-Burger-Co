@@ -8,7 +8,7 @@ export default async function KitchenLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  await requireStaffPage();
+  await requireStaffPage("/kitchen");
 
   return (
     <>

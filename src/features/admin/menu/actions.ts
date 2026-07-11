@@ -16,6 +16,7 @@ import {
   readCategoryMove,
   readProductForm,
   readProductId,
+  readStockAdjust,
   resolveSlug,
 } from "./action-helpers";
 
@@ -185,6 +186,26 @@ export async function toggleProductAvailability(formData: FormData) {
   await prisma.product.update({
     where: { id: productId },
     data: { isAvailable },
+  });
+
+  revalidateAdminMenu();
+}
+
+/**
+ * Quick restock/deduct straight from the menu table. Atomic: decrements are
+ * conditional on enough stock so concurrent taps can never go below zero.
+ */
+export async function adjustStock(formData: FormData) {
+  await requireAdminRoleSession();
+
+  const { productId, delta } = readStockAdjust(formData);
+
+  await prisma.product.updateMany({
+    where: {
+      id: productId,
+      ...(delta < 0 ? { stockQuantity: { gte: Math.abs(delta) } } : {}),
+    },
+    data: { stockQuantity: { increment: delta } },
   });
 
   revalidateAdminMenu();

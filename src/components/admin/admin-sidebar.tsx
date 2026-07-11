@@ -9,8 +9,10 @@ import {
   Check,
   Clock,
   LayoutDashboard,
+  Settings,
   ShoppingCart,
   Smartphone,
+  Users,
   Utensils,
   Menu,
   X,
@@ -35,6 +37,8 @@ const navItems = [
   { label: "Dashboard", href: "/admin", icon: LayoutDashboard, managerOnly: true },
   { label: "Orders", href: "/admin/orders", icon: ShoppingCart, managerOnly: true },
   { label: "Menu", href: "/admin/menu", icon: Utensils, managerOnly: true },
+  { label: "Staff", href: "/admin/staff", icon: Users, managerOnly: true },
+  { label: "Settings", href: "/admin/settings", icon: Settings, managerOnly: true },
 ];
 
 /* One alert row: quiet link with a colored count chip. */

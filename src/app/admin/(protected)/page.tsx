@@ -207,7 +207,7 @@ export default async function AdminDashboardPage() {
       value: formatPeso(metrics.totalSalesToday),
       Icon: TrendingUp,
       iconClass: "bg-red-700/8 text-red-700",
-      href: "/admin/reports",
+      href: "/admin/orders",
     },
     {
       label: "Pending Orders",

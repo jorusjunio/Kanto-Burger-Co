@@ -168,6 +168,19 @@ export function readCategoryMove(formData: FormData) {
   return { categoryId, direction };
 }
 
+export function readStockAdjust(formData: FormData) {
+  const productId = z.string().min(1).parse(formData.get("productId"));
+  const delta = z.coerce
+    .number()
+    .int()
+    .min(-99)
+    .max(99)
+    .refine((value) => value !== 0, "Delta cannot be zero.")
+    .parse(formData.get("delta"));
+
+  return { productId, delta };
+}
+
 export function readProductId(formData: FormData) {
   return z.string().min(1, "Product is required.").parse(formData.get("productId"));
 }

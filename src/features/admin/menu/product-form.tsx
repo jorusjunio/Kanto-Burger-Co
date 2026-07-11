@@ -3,7 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useEffect, useState } from "react";
-import { ImageUp, Layers, Save, Tag, UploadCloud, X } from "lucide-react";
+import { ImageUp, Layers, Plus, Save, Tag, UploadCloud, X } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -131,17 +131,129 @@ function ToggleRow({
   );
 }
 
-function addOnsToText(product?: ProductFormProduct) {
+type AddOnRow = {
+  key: number;
+  name: string;
+  price: string;
+  isAvailable: boolean;
+};
+
+/** Serialize rows into the `name | price | availability` lines the server
+ *  action already parses — the row editor is purely a UI upgrade. */
+function addOnsToText(rows: AddOnRow[]) {
+  return rows
+    .filter((row) => row.name.trim() !== "")
+    .map((row) =>
+      [
+        row.name.trim(),
+        row.price.trim() === "" ? "0" : row.price.trim(),
+        row.isAvailable ? "available" : "unavailable",
+      ].join(" | "),
+    )
+    .join("\n");
+}
+
+function AddOnsEditor({ initial }: { initial: AddOnRow[] }) {
+  const [rows, setRows] = useState<AddOnRow[]>(initial);
+
+  function updateRow(key: number, patch: Partial<AddOnRow>) {
+    setRows((current) =>
+      current.map((row) => (row.key === key ? { ...row, ...patch } : row)),
+    );
+  }
+
+  function addRow() {
+    setRows((current) => [
+      ...current,
+      { key: Date.now(), name: "", price: "", isAvailable: true },
+    ]);
+  }
+
+  function removeRow(key: number) {
+    setRows((current) => current.filter((row) => row.key !== key));
+  }
+
   return (
-    product?.addOns
-      .map((addOn) =>
-        [
-          addOn.name,
-          Number(addOn.price).toFixed(2),
-          addOn.isAvailable ? "available" : "unavailable",
-        ].join(" | "),
-      )
-      .join("\n") ?? ""
+    <div className="space-y-2.5">
+      {/* Serialized payload — same format the server action already parses. */}
+      <input type="hidden" name="addOns" value={addOnsToText(rows)} />
+
+      {rows.length === 0 ? (
+        <p className="rounded-lg bg-orange-950/[0.03] px-3.5 py-3 text-xs text-orange-950/40">
+          No add-ons yet — e.g. Extra Cheese, Bacon Strips.
+        </p>
+      ) : (
+        rows.map((row, index) => (
+          <div key={row.key} className="flex items-center gap-2">
+            <Input
+              value={row.name}
+              onChange={(event) =>
+                // "|" is the serializer's delimiter — keep it out of names.
+                updateRow(row.key, {
+                  name: event.target.value.replaceAll("|", ""),
+                })
+              }
+              placeholder={`Add-on ${index + 1} name`}
+              aria-label={`Add-on ${index + 1} name`}
+              className={`${fieldClassName} flex-1`}
+            />
+            <div className="relative w-28 shrink-0">
+              <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-xs font-bold text-orange-950/35">
+                ₱
+              </span>
+              <Input
+                value={row.price}
+                onChange={(event) =>
+                  updateRow(row.key, {
+                    price: event.target.value.replace(/[^\d.]/g, ""),
+                  })
+                }
+                inputMode="decimal"
+                placeholder="0.00"
+                aria-label={`Add-on ${index + 1} price`}
+                className={`${fieldClassName} pl-7`}
+              />
+            </div>
+            {/* Availability toggle */}
+            <button
+              type="button"
+              role="switch"
+              aria-checked={row.isAvailable}
+              aria-label={`${row.isAvailable ? "Disable" : "Enable"} add-on ${index + 1}`}
+              onClick={() =>
+                updateRow(row.key, { isAvailable: !row.isAvailable })
+              }
+              className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors duration-200 ${
+                row.isAvailable ? "bg-emerald-500" : "bg-orange-950/15"
+              }`}
+            >
+              <span
+                className={`inline-block size-4.5 rounded-full bg-white shadow-sm transition-transform duration-200 ${
+                  row.isAvailable ? "translate-x-6" : "translate-x-0.75"
+                }`}
+              />
+            </button>
+            <button
+              type="button"
+              onClick={() => removeRow(row.key)}
+              aria-label={`Remove add-on ${index + 1}`}
+              className="flex size-8 shrink-0 items-center justify-center rounded-full text-orange-950/35 transition-colors duration-200 hover:bg-red-50 hover:text-red-700"
+            >
+              <X className="size-4" aria-hidden="true" />
+            </button>
+          </div>
+        ))
+      )}
+
+      <button
+        type="button"
+        onClick={addRow}
+        className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-bold text-red-700 transition-colors duration-200 hover:bg-red-50"
+      >
+        <Plus className="size-3.5" aria-hidden="true" />
+        Add add-on
+      </button>
+    </div>
   );
 }
 
@@ -356,21 +468,19 @@ export function ProductForm({
           </details>
         </section>
 
-        {/* Add-ons */}
+        {/* Add-ons — row editor; serializes to the same format the action parses */}
         <section className={`${cardClassName} space-y-4`}>
           <SectionLabel icon={Layers}>Add-ons</SectionLabel>
-          <div className="space-y-2">
-            <Textarea
-              id="addOns"
-              name="addOns"
-              defaultValue={addOnsToText(product)}
-              placeholder="Extra Cheese | 20.00 | available"
-              className={`max-h-[228px] font-mono ${areaClassName}`}
-            />
-            <p className="text-xs leading-5 text-orange-950/40">
-              One add-on per line: name | price | available/unavailable.
-            </p>
-          </div>
+          <AddOnsEditor
+            initial={
+              product?.addOns.map((addOn, index) => ({
+                key: index,
+                name: addOn.name,
+                price: Number(addOn.price).toFixed(2),
+                isAvailable: addOn.isAvailable,
+              })) ?? []
+            }
+          />
         </section>
       </div>
 

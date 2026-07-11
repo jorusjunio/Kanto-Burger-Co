@@ -38,6 +38,15 @@ enum OrderStatus {
   CANCELLED
 }
 
+// Singleton row of manager-editable business settings — lets the shop change
+// operational values (delivery fee, accepting orders) without a deploy.
+model StoreSettings {
+  id                String   @id @default("store")
+  deliveryFee       Decimal  @default(49) @db.Decimal(10, 2)
+  isAcceptingOrders Boolean  @default(true)
+  updatedAt         DateTime @updatedAt
+}
+
 model User {
   id           String   @id @default(cuid())
   name         String

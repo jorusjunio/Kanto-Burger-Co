@@ -6,6 +6,7 @@ import { FormEvent, useMemo, useRef, useState, useTransition } from "react";
 import {
   ArrowLeft,
   CheckCircle2,
+  Clock,
   Lock,
   ShoppingBag,
   Smartphone,
@@ -36,8 +37,6 @@ import { cn } from "@/lib/utils";
 import { createOrder } from "./actions";
 import type { CheckoutOrderType, CheckoutPaymentMethod } from "./types";
 
-const deliveryFee = 49;
-
 function formatPhoneInput(value: string) {
   return value.replace(/[^\d+]/g, "").slice(0, 13);
 }
@@ -56,7 +55,14 @@ function StepHeading({ step, title }: { step: string; title: string }) {
   );
 }
 
-export function CheckoutPage() {
+export function CheckoutPage({
+  deliveryFee,
+  acceptingOrders,
+}: {
+  /** Manager-set fee from store settings (server-verified again on submit). */
+  deliveryFee: number;
+  acceptingOrders: boolean;
+}) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const items = useCartStore((state) => state.items);
@@ -74,7 +80,7 @@ export function CheckoutPage() {
   const formRef = useRef<HTMLFormElement>(null);
   const total = useMemo(
     () => subtotal + (orderType === "DELIVERY" ? deliveryFee : 0),
-    [orderType, subtotal],
+    [orderType, subtotal, deliveryFee],
   );
   const itemCount = items.reduce((sum, item) => sum + item.quantity, 0);
 
@@ -138,6 +144,33 @@ export function CheckoutPage() {
     confirmedRef.current = true;
     setConfirmOpen(false);
     formRef.current?.requestSubmit();
+  }
+
+  // Master switch from store settings — the server action rejects orders too,
+  // this just tells the customer up front instead of at submit time.
+  if (!acceptingOrders) {
+    return (
+      <main className="storefront-bg h-[100dvh] overflow-y-auto">
+        <div className="mx-auto flex min-h-[70vh] max-w-lg flex-col items-center justify-center px-4 text-center">
+          <div className="mb-6 flex size-16 items-center justify-center rounded-full bg-[#1d0906] shadow-lg">
+            <Clock className="size-6 text-amber-300" aria-hidden="true" />
+          </div>
+          <h1 className="food-heading text-4xl leading-none">
+            Closed for orders
+          </h1>
+          <p className="mt-3 max-w-sm font-medium text-orange-950/65">
+            We&apos;re not taking orders right now. Your cart is saved — check
+            back soon!
+          </p>
+          <Button
+            className="checkout-cta mt-8 h-12 rounded-full px-8 font-black transition-all duration-300 hover:-translate-y-0.5 active:scale-[0.98]"
+            asChild
+          >
+            <Link href="/menu">Back to Menu</Link>
+          </Button>
+        </div>
+      </main>
+    );
   }
 
   if (items.length === 0) {

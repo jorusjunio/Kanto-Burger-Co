@@ -7,6 +7,7 @@ import { triggerRealtimeEvent } from "@/server/services/pusher";
 import { logger } from "@/lib/logger";
 import { checkoutRateLimiter } from "@/lib/rate-limiter";
 import { paymentProvider } from "@/features/payments/provider";
+import { getStoreSettings } from "@/features/admin/settings/queries";
 
 import type { CreateOrderResult } from "./types";
 import { createOrderSchema } from "./validation";
@@ -62,8 +63,19 @@ export async function createOrder(
     };
   }
 
+  // Manager-editable business settings — fee and the master ordering switch.
+  const settings = await getStoreSettings();
+  if (!settings.isAcceptingOrders) {
+    return {
+      ok: false,
+      message:
+        "Sorry — we're not taking orders right now. Please check back later.",
+    };
+  }
+
   const productIds = [...new Set(values.items.map((item) => item.productId))];
-  const deliveryFee = values.orderType === "DELIVERY" ? 49 : 0;
+  const deliveryFee =
+    values.orderType === "DELIVERY" ? Number(settings.deliveryFee) : 0;
   const orderNumber = makeOrderNumber();
   const trackingToken = makeTrackingToken();
 
