@@ -17,6 +17,10 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
+// Same helper the server actions use, so the live preview in this form always
+// matches what resolveSlug() will actually store.
+import { slugify } from "./action-helpers";
+
 type CategoryOption = {
   id: string;
   name: string;
@@ -46,17 +50,22 @@ type ProductFormProps = {
   categories: CategoryOption[];
   product?: ProductFormProduct;
   submitLabel: string;
+  /** Extra card rendered at the bottom of the sidebar (e.g. the Edit page's
+      danger zone). Rendered inside the form visually, but any dialogs it opens
+      portal out, so nested-form rules stay intact. */
+  dangerZone?: React.ReactNode;
 };
 
 const fieldClassName =
-  "h-9 rounded-lg border-0 bg-white px-3 text-sm shadow-none ring-1 ring-orange-900/10 transition-shadow duration-200 focus-visible:ring-2 focus-visible:ring-red-500/30";
+  "h-10 rounded-lg border-0 bg-white px-3.5 text-sm shadow-none ring-1 ring-orange-900/10 transition-shadow duration-200 focus-visible:ring-2 focus-visible:ring-red-500/30";
 
 const areaClassName =
-  "rounded-lg border-0 bg-white px-3 py-2 text-sm shadow-none ring-1 ring-orange-900/10 transition-shadow duration-200 focus-visible:ring-2 focus-visible:ring-red-500/30";
+  "rounded-lg border-0 bg-white px-3.5 py-2.5 text-sm shadow-none ring-1 ring-orange-900/10 transition-shadow duration-200 focus-visible:ring-2 focus-visible:ring-red-500/30";
 
-const cardClassName = "rounded-xl bg-white p-4 ring-1 ring-orange-900/10";
+const cardClassName = "rounded-xl bg-white p-6 ring-1 ring-orange-900/10";
 
-const labelClassName = "text-xs font-bold text-orange-950/55";
+const cardTitleClassName =
+  "text-[13px] font-black uppercase tracking-wide text-[#25130b]";
 
 function SectionLabel({
   icon: Icon,
@@ -66,7 +75,7 @@ function SectionLabel({
   children: React.ReactNode;
 }) {
   return (
-    <div className="flex items-center gap-1.5 text-orange-950/45">
+    <div className="flex items-center gap-2 text-orange-950/45">
       <Icon className="size-3.5" aria-hidden="true" />
       <span className="text-[11px] font-black uppercase tracking-wider">
         {children}
@@ -75,21 +84,30 @@ function SectionLabel({
   );
 }
 
-/** Switch-styled checkbox, matching the Live toggle on the menu table. */
+/** Switch-styled checkbox row, matching the Live toggle on the menu table. */
 function ToggleRow({
   name,
   label,
+  hint,
   defaultChecked,
 }: {
   name: string;
   label: string;
+  hint?: string;
   defaultChecked: boolean;
 }) {
   const [checked, setChecked] = useState(defaultChecked);
 
   return (
-    <label className="flex cursor-pointer items-center justify-between gap-3 py-1.5">
-      <span className="text-sm font-bold text-[#25130b]">{label}</span>
+    <label className="flex cursor-pointer items-center justify-between gap-3 py-1">
+      <span className="min-w-0">
+        <span className="block text-sm font-bold text-[#25130b]">{label}</span>
+        {hint ? (
+          <span className="mt-0.5 block text-xs text-orange-950/40">
+            {hint}
+          </span>
+        ) : null}
+      </span>
       <input
         type="checkbox"
         name={name}
@@ -99,13 +117,13 @@ function ToggleRow({
       />
       <span
         aria-hidden="true"
-        className={`relative inline-flex h-5.5 w-10 shrink-0 items-center rounded-full transition-colors duration-200 ${
+        className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors duration-200 ${
           checked ? "bg-emerald-500" : "bg-orange-950/15"
         }`}
       >
         <span
-          className={`inline-block size-4 rounded-full bg-white shadow-sm transition-transform duration-200 ${
-            checked ? "translate-x-5.25" : "translate-x-0.75"
+          className={`inline-block size-4.5 rounded-full bg-white shadow-sm transition-transform duration-200 ${
+            checked ? "translate-x-6" : "translate-x-0.75"
           }`}
         />
       </span>
@@ -132,11 +150,30 @@ export function ProductForm({
   categories,
   product,
   submitLabel,
+  dangerZone,
 }: ProductFormProps) {
   const [preview, setPreview] = useState<string | null>(
     product?.imageUrl ?? null,
   );
   const [fileName, setFileName] = useState<string | null>(null);
+
+  // Slug follows the name live until the user types their own slug; clearing
+  // the slug field hands control back to auto-generation. Editing an existing
+  // product starts hands-off so saved slugs never change silently.
+  const [slug, setSlug] = useState(product?.slug ?? "");
+  const [slugEdited, setSlugEdited] = useState(Boolean(product?.slug));
+
+  function handleNameChange(event: React.ChangeEvent<HTMLInputElement>) {
+    if (!slugEdited) {
+      setSlug(slugify(event.target.value));
+    }
+  }
+
+  function handleSlugChange(event: React.ChangeEvent<HTMLInputElement>) {
+    const value = event.target.value;
+    setSlug(value);
+    setSlugEdited(value !== "");
+  }
 
   // Release object URLs created for the live preview to avoid memory leaks.
   useEffect(() => {
@@ -157,46 +194,53 @@ export function ProductForm({
   return (
     <form
       action={action}
-      className="grid gap-4 lg:grid-cols-[1fr_300px] lg:items-start animate-fade-in"
+      className="grid gap-5 lg:grid-cols-[1fr_340px] lg:items-start animate-fade-in"
     >
       {/* ── Main column ── */}
-      <div className={`${cardClassName} space-y-4`}>
+      <div className="space-y-5">
         {/* Details */}
-        <section className="space-y-3">
-          <SectionLabel icon={Tag}>Details</SectionLabel>
+        <section className={`${cardClassName} space-y-4`}>
+          <SectionLabel icon={Tag}>Product details</SectionLabel>
 
-          <div className="grid gap-3 sm:grid-cols-2">
-            <div className="space-y-1.5">
-              <Label htmlFor="name" className={labelClassName}>
-                Product name
-              </Label>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="space-y-2">
+              <Label htmlFor="name">Product name</Label>
               <Input
                 id="name"
                 name="name"
                 defaultValue={product?.name}
+                onChange={handleNameChange}
                 required
                 className={fieldClassName}
               />
             </div>
-            <div className="space-y-1.5">
-              <Label htmlFor="slug" className={labelClassName}>
-                Slug
-              </Label>
+            <div className="space-y-2">
+              <Label htmlFor="slug">Slug</Label>
               <Input
                 id="slug"
                 name="slug"
-                defaultValue={product?.slug}
-                placeholder="auto-generated"
-                className={fieldClassName}
+                value={slug ?? ""}
+                onChange={handleSlugChange}
+                placeholder="auto-generated from name"
+                className={`${fieldClassName} font-mono text-xs`}
               />
             </div>
           </div>
 
-          <div className="grid gap-3 sm:grid-cols-2">
-            <div className="space-y-1.5">
-              <Label htmlFor="categoryId" className={labelClassName}>
-                Category
-              </Label>
+          <div className="space-y-2">
+            <Label htmlFor="description">Description</Label>
+            <Textarea
+              id="description"
+              name="description"
+              defaultValue={product?.description}
+              required
+              className={`max-h-[152px] ${areaClassName}`}
+            />
+          </div>
+
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="space-y-2">
+              <Label htmlFor="categoryId">Category</Label>
               <Select
                 name="categoryId"
                 defaultValue={product?.categoryId ?? categories[0]?.id}
@@ -216,10 +260,8 @@ export function ProductForm({
                 </SelectContent>
               </Select>
             </div>
-            <div className="space-y-1.5">
-              <Label htmlFor="price" className={labelClassName}>
-                Price (₱)
-              </Label>
+            <div className="space-y-2">
+              <Label htmlFor="price">Price (₱)</Label>
               <Input
                 id="price"
                 name="price"
@@ -232,42 +274,27 @@ export function ProductForm({
               />
             </div>
           </div>
-
-          <div className="space-y-1.5">
-            <Label htmlFor="description" className={labelClassName}>
-              Description
-            </Label>
-            <Textarea
-              id="description"
-              name="description"
-              defaultValue={product?.description}
-              required
-              rows={2}
-              className={`min-h-0 ${areaClassName}`}
-            />
-          </div>
         </section>
 
-        <div className="h-px bg-orange-900/6" />
-
-        {/* Image — compact horizontal row */}
-        <section className="space-y-3">
+        {/* Image */}
+        <section className={`${cardClassName} space-y-4`}>
           <SectionLabel icon={ImageUp}>Image</SectionLabel>
 
-          <div className="flex items-stretch gap-3">
+          <div className="grid gap-4 sm:grid-cols-[1fr_auto] sm:items-start">
+            {/* Dropzone */}
             <label
               htmlFor="imageFile"
-              className="group flex flex-1 cursor-pointer items-center justify-center gap-2.5 rounded-lg border border-dashed border-orange-900/20 bg-orange-950/2 px-4 py-4 transition-colors duration-200 hover:border-red-400/60 hover:bg-red-50/40"
+              className="group flex cursor-pointer flex-col items-center justify-center gap-2.5 rounded-lg border border-dashed border-orange-900/20 bg-orange-950/2 px-4 py-8 text-center transition-colors duration-200 hover:border-red-400/60 hover:bg-red-50/40"
             >
               <UploadCloud
-                className="size-5 shrink-0 text-orange-950/30 transition-colors duration-200 group-hover:text-red-600"
+                className="size-6 text-orange-950/30 transition-colors duration-200 group-hover:text-red-600"
                 aria-hidden="true"
               />
-              <span className="min-w-0 text-left">
-                <span className="block truncate text-sm font-bold text-[#25130b]">
+              <span>
+                <span className="block text-sm font-bold text-[#25130b]">
                   {fileName ?? "Click to upload"}
                 </span>
-                <span className="block text-xs text-orange-950/40">
+                <span className="mt-0.5 block text-xs text-orange-950/40">
                   PNG or JPG, up to 5MB
                 </span>
               </span>
@@ -281,13 +308,14 @@ export function ProductForm({
               />
             </label>
 
+            {/* Live preview */}
             {preview ? (
-              <div className="relative aspect-square w-[72px] shrink-0 overflow-hidden rounded-lg ring-1 ring-orange-900/10">
+              <div className="relative aspect-square w-full overflow-hidden rounded-lg ring-1 ring-orange-900/10 sm:w-36">
                 <Image
                   src={preview}
                   alt={fileName ?? product?.name ?? "Preview"}
                   fill
-                  sizes="72px"
+                  sizes="144px"
                   unoptimized
                   className="object-cover"
                 />
@@ -299,79 +327,86 @@ export function ProductForm({
                       setFileName(null);
                     }}
                     aria-label="Remove selected image"
-                    className="absolute right-1 top-1 flex size-5 items-center justify-center rounded-full bg-black/50 text-white backdrop-blur-sm transition-colors duration-200 hover:bg-red-600"
+                    className="absolute right-2 top-2 flex size-7 items-center justify-center rounded-full bg-black/50 text-white backdrop-blur-sm transition-colors duration-200 hover:bg-red-600"
                   >
-                    <X className="size-3" />
+                    <X className="size-4" />
                   </button>
                 ) : null}
               </div>
             ) : null}
           </div>
 
-          <details>
+          <details className="group">
             <summary className="cursor-pointer list-none text-xs font-bold text-orange-950/40 transition-colors hover:text-red-700">
               Or paste an image URL
             </summary>
-            <Input
-              id="imageUrl"
-              name="imageUrl"
-              type="text"
-              defaultValue={product?.imageUrl ?? ""}
-              placeholder="https://... or /assets/products/item.jpg"
-              className={`mt-2 ${fieldClassName}`}
-            />
+            <div className="mt-3 space-y-2">
+              <Input
+                id="imageUrl"
+                name="imageUrl"
+                type="text"
+                defaultValue={product?.imageUrl ?? ""}
+                placeholder="https://... or /assets/products/item.jpg"
+                className={fieldClassName}
+              />
+              <p className="text-xs leading-5 text-orange-950/40">
+                Uploading a file replaces this URL after save.
+              </p>
+            </div>
           </details>
         </section>
 
-        <div className="h-px bg-orange-900/6" />
-
         {/* Add-ons */}
-        <section className="space-y-2">
-          <div className="flex items-baseline justify-between gap-3">
-            <SectionLabel icon={Layers}>Add-ons</SectionLabel>
-            <span className="text-[11px] font-medium text-orange-950/35">
-              name | price | available
-            </span>
+        <section className={`${cardClassName} space-y-4`}>
+          <SectionLabel icon={Layers}>Add-ons</SectionLabel>
+          <div className="space-y-2">
+            <Textarea
+              id="addOns"
+              name="addOns"
+              defaultValue={addOnsToText(product)}
+              placeholder="Extra Cheese | 20.00 | available"
+              className={`max-h-[228px] font-mono ${areaClassName}`}
+            />
+            <p className="text-xs leading-5 text-orange-950/40">
+              One add-on per line: name | price | available/unavailable.
+            </p>
           </div>
-          <Textarea
-            id="addOns"
-            name="addOns"
-            defaultValue={addOnsToText(product)}
-            placeholder="Extra Cheese | 20.00 | available"
-            rows={3}
-            className={`min-h-0 font-mono ${areaClassName}`}
-          />
         </section>
       </div>
 
-      {/* ── Sidebar — one card + actions ── */}
-      <aside className="space-y-4">
+      {/* ── Sidebar ── */}
+      <aside className="space-y-5">
         <div className={cardClassName}>
-          <h2 className="text-[13px] font-black uppercase tracking-wide text-[#25130b]">
-            Settings
-          </h2>
-          <div className="mt-2 divide-y divide-orange-900/6">
+          <h2 className={cardTitleClassName}>Storefront</h2>
+          <div className="mt-3 divide-y divide-orange-900/6">
             <ToggleRow
               name="isAvailable"
               label="Live on storefront"
+              hint="Customers can see and order this"
               defaultChecked={product?.isAvailable ?? true}
             />
             <ToggleRow
               name="isFeatured"
               label="Featured"
+              hint="Highlighted on the menu hero"
               defaultChecked={product?.isFeatured ?? false}
             />
+          </div>
+        </div>
+
+        <div className={cardClassName}>
+          <h2 className={cardTitleClassName}>Inventory</h2>
+          <div className="mt-3">
             <ToggleRow
               name="trackStock"
               label="Track stock"
+              hint="Auto sold-out at zero; restocks on cancel"
               defaultChecked={product?.trackStock ?? true}
             />
           </div>
-          <div className="mt-3 grid grid-cols-2 gap-3 border-t border-orange-900/6 pt-3">
-            <div className="space-y-1.5">
-              <Label htmlFor="stockQuantity" className={labelClassName}>
-                Quantity
-              </Label>
+          <div className="mt-3 grid grid-cols-2 gap-3 border-t border-orange-900/6 pt-4">
+            <div className="space-y-2">
+              <Label htmlFor="stockQuantity">Quantity</Label>
               <Input
                 id="stockQuantity"
                 name="stockQuantity"
@@ -382,10 +417,8 @@ export function ProductForm({
                 className={fieldClassName}
               />
             </div>
-            <div className="space-y-1.5">
-              <Label htmlFor="lowStockThreshold" className={labelClassName}>
-                Low-stock alert
-              </Label>
+            <div className="space-y-2">
+              <Label htmlFor="lowStockThreshold">Low-stock alert</Label>
               <Input
                 id="lowStockThreshold"
                 name="lowStockThreshold"
@@ -399,10 +432,10 @@ export function ProductForm({
           </div>
         </div>
 
-        <div className="flex gap-2">
+        <div className="flex flex-col gap-2">
           <Button
             type="submit"
-            className="h-10 flex-1 rounded-full bg-red-600 text-sm font-bold text-white transition-colors duration-200 hover:bg-red-700 active:scale-[0.99]"
+            className="h-11 rounded-full bg-red-600 text-sm font-bold text-white transition-colors duration-200 hover:bg-red-700 active:scale-[0.99]"
           >
             <Save className="size-4" aria-hidden="true" />
             {submitLabel}
@@ -411,11 +444,13 @@ export function ProductForm({
             type="button"
             variant="ghost"
             asChild
-            className="h-10 rounded-full px-4 text-sm font-bold text-orange-950/50 transition-colors hover:bg-orange-950/5 hover:text-[#25130b]"
+            className="h-11 rounded-full text-sm font-bold text-orange-950/50 transition-colors hover:bg-orange-950/5 hover:text-[#25130b]"
           >
             <Link href="/admin/menu">Cancel</Link>
           </Button>
         </div>
+
+        {dangerZone}
       </aside>
     </form>
   );

@@ -5,8 +5,12 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 import {
+  AlertTriangle,
+  Check,
+  Clock,
   LayoutDashboard,
   ShoppingCart,
+  Smartphone,
   Utensils,
   Menu,
   X,
@@ -21,11 +25,123 @@ export type SidebarUser = {
   role: string;
 };
 
+export type SidebarAlerts = {
+  pendingOrders: number;
+  paymentsToVerify: number;
+  lowStock: number;
+};
+
 const navItems = [
   { label: "Dashboard", href: "/admin", icon: LayoutDashboard, managerOnly: true },
   { label: "Orders", href: "/admin/orders", icon: ShoppingCart, managerOnly: true },
   { label: "Menu", href: "/admin/menu", icon: Utensils, managerOnly: true },
 ];
+
+/* One alert row: quiet link with a colored count chip. */
+function AlertRow({
+  href,
+  label,
+  count,
+  Icon,
+  tone,
+  onNavigate,
+}: {
+  href: string;
+  label: string;
+  count: number;
+  Icon: typeof Clock;
+  tone: "red" | "sky" | "amber";
+  onNavigate?: () => void;
+}) {
+  return (
+    <Link
+      href={href}
+      onClick={onNavigate}
+      className="group flex items-center gap-2.5 rounded-lg px-3 py-2 transition-colors duration-200 hover:bg-white/5"
+    >
+      <Icon
+        className={cn(
+          "size-4 shrink-0",
+          tone === "red" && "text-red-400",
+          tone === "sky" && "text-sky-400",
+          tone === "amber" && "text-amber-400",
+        )}
+        aria-hidden="true"
+      />
+      <span className="flex-1 text-xs font-bold text-stone-300 transition-colors group-hover:text-white">
+        {label}
+      </span>
+      <span
+        className={cn(
+          "rounded-full px-2 py-0.5 text-[11px] font-black tabular-nums",
+          tone === "red" && "bg-red-500/15 text-red-400",
+          tone === "sky" && "bg-sky-500/15 text-sky-400",
+          tone === "amber" && "bg-amber-500/15 text-amber-400",
+        )}
+      >
+        {count}
+      </span>
+    </Link>
+  );
+}
+
+function SidebarAlertsBlock({
+  alerts,
+  onNavigate,
+}: {
+  alerts: SidebarAlerts;
+  onNavigate?: () => void;
+}) {
+  const total =
+    alerts.pendingOrders + alerts.paymentsToVerify + alerts.lowStock;
+
+  return (
+    <div className="border-t border-white/8 px-3 py-4">
+      <p className="mb-2 px-3 text-[10px] font-bold uppercase tracking-widest text-stone-500">
+        Needs attention
+      </p>
+      {total === 0 ? (
+        <p className="flex items-center gap-2 px-3 py-1.5 text-xs font-bold text-stone-500">
+          <Check className="size-4 text-emerald-500" aria-hidden="true" />
+          All clear
+        </p>
+      ) : (
+        <div className="space-y-0.5">
+          {alerts.pendingOrders > 0 ? (
+            <AlertRow
+              href="/kitchen"
+              label={`New order${alerts.pendingOrders !== 1 ? "s" : ""} waiting`}
+              count={alerts.pendingOrders}
+              Icon={Clock}
+              tone="red"
+              onNavigate={onNavigate}
+            />
+          ) : null}
+          {alerts.paymentsToVerify > 0 ? (
+            <AlertRow
+              href="/admin/orders"
+              label="GCash to verify"
+              count={alerts.paymentsToVerify}
+              Icon={Smartphone}
+              tone="sky"
+              onNavigate={onNavigate}
+            />
+          ) : null}
+          {alerts.lowStock > 0 ? (
+            <AlertRow
+              href="/admin/menu"
+              label="Low on stock"
+              count={alerts.lowStock}
+              Icon={AlertTriangle}
+              tone="amber"
+              onNavigate={onNavigate}
+            />
+          ) : null}
+        </div>
+      )}
+    </div>
+  );
+}
 
 function isItemActive(href: string, pathname: string) {
   return href === "/admin"
@@ -36,10 +152,12 @@ function isItemActive(href: string, pathname: string) {
 function SidebarBody({
   isManager,
   user,
+  alerts,
   onNavigate,
 }: {
   isManager: boolean;
   user: SidebarUser;
+  alerts: SidebarAlerts;
   onNavigate?: () => void;
 }) {
   const pathname = usePathname();
@@ -119,6 +237,9 @@ function SidebarBody({
         })}
       </nav>
 
+      {/* Live operational alerts — what needs a manager's hand right now. */}
+      <SidebarAlertsBlock alerts={alerts} onNavigate={onNavigate} />
+
       {/* Account + sign out — single quiet row; who's signed in lives here,
           not in every page header. */}
       <div className="border-t border-white/8 px-4 py-4">
@@ -166,9 +287,11 @@ function SidebarBody({
 export function AdminSidebar({
   isManager,
   user,
+  alerts,
 }: {
   isManager: boolean;
   user: SidebarUser;
+  alerts: SidebarAlerts;
 }) {
   const [isOpen, setIsOpen] = useState(false);
 
@@ -176,7 +299,7 @@ export function AdminSidebar({
     <>
       {/* Desktop sidebar (fixed) */}
       <aside className="fixed inset-y-0 left-0 z-20 hidden w-64 lg:block">
-        <SidebarBody isManager={isManager} user={user} />
+        <SidebarBody isManager={isManager} user={user} alerts={alerts} />
       </aside>
 
       {/* Mobile trigger */}
@@ -208,6 +331,7 @@ export function AdminSidebar({
         <SidebarBody
           isManager={isManager}
           user={user}
+          alerts={alerts}
           onNavigate={() => setIsOpen(false)}
         />
       </aside>

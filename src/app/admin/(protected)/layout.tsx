@@ -1,9 +1,41 @@
 ﻿import { redirect } from "next/navigation";
 
-import { UserRole } from "@/generated/prisma/enums";
+import {
+  OrderStatus,
+  PaymentMethod,
+  PaymentStatus,
+  UserRole,
+} from "@/generated/prisma/enums";
 import { RealtimeOrderListener } from "@/features/orders/realtime-order-listener";
 import { getCurrentSession } from "@/server/auth/session";
+import { prisma } from "@/server/db/prisma";
 import { AdminSidebar } from "@/components/admin/admin-sidebar";
+
+/**
+ * Operational alerts for the sidebar — the three things that actually need a
+ * manager's hand: new orders, GCash payments awaiting verification, and stock
+ * running low. Live: the realtime listener refreshes the layout on order events.
+ */
+async function getSidebarAlerts() {
+  const [pendingOrders, paymentsToVerify, lowStock] = await Promise.all([
+    prisma.order.count({ where: { status: OrderStatus.PENDING } }),
+    prisma.order.count({
+      where: {
+        paymentStatus: PaymentStatus.PENDING,
+        paymentMethod: PaymentMethod.GCASH,
+      },
+    }),
+    prisma.product.count({
+      where: {
+        isActive: true,
+        trackStock: true,
+        stockQuantity: { lte: prisma.product.fields.lowStockThreshold },
+      },
+    }),
+  ]);
+
+  return { pendingOrders, paymentsToVerify, lowStock };
+}
 
 export default async function ProtectedAdminLayout({
   children,
@@ -17,6 +49,7 @@ export default async function ProtectedAdminLayout({
   }
 
   const isAdmin = session.user.role === UserRole.ADMIN;
+  const alerts = await getSidebarAlerts();
 
   return (
     <>
@@ -29,6 +62,7 @@ export default async function ProtectedAdminLayout({
             Who's signed in lives in the sidebar account row, not on every page. */}
         <AdminSidebar
           isManager={isAdmin}
+          alerts={alerts}
           user={{
             name: session.user.name ?? null,
             email: session.user.email ?? null,

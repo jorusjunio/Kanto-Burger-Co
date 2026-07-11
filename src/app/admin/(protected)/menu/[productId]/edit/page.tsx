@@ -3,6 +3,7 @@ import { ArrowLeft } from "lucide-react";
 
 import { requireManagerPage } from "@/features/admin/auth/guards";
 import { updateProduct } from "@/features/admin/menu/actions";
+import { DeleteProductDialog } from "@/features/admin/menu/delete-product-dialog";
 import { ProductForm } from "@/features/admin/menu/product-form";
 import {
   getAdminMenuCategories,
@@ -39,30 +40,28 @@ export default async function EditProductPage({
   };
 
   return (
-    <div className="space-y-4">
-      {/* Compact header — back link inline with the title */}
-      <div className="flex items-center gap-3">
-        <Link
-          href="/admin/menu"
-          aria-label="Back to Menu"
-          className="group flex size-8 items-center justify-center rounded-full bg-white text-orange-950/50 ring-1 ring-orange-900/10 transition-colors hover:text-red-700"
-        >
-          <ArrowLeft
-            className="size-4 transition-transform duration-300 group-hover:-translate-x-0.5"
-            aria-hidden="true"
-          />
-        </Link>
-        <div>
-          <p className="text-[10px] font-black uppercase tracking-wide text-red-700">
-            Menu
-          </p>
-          <h1 className="text-xl font-black leading-tight text-[#25130b]">
-            Edit product
-            <span className="ml-2 text-sm font-bold text-orange-950/40">
-              {product.name}
-            </span>
-          </h1>
-        </div>
+    <div className="space-y-5">
+      {/* Back link */}
+      <Link
+        href="/admin/menu"
+        className="group inline-flex items-center gap-1.5 text-xs font-bold text-orange-950/50 transition-colors hover:text-red-700"
+      >
+        <ArrowLeft
+          className="size-3.5 transition-transform duration-300 group-hover:-translate-x-0.5"
+          aria-hidden="true"
+        />
+        Back to Menu
+      </Link>
+
+      {/* Header */}
+      <div>
+        <p className="text-xs font-black uppercase tracking-wide text-red-700">
+          Menu
+        </p>
+        <h1 className="mt-1 text-2xl font-black text-[#25130b]">
+          Edit product
+        </h1>
+        <p className="mt-1 text-sm text-orange-950/45">{product.name}</p>
       </div>
 
       {/* Form */}
@@ -71,6 +70,23 @@ export default async function EditProductPage({
         categories={categories}
         product={productForForm}
         submitLabel="Save changes"
+        dangerZone={
+          <div className="rounded-xl bg-white p-6 ring-1 ring-red-200">
+            <h2 className="text-[13px] font-black uppercase tracking-wide text-red-700">
+              Danger zone
+            </h2>
+            <p className="mt-2 text-xs leading-5 text-orange-950/45">
+              Removes this product from the menu and storefront. Past orders
+              keep their history.
+            </p>
+            <div className="mt-3">
+              <DeleteProductDialog
+                productId={product.id}
+                productName={product.name}
+              />
+            </div>
+          </div>
+        }
       />
     </div>
   );
