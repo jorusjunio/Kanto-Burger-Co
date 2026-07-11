@@ -6,13 +6,6 @@ import { ChevronRight, ClipboardList, Download, FilterX, Search } from "lucide-r
 
 import { Button } from "@/components/ui/button";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
   Table,
   TableBody,
   TableCell,
@@ -50,22 +43,6 @@ const statusTabs = [
   ["COMPLETED", "Completed"],
   ["CANCELLED", "Cancelled"],
 ] as const;
-
-const paymentOptions = [
-  [ALL, "All payments"],
-  ["UNPAID", "Unpaid"],
-  ["PENDING", "Awaiting GCash"],
-  ["PAID", "Paid"],
-];
-
-const typeOptions = [
-  [ALL, "All types"],
-  ["PICKUP", "Pickup"],
-  ["DELIVERY", "Delivery"],
-];
-
-const selectTriggerClassName =
-  "h-9 w-full min-w-0 rounded-full bg-white px-3.5 text-xs font-bold text-orange-950/70 ring-1 ring-orange-900/10 border-0 shadow-none transition-colors duration-200 hover:ring-orange-900/25 sm:w-auto";
 
 function formatDate(value: Date) {
   return new Intl.DateTimeFormat("en-PH", {
@@ -118,24 +95,20 @@ function exportCsv(rows: AdminOrderRow[]) {
 export function OrdersView({ orders }: { orders: AdminOrderRow[] }) {
   const router = useRouter();
   const [status, setStatus] = useState<string>(ALL);
-  const [payment, setPayment] = useState(ALL);
-  const [type, setType] = useState(ALL);
   const [query, setQuery] = useState("");
 
-  // Everything except the status tab narrows the pool; tab counts are computed
-  // against this pool so the numbers stay truthful while filtering.
+  // Search narrows the pool; tab counts are computed against this pool so the
+  // numbers stay truthful while searching.
   const pool = useMemo(() => {
     const q = query.trim().toLowerCase();
     return orders.filter(
       (order) =>
-        (payment === ALL || order.paymentStatus === payment) &&
-        (type === ALL || order.orderType === type) &&
-        (q === "" ||
-          order.orderNumber.toLowerCase().includes(q) ||
-          order.customerName.toLowerCase().includes(q) ||
-          order.customerPhone.toLowerCase().includes(q)),
+        q === "" ||
+        order.orderNumber.toLowerCase().includes(q) ||
+        order.customerName.toLowerCase().includes(q) ||
+        order.customerPhone.toLowerCase().includes(q),
     );
-  }, [orders, payment, type, query]);
+  }, [orders, query]);
 
   const countsByStatus = useMemo(() => {
     const counts: Record<string, number> = { [ALL]: pool.length };
@@ -167,13 +140,10 @@ export function OrdersView({ orders }: { orders: AdminOrderRow[] }) {
     [filtered],
   );
 
-  const hasActiveFilters =
-    status !== ALL || payment !== ALL || type !== ALL || query.trim() !== "";
+  const hasActiveFilters = status !== ALL || query.trim() !== "";
 
   function clearFilters() {
     setStatus(ALL);
-    setPayment(ALL);
-    setType(ALL);
     setQuery("");
   }
 
@@ -269,48 +239,23 @@ export function OrdersView({ orders }: { orders: AdminOrderRow[] }) {
             </div>
           </div>
 
-          {/* ── One-line toolbar: type + payment + clear, summary at right ── */}
-          <div className="flex flex-wrap items-center gap-2">
-            <Select value={type} onValueChange={setType}>
-              <SelectTrigger className={selectTriggerClassName}>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {typeOptions.map(([value, label]) => (
-                  <SelectItem key={value} value={value}>
-                    {label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-
-            <Select value={payment} onValueChange={setPayment}>
-              <SelectTrigger className={selectTriggerClassName}>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {paymentOptions.map(([value, label]) => (
-                  <SelectItem key={value} value={value}>
-                    {label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-
+          {/* ── Summary line: clear (when filtering) + count/revenue ── */}
+          <div className="flex items-center justify-between gap-2">
             {hasActiveFilters ? (
               <Button
                 type="button"
                 variant="ghost"
                 onClick={clearFilters}
-                className="h-9 rounded-full px-3 text-xs font-bold text-orange-950/45 transition-colors hover:bg-red-50 hover:text-red-700"
+                className="h-8 rounded-full px-3 text-xs font-bold text-orange-950/45 transition-colors hover:bg-red-50 hover:text-red-700"
               >
                 <FilterX className="size-3.5" aria-hidden="true" />
-                Clear
+                Clear filters
               </Button>
-            ) : null}
+            ) : (
+              <span />
+            )}
 
-            {/* Summary — count + live revenue of the current view */}
-            <p className="ml-auto text-xs font-bold text-orange-950/45 tabular-nums">
+            <p className="text-xs font-bold text-orange-950/45 tabular-nums">
               {filtered.length} order{filtered.length !== 1 ? "s" : ""}
               <span className="mx-1.5 text-orange-950/20">·</span>
               {formatPeso(filteredRevenue)}
