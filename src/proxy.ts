@@ -5,7 +5,11 @@ import { getToken } from "next-auth/jwt";
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  if (pathname.startsWith("/admin") && pathname !== "/admin/login") {
+  const isProtected =
+    (pathname.startsWith("/admin") && pathname !== "/admin/login") ||
+    pathname.startsWith("/kitchen");
+
+  if (isProtected) {
     const token = await getToken({
       req: request,
       secret: process.env.AUTH_SECRET,
@@ -22,5 +26,5 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/admin/:path*"],
+  matcher: ["/admin/:path*", "/kitchen/:path*"],
 };

@@ -26,8 +26,11 @@ const labels: Record<ConnectionState, string> = {
  * A frozen board looks identical to a quiet night — this dot is the difference.
  */
 export function ConnectionIndicator() {
+  // Start "connecting" on both server and client (hydration-safe), then sync to
+  // the real Pusher connection state after mount.
   const [state, setState] = useState<ConnectionState>("connecting");
 
+  /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
     const client = pusherClient;
 
@@ -47,6 +50,7 @@ export function ConnectionIndicator() {
       client.connection.unbind("state_change", handleChange);
     };
   }, []);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   return (
     <span

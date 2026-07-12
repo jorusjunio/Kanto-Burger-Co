@@ -1,4 +1,5 @@
 import { KitchenBoard } from "@/features/admin/kitchen/kitchen-board";
+import { requireStaffPage } from "@/features/admin/auth/guards";
 import {
   getKitchenCompletedTodayCount,
   getKitchenOrders,
@@ -22,6 +23,10 @@ function getAddOnNames(value: unknown) {
 }
 
 export default async function KitchenPage() {
+  // /kitchen is outside the /admin proxy matcher, so guard it here — the board
+  // exposes live customer names, phones, and order contents.
+  await requireStaffPage("/kitchen");
+
   const [orders, completedToday] = await Promise.all([
     getKitchenOrders(),
     getKitchenCompletedTodayCount(),

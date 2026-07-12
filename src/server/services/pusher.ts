@@ -1,5 +1,7 @@
 import Pusher from "pusher";
 
+import { logger } from "@/lib/logger";
+
 function hasPusherConfig() {
   return Boolean(
     process.env.PUSHER_APP_ID &&
@@ -37,13 +39,13 @@ export async function triggerRealtimeEvent(
   const pusher = getPusherServer();
 
   if (!pusher) {
-    console.warn("Pusher not configured, skipping event trigger");
+    logger.warn("Pusher not configured, skipping event trigger");
     return;
   }
 
   try {
     await pusher.trigger(channel, event, data);
   } catch (error) {
-    console.error("Pusher event failed", error);
+    logger.error("Pusher event failed", error, { channel, event });
   }
 }

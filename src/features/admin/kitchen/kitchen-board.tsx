@@ -258,11 +258,14 @@ export function KitchenBoard({
   // SSR/client hydration mismatch), refreshed on the same cadence as the
   // per-card timers so chip counts and card tints agree.
   const [now, setNow] = useState<number | null>(null);
+  // Client clock, set after mount to stay hydration-safe (server has no "now").
+  /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
     setNow(Date.now());
     const interval = setInterval(() => setNow(Date.now()), 30000);
     return () => clearInterval(interval);
   }, []);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   const lateCount = useMemo(
     () =>
