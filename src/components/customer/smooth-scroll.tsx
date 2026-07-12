@@ -28,37 +28,79 @@ export function SmoothScroll() {
   const enableLenis = true;
 
   useEffect(() => {
-    const revealElements = Array.from(
-      document.querySelectorAll<HTMLElement>("[data-scroll-reveal]"),
-    );
-    const revealObserver =
-      revealElements.length > 0
-        ? new IntersectionObserver(
-            (entries) => {
-              entries.forEach((entry) => {
-                if (entry.isIntersecting) {
-                  entry.target.setAttribute("data-scroll-visible", "");
-                } else {
-                  entry.target.removeAttribute("data-scroll-visible");
-                }
-              });
-            },
-            {
-              rootMargin: "0px 0px -8% 0px",
-              threshold: 0.05,
-            },
-          )
-        : null;
+    document.documentElement.classList.add("has-scroll-reveal");
 
-    revealElements.forEach((element, index) => {
-      // Only auto-assign delay if the element doesn't have a custom one
-      if (!element.style.getPropertyValue("--reveal-delay")) {
-        element.style.setProperty(
-          "--reveal-delay",
-          `${Math.min(index * 45, 270)}ms`,
-        );
+    const observedRevealElements = new Set<HTMLElement>();
+    const markIfInViewport = (element: HTMLElement) => {
+      const rect = element.getBoundingClientRect();
+      const isVisible =
+        rect.top < window.innerHeight * 0.92 && rect.bottom > 0;
+
+      if (isVisible || !revealObserver) {
+        element.setAttribute("data-scroll-visible", "");
       }
-      revealObserver?.observe(element);
+    };
+
+    const revealObserver =
+      typeof IntersectionObserver === "undefined"
+        ? null
+        : new IntersectionObserver(
+          (entries) => {
+            entries.forEach((entry) => {
+              if (entry.isIntersecting) {
+                entry.target.setAttribute("data-scroll-visible", "");
+              } else {
+                entry.target.removeAttribute("data-scroll-visible");
+              }
+            });
+          },
+          {
+            rootMargin: "0px 0px -8% 0px",
+            threshold: 0.05,
+          },
+        );
+
+    const observeRevealElements = () => {
+      const revealElements = Array.from(
+        document.querySelectorAll<HTMLElement>("[data-scroll-reveal]"),
+      );
+
+      revealElements.forEach((element, index) => {
+        if (observedRevealElements.has(element)) {
+          return;
+        }
+
+        observedRevealElements.add(element);
+
+        // Only auto-assign delay if the element doesn't have a custom one
+        if (!element.style.getPropertyValue("--reveal-delay")) {
+          element.style.setProperty(
+            "--reveal-delay",
+            `${Math.min(index * 45, 270)}ms`,
+          );
+        }
+
+        revealObserver?.observe(element);
+        markIfInViewport(element);
+      });
+    };
+
+    observeRevealElements();
+
+    const revealScanTimers = [100, 400, 900, 1800].map((delay) =>
+      window.setTimeout(observeRevealElements, delay),
+    );
+
+    const mutationObserver =
+      typeof MutationObserver === "undefined"
+        ? null
+        : new MutationObserver(() => {
+          observeRevealElements();
+        });
+
+    mutationObserver?.observe(document.body, {
+      childList: true,
+      subtree: true,
     });
 
     const reduceMotion = window.matchMedia(
@@ -66,18 +108,24 @@ export function SmoothScroll() {
     ).matches;
 
     if (reduceMotion) {
-      revealElements.forEach((element) => {
+      observedRevealElements.forEach((element) => {
         element.setAttribute("data-scroll-visible", "");
       });
 
       return () => {
+        revealScanTimers.forEach(window.clearTimeout);
         revealObserver?.disconnect();
+        mutationObserver?.disconnect();
+        document.documentElement.classList.remove("has-scroll-reveal");
       };
     }
 
     if (!enableLenis) {
       return () => {
+        revealScanTimers.forEach(window.clearTimeout);
         revealObserver?.disconnect();
+        mutationObserver?.disconnect();
+        document.documentElement.classList.remove("has-scroll-reveal");
       };
     }
 
@@ -114,7 +162,10 @@ export function SmoothScroll() {
     window.addEventListener("project-preview-close", startSmoothScroll);
 
     return () => {
+      revealScanTimers.forEach(window.clearTimeout);
       revealObserver?.disconnect();
+      mutationObserver?.disconnect();
+      document.documentElement.classList.remove("has-scroll-reveal");
       window.removeEventListener("project-preview-open", stopSmoothScroll);
       window.removeEventListener("project-preview-close", startSmoothScroll);
       cancelAnimationFrame(frameId);

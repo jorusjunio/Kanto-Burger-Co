@@ -380,8 +380,13 @@
 
 
   [data-scroll-reveal] {
-    opacity: 0;
-    transform: translate3d(0, 24px, 0) scale(0.96);
+    opacity: 1;
+    transform: none;
+  }
+
+  html.has-scroll-reveal [data-scroll-reveal] {
+    opacity: 1;
+    transform: none;
     will-change: opacity, transform;
     /* Outro transition - fast and direct */
     transition:
@@ -417,6 +422,7 @@
     }
   }
 
+  html.has-scroll-reveal [data-scroll-reveal][data-scroll-visible],
   [data-scroll-reveal][data-scroll-visible] {
     opacity: 1;
     transform: translate3d(0, 0, 0) scale(1);
