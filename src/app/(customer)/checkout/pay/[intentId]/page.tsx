@@ -7,6 +7,7 @@ import { signIntent } from "@/features/payments/signing";
 import { MockGatewayForm } from "@/features/payments/mock-gateway-form";
 import { QrPhGateway } from "@/features/payments/qrph-gateway";
 import { formatPeso } from "@/lib/format";
+import { logger } from "@/lib/logger";
 
 export default async function PaymentGatewayPage({
   params,
@@ -26,10 +27,22 @@ export default async function PaymentGatewayPage({
   }
 
   const isPaymongo = session.paymentProvider === "paymongo";
-  const qr = isPaymongo ? await getQrPhStatus(intentId) : null;
+
+  // A failed lookup (PayMongo outage, or an intent created under the other
+  // test/live key) shows an "unavailable" state with a way back to the order
+  // instead of crashing into the error boundary.
+  let qr: Awaited<ReturnType<typeof getQrPhStatus>> | null = null;
+  if (isPaymongo) {
+    try {
+      qr = await getQrPhStatus(intentId);
+    } catch (error) {
+      logger.error("Failed to load PayMongo QR status", error, { intentId });
+    }
+  }
 
   // Sandbox key: PayMongo hands back a hosted Authorize/Fail simulator
   // instead of a real, scannable QR, so send the customer straight there.
+  // Kept outside the try above because redirect() works by throwing.
   if (qr?.testUrl) {
     redirect(qr.testUrl);
   }
@@ -70,6 +83,8 @@ export default async function PaymentGatewayPage({
             <QrPhGateway
               intentId={intentId}
               qrImageUrl={qr?.qrImageUrl ?? null}
+              status={qr?.status ?? "unavailable"}
+              expiresAt={qr?.expiresAt ?? null}
               orderNumber={session.orderNumber}
               trackingToken={session.trackingToken}
             />

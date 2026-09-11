@@ -85,6 +85,7 @@ const attachResponseSchema = z.object({
               // image is a live P2M code that a real wallet app WILL settle,
               // so this must take priority whenever it's present.
               test_url: z.string().optional(),
+              expires_at: z.string().optional(),
             })
             .optional(),
         })
@@ -217,6 +218,7 @@ export async function getQrPhStatus(paymentIntentId: string): Promise<{
   status: string;
   qrImageUrl: string | null;
   testUrl: string | null;
+  expiresAt: string | null;
 }> {
   const json = await paymongoRequest("GET", `/payment_intents/${paymentIntentId}`);
   const parsed = attachResponseSchema.parse(json);
@@ -226,6 +228,7 @@ export async function getQrPhStatus(paymentIntentId: string): Promise<{
     status: parsed.data.attributes.status,
     qrImageUrl: code?.image_url ?? null,
     testUrl: code?.test_url ?? null,
+    expiresAt: code?.expires_at ?? null,
   };
 }
 
