@@ -81,7 +81,7 @@ class RedisBackend {
 
     let ttlMs: number;
     if (count === 1) {
-      // First request in a new window — arm the expiry.
+      // First request in a new window: arm the expiry.
       await this.redis.pexpire(key, windowMs);
       ttlMs = windowMs;
     } else {
@@ -123,7 +123,7 @@ if (redisUrl && redisToken) {
 } else {
   backend = new MemoryBackend();
   logger.warn(
-    "Rate limiter using in-memory backend — set UPSTASH_REDIS_REST_URL and " +
+    "Rate limiter using in-memory backend. Set UPSTASH_REDIS_REST_URL and " +
       "UPSTASH_REDIS_REST_TOKEN for durable, serverless-safe limiting.",
   );
 }
@@ -146,7 +146,7 @@ export class RateLimiter {
     } catch (error) {
       // Fail open: a rate-limiter outage must never block legitimate checkout
       // or login traffic. Log so the outage is visible.
-      logger.error("Rate limiter backend error — failing open", error, {
+      logger.error("Rate limiter backend error, failing open", error, {
         identifier,
       });
       return {
@@ -172,6 +172,6 @@ export const authRateLimiter = new RateLimiter(10, 15 * 60 * 1000, "rl:auth"); /
 // Throttles the payment settlement webhook (keyed per intent id) so the settle
 // endpoint can't be brute-forced independently of checkout.
 export const paymentCallbackRateLimiter = new RateLimiter(20, 60 * 1000, "rl:pay"); // 20 / min
-// Caps how often a customer can re-open payment for one order — every attempt
+// Caps how often a customer can re-open payment for one order; every attempt
 // may create resources at the gateway.
 export const paymentResumeRateLimiter = new RateLimiter(5, 10 * 60 * 1000, "rl:payresume"); // 5 / 10 min

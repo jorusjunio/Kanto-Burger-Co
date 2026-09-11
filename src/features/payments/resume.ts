@@ -19,7 +19,7 @@ export type ResumableOrder = {
   gcashReference: string | null;
 };
 
-/** Injectable dependencies — same DI pattern as `settlePaymentWithDeps`, so
+/** Injectable dependencies (same DI pattern as `settlePaymentWithDeps`), so
  *  the resume-vs-mint decision is testable without a DB or a live gateway. */
 export type ResumePaymentDeps = {
   findOrder: (orderNumber: string) => Promise<ResumableOrder | null>;
@@ -48,7 +48,7 @@ export function canResumePayment(
     order.paymentStatus === PaymentStatus.PENDING &&
     order.status !== OrderStatus.CANCELLED &&
     // Legacy manual flow: the customer already sent money to the shop's GCash
-    // number and submitted a reference for staff to verify — opening an
+    // number and submitted a reference for staff to verify. Opening an
     // online payment on top of that would charge them twice.
     !order.gcashReference
   );
@@ -57,7 +57,7 @@ export function canResumePayment(
 /**
  * Lets a customer finish paying an order whose payment session failed to
  * open, was abandoned, or expired. Reuses the existing session whenever the
- * provider says it's still payable, and only mints a new one when it isn't —
+ * provider says it's still payable, and only mints a new one when it isn't:
  * replacing a live session would orphan it, and a payment against the orphan
  * could never be matched back to this order.
  */
@@ -81,7 +81,7 @@ export async function resumePaymentWithDeps(
     return { ok: false, message: "This order can't be paid online." };
   }
 
-  // A session id only means something to the provider that issued it — after
+  // A session id only means something to the provider that issued it. After
   // a PAYMENT_PROVIDER switch, fall through and mint one with the new provider.
   if (order.paymentIntentId && order.paymentProvider === deps.provider.id) {
     const resumed = await deps.provider.resumeSession(order.paymentIntentId);

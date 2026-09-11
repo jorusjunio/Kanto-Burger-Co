@@ -15,8 +15,8 @@ const callbackSchema = z.object({
 /**
  * Simulated payment gateway. `createSession` mints an intent id and points the
  * customer at our local mock gateway screen (Pay / Simulate failure). A real
- * provider would call its API here and return a hosted checkout URL instead —
- * same interface, so nothing downstream changes.
+ * provider would call its API here and return a hosted checkout URL instead,
+ * with the same interface, so nothing downstream changes.
  */
 export const mockPaymentProvider: PaymentProvider = {
   id: "mock",
@@ -39,7 +39,7 @@ export const mockPaymentProvider: PaymentProvider = {
     return callbackSchema.parse(payload);
   },
 
-  // Mock sessions never expire — the gateway screen works as long as the
+  // Mock sessions never expire: the gateway screen works as long as the
   // order exists, so the same session is always resumable.
   async resumeSession(intentId: string): Promise<PaymentSession> {
     return {

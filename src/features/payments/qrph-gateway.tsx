@@ -17,7 +17,7 @@ const POLL_INTERVAL_MS = 4000;
 /**
  * Renders the QR Ph code and polls our own settlement status (rather than
  * PayMongo directly) so it picks up the moment the webhook marks the order
- * PAID — works whether or not Pusher is configured.
+ * PAID. Works whether or not Pusher is configured.
  */
 export function QrPhGateway({
   intentId,
@@ -43,11 +43,11 @@ export function QrPhGateway({
         if (data.paymentStatus === "PAID") {
           clearInterval(interval);
           sessionStorage.removeItem("kanto:justPlaced");
-          toast.success("Order placed — payment successful!");
+          toast.success("Order placed, payment successful!");
           router.push(`/order/${orderNumber}?token=${trackingToken}`);
         }
       } catch {
-        // Transient network hiccup — the next poll tick will retry.
+        // Transient network hiccup; the next poll tick will retry.
       }
     }, POLL_INTERVAL_MS);
 

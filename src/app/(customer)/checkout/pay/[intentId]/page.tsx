@@ -20,7 +20,7 @@ export default async function PaymentGatewayPage({
     notFound();
   }
 
-  // Already settled — send the customer straight to their order tracker.
+  // Already settled: send the customer straight to their order tracker.
   if (session.paymentStatus === "PAID") {
     redirect(`/order/${session.orderNumber}?token=${session.trackingToken}`);
   }
@@ -29,7 +29,7 @@ export default async function PaymentGatewayPage({
   const qr = isPaymongo ? await getQrPhStatus(intentId) : null;
 
   // Sandbox key: PayMongo hands back a hosted Authorize/Fail simulator
-  // instead of a real, scannable QR — send the customer straight there.
+  // instead of a real, scannable QR, so send the customer straight there.
   if (qr?.testUrl) {
     redirect(qr.testUrl);
   }
@@ -87,7 +87,7 @@ export default async function PaymentGatewayPage({
           <Lock className="size-3" aria-hidden="true" />
           {isPaymongo
             ? "Secured by PayMongo QR Ph."
-            : "Simulated gateway — no real charge is made."}
+            : "Simulated gateway. No real charge is made."}
         </p>
       </div>
     </main>

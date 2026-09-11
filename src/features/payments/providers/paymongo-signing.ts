@@ -26,11 +26,11 @@ function parseSignatureHeader(header: string): ParsedSignatureHeader | null {
 /**
  * Verifies PayMongo's `Paymongo-Signature` webhook header: HMAC-SHA256 over
  * `${timestamp}.${rawBody}` using the webhook's signing secret. The header
- * carries both a test (`te`) and live (`li`) digest — whichever one matches
+ * carries both a test (`te`) and live (`li`) digest; whichever one matches
  * depends on which secret this endpoint was registered with, so we accept
  * either matching the provided secret. `rawBody` must be the exact bytes
- * PayMongo sent, read before any JSON.parse — re-serializing changes the
- * digest.
+ * PayMongo sent, read before any JSON.parse, because re-serializing changes
+ * the digest.
  */
 export function verifyPaymongoSignature(
   rawBody: string,

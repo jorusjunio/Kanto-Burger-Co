@@ -81,7 +81,7 @@ const attachResponseSchema = z.object({
             .object({
               image_url: z.string().optional(),
               // Only present with a sandbox (sk_test_) key. It points to
-              // PayMongo's hosted Authorize/Fail simulator — the real QR
+              // PayMongo's hosted Authorize/Fail simulator. The real QR
               // image is a live P2M code that a real wallet app WILL settle,
               // so this must take priority whenever it's present.
               test_url: z.string().optional(),
@@ -102,7 +102,7 @@ const paymentEventSchema = z.object({
         attributes: z.object({
           // Present when the payment came from a Payment Intent flow (QR Ph,
           // cards). Absent (source present instead) for the e-wallet Source
-          // flow (GCash) — kept for when that channel is verified/enabled.
+          // flow (GCash), kept for when that channel is verified/enabled.
           payment_intent_id: z.string().nullable().optional(),
           source: z.object({ id: z.string() }).nullable().optional(),
         }),
@@ -117,12 +117,12 @@ const eventTypeSchema = z.object({
 
 /**
  * Real PayMongo gateway. Uses QR Ph (dynamic, single-use QR code) rather than
- * a GCash e-wallet Source — GCash-as-a-channel is gated behind PayMongo
+ * a GCash e-wallet Source: GCash-as-a-channel is gated behind PayMongo
  * business verification, but QR Ph is active immediately and any QR Ph-
  * capable app (including GCash) can scan it. Flow:
  *  1. Create a Payment Intent for the order total.
  *  2. Create a "qrph" Payment Method (billing details are optional).
- *  3. Attach the method to the intent — the response carries a QR code image
+ *  3. Attach the method to the intent. The response carries a QR code image
  *     (`next_action.code.image_url`) instead of a redirect URL, so our own
  *     `/checkout/pay/[intentId]` page renders it and polls for settlement.
  * Settlement still arrives as `payment.paid`/`payment.failed` webhooks, same
@@ -180,16 +180,16 @@ export const paymongoPaymentProvider: PaymentProvider = {
   async resumeSession(intentId: string): Promise<PaymentSession | null> {
     try {
       const { status } = await getQrPhStatus(intentId);
-      // An expired QR sends the intent back to awaiting_payment_method — only
+      // An expired QR sends the intent back to awaiting_payment_method; only
       // then is it safe to mint a replacement. Any other state (QR still
       // live, payment processing or already succeeded but the webhook hasn't
       // landed) resumes the same intent, so the customer can't pay twice.
       if (status === "awaiting_payment_method") return null;
     } catch (error) {
       // 404: the intent doesn't exist under the current key (e.g. created in
-      // the other test/live mode) — treat as gone. Anything else is rethrown:
-      // minting a replacement during an outage could orphan a QR the customer
-      // can still pay.
+      // the other test/live mode), so treat it as gone. Anything else is
+      // rethrown: minting a replacement during an outage could orphan a QR
+      // the customer can still pay.
       if (error instanceof PaymongoApiError && error.status === 404) return null;
       throw error;
     }
@@ -201,7 +201,7 @@ export const paymongoPaymentProvider: PaymentProvider = {
   },
 };
 
-/** Reads just the event type — used by the webhook route to branch before
+/** Reads just the event type, used by the webhook route to branch before
  *  picking the right schema to parse the rest of the payload with. */
 export function getPaymongoEventType(payload: unknown): string | null {
   const parsed = eventTypeSchema.safeParse(payload);
@@ -210,7 +210,7 @@ export function getPaymongoEventType(payload: unknown): string | null {
 
 /** Current status + QR code image (base64) for a Payment Intent, fetched
  *  fresh so the pay page always renders the live state. In sandbox, PayMongo
- *  also returns `testUrl` — its hosted Authorize/Fail simulator — which the
+ *  also returns `testUrl` (its hosted Authorize/Fail simulator), which the
  *  pay page must prefer over the raw QR image: that image is a real P2M QR
  *  code that a real wallet app WILL attempt to settle even with a test key. */
 export async function getQrPhStatus(paymentIntentId: string): Promise<{
@@ -241,7 +241,7 @@ const chargeableSourceSchema = z.object({
 });
 
 /** Extracts the source id + amount (centavos) from a `source.chargeable` event
- *  — only relevant once the GCash e-wallet Source channel is verified. */
+ *  (only relevant once the GCash e-wallet Source channel is verified). */
 export function getChargeableSource(
   payload: unknown,
 ): { id: string; amountCentavos: number } | null {
@@ -255,7 +255,7 @@ export function getChargeableSource(
 /**
  * Step 2 of the GCash Source flow: once a Source is `chargeable`, actually
  * charge it by creating a Payment against it. Unused while GCash is gated
- * behind business verification, but kept ready — PayMongo rejects a second
+ * behind business verification, but kept ready: PayMongo rejects a second
  * charge attempt on an already-used source, so a retried webhook is safe.
  */
 export async function chargeSource(

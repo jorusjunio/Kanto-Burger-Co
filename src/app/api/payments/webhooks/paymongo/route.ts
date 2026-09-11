@@ -16,14 +16,14 @@ import { logger } from "@/lib/logger";
 
 /**
  * PayMongo webhook. GCash settles in two steps:
- *  1. `source.chargeable` — the customer paid at PayMongo's checkout; we turn
+ *  1. `source.chargeable`: the customer paid at PayMongo's checkout; we turn
  *     the source into an actual Payment via `chargeSource`.
- *  2. `payment.paid` / `payment.failed` — the real settlement, handed to the
+ *  2. `payment.paid` / `payment.failed`: the real settlement, handed to the
  *     same idempotent `settlePaymentWithDeps` the mock gateway uses.
  * Every other event type is acknowledged and ignored.
  */
 export async function POST(request: Request) {
-  // Read the raw body first — signature verification needs the exact bytes
+  // Read the raw body first: signature verification needs the exact bytes
   // PayMongo sent, before any JSON.parse/reserialize round-trip.
   const rawBody = await request.text();
 

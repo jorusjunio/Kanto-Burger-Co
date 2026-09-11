@@ -161,7 +161,7 @@ export default async function OrderPage({ params, searchParams }: OrderPageProps
                   Payment still pending
                 </p>
                 <p className="mt-0.5 text-[10px] font-medium text-amber-800/80">
-                  Finish paying with GCash — if you already started, you&apos;ll pick up where you left off.
+                  Finish paying with GCash. If you already started, you&apos;ll pick up where you left off.
                 </p>
               </div>
               <ResumePaymentButton
