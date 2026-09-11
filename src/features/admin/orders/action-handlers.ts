@@ -13,7 +13,7 @@ import { assertAllowedStatusTransition } from "./lifecycle";
 const updateOrderStatusSchema = z.object({
   orderId: z.string().min(1),
   // Enum values sourced from the generated Prisma enum so this schema stays in
-  // lockstep with the DB enum and lifecycle.ts — single source of truth, no
+  // lockstep with the DB enum and lifecycle.ts: single source of truth, no
   // hand-duplicated string list to drift.
   status: z.enum(OrderStatus),
 });
@@ -25,7 +25,7 @@ const updatePaymentStatusSchema = z.object({
 
 // Dependency-injection contract types. Kept intentionally narrow (only the
 // fields these handlers actually read/write) so tests can inject lightweight
-// mocks — but every field shape is now derived from the generated Prisma models
+// mocks, but every field shape is now derived from the generated Prisma models
 // and arg types. A schema change that renames or retypes a column now fails
 // compilation here instead of drifting silently out of sync.
 

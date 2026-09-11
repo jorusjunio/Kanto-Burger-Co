@@ -16,7 +16,7 @@ export default async function AdminLoginPage() {
 
   return (
     <main className="flex min-h-screen">
-      {/* ── Brand panel (desktop) — same dark surface as the admin sidebar ── */}
+      {/* ── Brand panel (desktop), same dark surface as the admin sidebar ── */}
       <aside className="relative hidden w-[42%] flex-col justify-between bg-stone-950 p-10 lg:flex">
         <div className="flex items-center gap-3">
           <span className="flex size-9 items-center justify-center rounded-full bg-white shadow-sm">
@@ -44,8 +44,8 @@ export default async function AdminLoginPage() {
             Watch the numbers.
           </h2>
           <p className="mt-4 max-w-sm text-sm leading-relaxed text-stone-400">
-            Orders, kitchen board, menu, and sales — everything the crew and
-            managers need, in one place.
+            Orders, kitchen board, menu, and sales, everything the crew and
+            managers need in one place.
           </p>
         </div>
 

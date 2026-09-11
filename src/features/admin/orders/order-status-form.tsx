@@ -13,7 +13,7 @@ type OrderStatusFormProps = {
   paymentStatus: string;
 };
 
-// Verb labels for each transition target — the button says what the click does,
+// Verb labels for each transition target: the button says what the click does,
 // not what the order currently is.
 const statusActionLabels: Record<OrderStatus, string> = {
   PENDING: "Reopen",
@@ -105,7 +105,7 @@ export function OrderStatusForm({
 
   return (
     <div className="grid gap-5 sm:grid-cols-2">
-      {/* Order status — one button per allowed next step, no free-choice dropdown */}
+      {/* Order status: one button per allowed next step, no free-choice dropdown */}
       <div className="space-y-2.5">
         <p className={sectionLabelClassName}>
           <span className="size-1.5 rounded-full bg-red-600" />
@@ -137,7 +137,7 @@ export function OrderStatusForm({
         )}
       </div>
 
-      {/* Payment — shaped by method: cash is a simple toggle, GCash adds verify */}
+      {/* Payment: shaped by method, cash is a simple toggle, GCash adds verify */}
       <div className="space-y-2.5">
         <p className={sectionLabelClassName}>
           <span className="size-1.5 rounded-full bg-amber-500" />

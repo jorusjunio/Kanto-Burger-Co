@@ -21,7 +21,7 @@ export function OrderStatusBadge({ value }: BadgeProps) {
   );
 }
 
-// Payment PENDING means "GCash reference submitted, awaiting verification" — it
+// Payment PENDING means "GCash reference submitted, awaiting verification": it
 // only occurs for GCash. Relabel + recolor (blue) so it never reads like the
 // amber kitchen "Pending" order status, which means something entirely different.
 const paymentBadgeLabels: Record<string, string> = {

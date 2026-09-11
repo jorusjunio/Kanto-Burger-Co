@@ -28,14 +28,14 @@ export function SettingsForm({
       </h2>
 
       <div className="mt-4 divide-y divide-orange-900/6">
-        {/* Accepting orders — the store's master switch */}
+        {/* Accepting orders: the store's master switch */}
         <label className="flex cursor-pointer items-center justify-between gap-3 py-4">
           <span className="min-w-0">
             <span className="block text-sm font-bold text-[#25130b]">
               Accepting orders
             </span>
             <span className="mt-0.5 block text-xs text-orange-950/40">
-              Turn off to pause checkout — customers see a “temporarily closed”
+              Turn off to pause checkout. Customers see a “temporarily closed”
               notice.
             </span>
           </span>

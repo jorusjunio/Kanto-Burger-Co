@@ -115,7 +115,7 @@ export default async function AdminOrderPage({ params }: AdminOrderPageProps) {
             </div>
           </section>
 
-          {/* Items — receipt style with totals footer */}
+          {/* Items: receipt style with totals footer */}
           <section
             className={`${cardClassName} animate-fade-in`}
             style={{ animationDelay: "100ms" }}

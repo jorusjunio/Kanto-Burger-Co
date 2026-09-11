@@ -65,7 +65,7 @@ export default async function AdminMenuPage({
           </p>
           <h1 className="mt-1 text-2xl font-black text-[#25130b]">Menu</h1>
           <p className="mt-1 text-sm text-orange-950/45">
-            Menu groups — the order here is the order customers see.
+            Menu groups: the order here is the order customers see.
           </p>
         </div>
 

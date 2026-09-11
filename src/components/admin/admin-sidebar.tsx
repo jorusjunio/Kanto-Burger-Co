@@ -241,10 +241,10 @@ function SidebarBody({
         })}
       </nav>
 
-      {/* Live operational alerts — what needs a manager's hand right now. */}
+      {/* Live operational alerts: what needs a manager's hand right now. */}
       <SidebarAlertsBlock alerts={alerts} onNavigate={onNavigate} />
 
-      {/* Account + sign out — single quiet row; who's signed in lives here,
+      {/* Account + sign out: single quiet row; who's signed in lives here,
           not in every page header. */}
       <div className="border-t border-white/8 px-4 py-4">
         <div className="flex items-center gap-3">
@@ -264,7 +264,7 @@ function SidebarBody({
                 {(user.name ?? user.email ?? "?").charAt(0).toUpperCase()}
               </span>
             )}
-            {/* Role dot — red = admin, amber = staff */}
+            {/* Role dot: red = admin, amber = staff */}
             <span
               title={user.role}
               className={cn(
@@ -306,15 +306,18 @@ export function AdminSidebar({
         <SidebarBody isManager={isManager} user={user} alerts={alerts} />
       </aside>
 
-      {/* Mobile trigger */}
-      <button
-        type="button"
-        onClick={() => setIsOpen(true)}
-        aria-label="Open navigation"
-        className="fixed left-4 top-4 z-50 flex size-10 items-center justify-center rounded-full bg-stone-950 text-white shadow-lg transition-transform duration-200 hover:scale-105 active:scale-95 lg:hidden"
-      >
-        <Menu className="size-5" />
-      </button>
+      {/* Mobile trigger, an organic corner blob instead of a plain floating circle */}
+      <div className="fixed left-0 top-0 z-50 lg:hidden">
+        <div className="admin-menu-blob" aria-hidden="true" />
+        <button
+          type="button"
+          onClick={() => setIsOpen(true)}
+          aria-label="Open navigation"
+          className="absolute left-4 top-4 flex size-8 items-center justify-center text-white transition-transform duration-200 hover:scale-105 active:scale-95"
+        >
+          <Menu className="size-5" />
+        </button>
+      </div>
 
       {/* Mobile overlay */}
       <div

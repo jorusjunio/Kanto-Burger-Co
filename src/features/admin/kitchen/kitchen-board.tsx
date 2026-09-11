@@ -67,7 +67,7 @@ function formatAge(minutes: number) {
   return `${Math.floor(minutes / (60 * 24))}d`;
 }
 
-/** Short, shout-across-the-kitchen code — the last segment of the order number. */
+/** Short, shout-across-the-kitchen code (the last segment of the order number). */
 function shortCode(orderNumber: string) {
   return orderNumber.split("-").at(-1) ?? orderNumber;
 }
@@ -254,7 +254,7 @@ export function KitchenBoard({
   const [lateOnly, setLateOnly] = useState(false);
   const [query, setQuery] = useState("");
 
-  // Client clock for the "late" cut-off — null until mounted (avoids an
+  // Client clock for the "late" cut-off, null until mounted (avoids an
   // SSR/client hydration mismatch), refreshed on the same cadence as the
   // per-card timers so chip counts and card tints agree.
   const [now, setNow] = useState<number | null>(null);
@@ -361,7 +361,7 @@ export function KitchenBoard({
         ) : null}
       </div>
 
-      {/* Stage filter chips — click to focus one stage; counts reflect type/search. */}
+      {/* Stage filter chips: click to focus one stage; counts reflect type/search. */}
       {orders.length > 0 ? (
         <div className="flex flex-wrap items-center gap-2">
           <button
@@ -399,7 +399,7 @@ export function KitchenBoard({
             </button>
           ))}
 
-          {/* Urgency — orders waiting 15+ minutes. Hidden while nothing is late. */}
+          {/* Urgency: orders waiting 15+ minutes. Hidden while nothing is late. */}
           {lateCount > 0 ? (
             <button
               type="button"

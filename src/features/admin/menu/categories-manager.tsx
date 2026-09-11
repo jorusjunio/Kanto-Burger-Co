@@ -68,7 +68,7 @@ function CategoryItem({
           action={updateCategory.bind(null, category.id)}
           className="grid gap-3 sm:grid-cols-[1fr_1fr_auto] sm:items-end"
         >
-          {/* Order is owned by the arrows — carry the current value through. */}
+          {/* Order is owned by the arrows: carry the current value through. */}
           <input type="hidden" name="sortOrder" value={category.sortOrder} />
           <div className="space-y-1.5">
             <Label htmlFor={`name-${category.id}`} className="checkout-label">

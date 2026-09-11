@@ -15,7 +15,7 @@ export default async function AdminStaffPage() {
         </p>
         <h1 className="mt-1 text-2xl font-black text-[#25130b]">Staff</h1>
         <p className="mt-1 text-sm text-orange-950/45">
-          Who can sign in — managers see everything, crew get the kitchen board.
+          Who can sign in: managers see everything, crew get the kitchen board.
         </p>
       </div>
 

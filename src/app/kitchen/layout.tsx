@@ -1,14 +1,18 @@
+import Link from "next/link";
+
 import { RealtimeOrderListener } from "@/features/orders/realtime-order-listener";
 import { ConnectionIndicator } from "@/features/admin/kitchen/connection-indicator";
 import { SignOutButton } from "@/features/admin/auth/sign-out-button";
 import { requireStaffPage } from "@/features/admin/auth/guards";
+import { PresenceBeacon } from "@/features/admin/realtime/presence-beacon";
+import { UserRole } from "@/generated/prisma/enums";
 
 export default async function KitchenLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  await requireStaffPage("/kitchen");
+  const session = await requireStaffPage("/kitchen");
 
   return (
     <>
@@ -17,6 +21,7 @@ export default async function KitchenLayout({
         channelName="admin-orders"
         events={["order-created", "order-updated"]}
       />
+      <PresenceBeacon />
       <div className="flex min-h-screen flex-col bg-[#f7f3ea]">
         {/* Slim top bar — no admin sidebar, just enough chrome for the crew */}
         <header className="sticky top-0 z-10 flex items-center justify-between gap-3 border-b border-orange-900/10 bg-[#f7f3ea]/85 px-4 py-3 backdrop-blur lg:px-8">
@@ -30,6 +35,14 @@ export default async function KitchenLayout({
           </div>
           <div className="flex items-center gap-2">
             <ConnectionIndicator />
+            {session.user.role === UserRole.ADMIN && (
+              <Link
+                href="/admin"
+                className="rounded-md border border-orange-900/15 bg-white px-3 py-1.5 text-xs font-semibold text-orange-950/70 transition-colors hover:border-orange-300 hover:bg-orange-50 hover:text-orange-900"
+              >
+                Back to Admin
+              </Link>
+            )}
             <SignOutButton className="border-orange-900/15 bg-white text-orange-950/70 hover:border-red-300 hover:bg-red-50 hover:text-red-700" />
           </div>
         </header>

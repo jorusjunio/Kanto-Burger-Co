@@ -118,7 +118,7 @@ export function OrdersView({ orders }: { orders: AdminOrderRow[] }) {
     return counts;
   }, [pool]);
 
-  // Newest first — the only ordering managers actually reach for.
+  // Newest first: the only ordering managers actually reach for.
   const filtered = useMemo(
     () =>
       pool
@@ -274,68 +274,124 @@ export function OrdersView({ orders }: { orders: AdminOrderRow[] }) {
                 </p>
               </div>
             ) : (
-              <div className="max-h-[65vh] overflow-auto">
-                <Table className="admin-table">
-                  <TableHeader className="sticky top-0 z-10 bg-white shadow-[0_1px_0_rgba(120,53,15,0.08)]">
-                    <TableRow>
-                      <TableHead>Order</TableHead>
-                      <TableHead>Customer</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead>Payment</TableHead>
-                      <TableHead>Type</TableHead>
-                      <TableHead className="text-right">Items</TableHead>
-                      <TableHead className="text-right">Total</TableHead>
-                      <TableHead className="text-right">Created</TableHead>
-                      <TableHead aria-label="Open" />
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {filtered.map((order) => (
-                      <TableRow
-                        key={order.id}
+              <>
+                {/* Mobile: stacked cards, no cramped columns to cut off. */}
+                <ul className="divide-y divide-orange-900/6 sm:hidden">
+                  {filtered.map((order) => (
+                    <li key={order.id}>
+                      <button
+                        type="button"
                         onClick={() => router.push(`/admin/orders/${order.id}`)}
-                        className="group cursor-pointer transition-colors duration-150 hover:bg-orange-50/60"
+                        className="flex w-full items-start gap-2 p-4 text-left transition-colors duration-150 active:bg-orange-50/60"
                       >
-                        <TableCell className="font-mono text-xs font-bold text-[#25130b]">
-                          {order.orderNumber}
-                        </TableCell>
-                        <TableCell>
-                          <p className="font-bold text-[#25130b]">
-                            {order.customerName}
+                        <div className="min-w-0 flex-1 space-y-2">
+                          <div className="flex items-center justify-between gap-2">
+                            <p className="truncate font-mono text-xs font-bold text-[#25130b]">
+                              {order.orderNumber}
+                            </p>
+                            <OrderStatusBadge value={order.status} />
+                          </div>
+
+                          <div>
+                            <p className="truncate font-bold text-[#25130b]">
+                              {order.customerName}
+                            </p>
+                            <p className="truncate text-xs text-orange-950/40">
+                              {order.customerPhone}
+                            </p>
+                          </div>
+
+                          <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                            <PaymentStatusBadge value={order.paymentStatus} />
+                            <span className="text-[11px] font-bold uppercase tracking-wide text-orange-950/50">
+                              {order.orderType}
+                            </span>
+                          </div>
+
+                          <p className="text-xs text-orange-950/45 tabular-nums">
+                            {order.itemsCount} item
+                            {order.itemsCount !== 1 ? "s" : ""}
+                            <span className="mx-1.5 text-orange-950/20">·</span>
+                            <span className="font-black text-[#25130b]">
+                              {formatPeso(order.total)}
+                            </span>
+                            <span className="mx-1.5 text-orange-950/20">·</span>
+                            {formatDate(order.createdAt)}
                           </p>
-                          <p className="text-xs text-orange-950/40">
-                            {order.customerPhone}
-                          </p>
-                        </TableCell>
-                        <TableCell>
-                          <OrderStatusBadge value={order.status} />
-                        </TableCell>
-                        <TableCell>
-                          <PaymentStatusBadge value={order.paymentStatus} />
-                        </TableCell>
-                        <TableCell className="text-xs font-bold uppercase tracking-wide text-orange-950/50">
-                          {order.orderType}
-                        </TableCell>
-                        <TableCell className="text-right tabular-nums text-orange-950/60">
-                          {order.itemsCount}
-                        </TableCell>
-                        <TableCell className="text-right font-black tabular-nums">
-                          {formatPeso(order.total)}
-                        </TableCell>
-                        <TableCell className="text-right text-xs text-orange-950/45 tabular-nums">
-                          {formatDate(order.createdAt)}
-                        </TableCell>
-                        <TableCell className="w-10 text-right">
-                          <ChevronRight
-                            className="ml-auto size-4 text-orange-950/20 transition-all duration-200 group-hover:translate-x-0.5 group-hover:text-red-700"
-                            aria-hidden="true"
-                          />
-                        </TableCell>
+                        </div>
+                        <ChevronRight
+                          className="mt-1 size-4 shrink-0 text-orange-950/20"
+                          aria-hidden="true"
+                        />
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+
+                {/* Desktop/tablet: full table. */}
+                <div className="hidden max-h-[65vh] overflow-auto sm:block">
+                  <Table className="admin-table">
+                    <TableHeader className="sticky top-0 z-10 bg-white shadow-[0_1px_0_rgba(120,53,15,0.08)]">
+                      <TableRow>
+                        <TableHead>Order</TableHead>
+                        <TableHead>Customer</TableHead>
+                        <TableHead>Status</TableHead>
+                        <TableHead>Payment</TableHead>
+                        <TableHead>Type</TableHead>
+                        <TableHead className="text-right">Items</TableHead>
+                        <TableHead className="text-right">Total</TableHead>
+                        <TableHead className="text-right">Created</TableHead>
+                        <TableHead aria-label="Open" />
                       </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </div>
+                    </TableHeader>
+                    <TableBody>
+                      {filtered.map((order) => (
+                        <TableRow
+                          key={order.id}
+                          onClick={() => router.push(`/admin/orders/${order.id}`)}
+                          className="group cursor-pointer transition-colors duration-150 hover:bg-orange-50/60"
+                        >
+                          <TableCell className="font-mono text-xs font-bold text-[#25130b]">
+                            {order.orderNumber}
+                          </TableCell>
+                          <TableCell>
+                            <p className="font-bold text-[#25130b]">
+                              {order.customerName}
+                            </p>
+                            <p className="text-xs text-orange-950/40">
+                              {order.customerPhone}
+                            </p>
+                          </TableCell>
+                          <TableCell>
+                            <OrderStatusBadge value={order.status} />
+                          </TableCell>
+                          <TableCell>
+                            <PaymentStatusBadge value={order.paymentStatus} />
+                          </TableCell>
+                          <TableCell className="text-xs font-bold uppercase tracking-wide text-orange-950/50">
+                            {order.orderType}
+                          </TableCell>
+                          <TableCell className="text-right tabular-nums text-orange-950/60">
+                            {order.itemsCount}
+                          </TableCell>
+                          <TableCell className="text-right font-black tabular-nums">
+                            {formatPeso(order.total)}
+                          </TableCell>
+                          <TableCell className="text-right text-xs text-orange-950/45 tabular-nums">
+                            {formatDate(order.createdAt)}
+                          </TableCell>
+                          <TableCell className="w-10 text-right">
+                            <ChevronRight
+                              className="ml-auto size-4 text-orange-950/20 transition-all duration-200 group-hover:translate-x-0.5 group-hover:text-red-700"
+                              aria-hidden="true"
+                            />
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              </>
             )}
           </div>
         </>

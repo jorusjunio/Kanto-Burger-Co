@@ -25,7 +25,7 @@ export function SignOutButton({
   iconOnly = false,
 }: {
   className?: string;
-  /** Compact round icon trigger — used in the sidebar account row. */
+  /** Compact round icon trigger, used in the sidebar account row. */
   iconOnly?: boolean;
 }) {
   const [open, setOpen] = useState(false);

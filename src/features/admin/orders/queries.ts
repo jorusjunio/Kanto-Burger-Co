@@ -5,7 +5,7 @@ import { prisma } from "@/server/db/prisma";
 import { logger } from "@/lib/logger";
 
 /**
- * Active orders for the kitchen board — everything still being worked on, oldest
+ * Active orders for the kitchen board: everything still being worked on, oldest
  * first so the crew clears the queue in the order it came in. Closed orders
  * (Completed / Cancelled) drop off the board entirely.
  */
@@ -28,7 +28,7 @@ export async function getKitchenOrders() {
   }
 }
 
-/** How many orders the crew has closed out since midnight — header tally. */
+/** How many orders the crew has closed out since midnight (header tally). */
 export async function getKitchenCompletedTodayCount() {
   const todayStart = new Date();
   todayStart.setHours(0, 0, 0, 0);

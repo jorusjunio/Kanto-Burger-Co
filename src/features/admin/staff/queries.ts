@@ -1,7 +1,7 @@
 import { prisma } from "@/server/db/prisma";
 import { logger } from "@/lib/logger";
 
-/** All staff/admin accounts, newest first — the team roster. */
+/** All staff/admin accounts, newest first (the team roster). */
 export async function getStaffMembers() {
   try {
     return await prisma.user.findMany({

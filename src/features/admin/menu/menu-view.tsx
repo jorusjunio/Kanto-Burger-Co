@@ -46,7 +46,7 @@ export type AdminMenuRow = {
 
 const ALL = "ALL";
 
-/* Availability tabs — the manager's main lens on the menu. */
+/* Availability tabs: the manager's main lens on the menu. */
 const availabilityTabs = [
   [ALL, "All"],
   ["LIVE", "Live"],
@@ -62,7 +62,7 @@ function stockState(row: AdminMenuRow): StockState {
   return "ok";
 }
 
-/** One-tap restock/deduct — submits the shared adjustStock action. */
+/** One-tap restock/deduct, submits the shared adjustStock action. */
 function StockNudge({
   productId,
   delta,
@@ -125,7 +125,7 @@ function StockCell({ row }: { row: AdminMenuRow }) {
           {state === "out" ? "sold out" : state === "low" ? "low" : "in stock"}
         </span>
       </div>
-      {/* Quiet meter — full width is 2× the low-stock threshold. */}
+      {/* Quiet meter: full width is 2× the low-stock threshold. */}
       <div className="mt-1.5 h-1 w-full overflow-hidden rounded-full bg-orange-950/8">
         <div
           className={cn(
@@ -155,7 +155,7 @@ function AvailabilityToggle({ row }: { row: AdminMenuRow }) {
         name="isAvailable"
         value={row.isAvailable ? "false" : "true"}
       />
-      {/* Switch-styled submit — state is obvious at a glance, one tap flips it. */}
+      {/* Switch-styled submit: state is obvious at a glance, one tap flips it. */}
       <button
         type="submit"
         role="switch"
@@ -359,7 +359,7 @@ export function MenuView({
           </div>
 
           {/* ── Table ── */}
-          <div className="overflow-hidden rounded-xl bg-white ring-1 ring-orange-900/10">
+          <div className="rounded-xl bg-white ring-1 ring-orange-900/10">
             {filtered.length === 0 ? (
               <div className="flex min-h-[280px] flex-col items-center justify-center p-8 text-center">
                 <div className="mb-4 flex size-12 items-center justify-center rounded-full bg-orange-950/5 text-orange-950/40">
@@ -373,86 +373,69 @@ export function MenuView({
                 </p>
               </div>
             ) : (
-              <Table className="admin-table">
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Product</TableHead>
-                    <TableHead>Category</TableHead>
-                    <TableHead>Price</TableHead>
-                    <TableHead>Stock</TableHead>
-                    <TableHead>Live</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
+              <>
+                {/* Mobile: stacked cards, no cramped columns to cut off. */}
+                <ul className="divide-y divide-orange-900/6 sm:hidden">
                   {filtered.map((product) => (
-                    <TableRow
+                    <li
                       key={product.id}
-                      className={cn(!product.isAvailable && "opacity-55")}
+                      className={cn(
+                        "space-y-3 p-4",
+                        !product.isAvailable && "opacity-55",
+                      )}
                     >
-                      <TableCell>
-                        <div className="flex items-center gap-3">
-                          <div className="relative size-11 shrink-0 overflow-hidden rounded-lg bg-orange-950/5 ring-1 ring-orange-900/8">
-                            {product.imageUrl ? (
-                              <Image
-                                src={product.imageUrl}
-                                alt=""
-                                fill
-                                sizes="44px"
-                                className="object-cover"
-                              />
-                            ) : (
-                              <span className="flex h-full items-center justify-center text-orange-950/25">
-                                <ImageOff className="size-4" aria-hidden="true" />
-                              </span>
-                            )}
-                          </div>
-                          <div className="min-w-0">
-                            <div className="flex items-center gap-1.5">
-                              <p className="truncate font-black text-[#25130b]">
-                                {product.name}
-                              </p>
-                              {product.isFeatured ? (
-                                <Star
-                                  className="size-3.5 shrink-0 fill-amber-400 text-amber-400"
-                                  aria-label="Featured"
-                                />
-                              ) : null}
-                            </div>
-                            <p className="mt-0.5 line-clamp-1 max-w-72 text-xs text-orange-950/40">
-                              {product.description}
-                              {product.addOnsCount > 0
-                                ? ` · ${product.addOnsCount} add-on${product.addOnsCount > 1 ? "s" : ""}`
-                                : ""}
-                            </p>
-                          </div>
+                      <div className="flex items-center gap-3">
+                        <div className="relative size-11 shrink-0 overflow-hidden rounded-lg bg-orange-950/5 ring-1 ring-orange-900/8">
+                          {product.imageUrl ? (
+                            <Image
+                              src={product.imageUrl}
+                              alt=""
+                              fill
+                              sizes="44px"
+                              className="object-cover"
+                            />
+                          ) : (
+                            <span className="flex h-full items-center justify-center text-orange-950/25">
+                              <ImageOff className="size-4" aria-hidden="true" />
+                            </span>
+                          )}
                         </div>
-                      </TableCell>
-                      <TableCell>
-                        <span className="inline-flex items-center rounded-full bg-orange-950/5 px-2.5 py-1 text-[11px] font-bold text-orange-950/55">
-                          {product.categoryName}
-                        </span>
-                      </TableCell>
-                      <TableCell className="font-black tabular-nums">
-                        {formatPeso(product.price)}
-                      </TableCell>
-                      <TableCell>
-                        <StockCell row={product} />
-                      </TableCell>
-                      <TableCell>
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-center gap-1.5">
+                            <p className="truncate font-black text-[#25130b]">
+                              {product.name}
+                            </p>
+                            {product.isFeatured ? (
+                              <Star
+                                className="size-3.5 shrink-0 fill-amber-400 text-amber-400"
+                                aria-label="Featured"
+                              />
+                            ) : null}
+                          </div>
+                          <p className="truncate text-xs text-orange-950/40">
+                            {product.description}
+                          </p>
+                          <span className="mt-1 inline-flex items-center rounded-full bg-orange-950/5 px-2 py-0.5 text-[10px] font-bold text-orange-950/55">
+                            {product.categoryName}
+                          </span>
+                        </div>
                         <AvailabilityToggle row={product} />
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <div className="flex justify-end gap-1.5">
+                      </div>
+
+                      <div className="flex items-center justify-between gap-2">
+                        <StockCell row={product} />
+                        <div className="flex items-center gap-1">
                           <Button
-                            size="sm"
+                            size="icon"
                             variant="ghost"
                             asChild
-                            className="h-8 rounded-full px-3 text-xs font-bold text-orange-950/55 hover:bg-orange-950/5 hover:text-red-700"
+                            className="size-8 rounded-full text-orange-950/55 hover:bg-orange-950/5 hover:text-red-700"
                           >
-                            <Link href={`/admin/menu/${product.id}/edit`}>
+                            <Link
+                              href={`/admin/menu/${product.id}/edit`}
+                              aria-label={`Edit ${product.name}`}
+                            >
                               <Edit className="size-3.5" aria-hidden="true" />
-                              Edit
                             </Link>
                           </Button>
                           <DeleteProductDialog
@@ -460,11 +443,105 @@ export function MenuView({
                             productName={product.name}
                           />
                         </div>
-                      </TableCell>
-                    </TableRow>
+                      </div>
+                    </li>
                   ))}
-                </TableBody>
-              </Table>
+                </ul>
+
+                {/* Desktop/tablet: full table. */}
+                <Table className="admin-table hidden sm:min-w-[760px] sm:table">
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Product</TableHead>
+                      <TableHead>Category</TableHead>
+                      <TableHead>Price</TableHead>
+                      <TableHead>Stock</TableHead>
+                      <TableHead>Live</TableHead>
+                      <TableHead className="text-right">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {filtered.map((product) => (
+                      <TableRow
+                        key={product.id}
+                        className={cn(!product.isAvailable && "opacity-55")}
+                      >
+                        <TableCell>
+                          <div className="flex items-center gap-3">
+                            <div className="relative size-11 shrink-0 overflow-hidden rounded-lg bg-orange-950/5 ring-1 ring-orange-900/8">
+                              {product.imageUrl ? (
+                                <Image
+                                  src={product.imageUrl}
+                                  alt=""
+                                  fill
+                                  sizes="44px"
+                                  className="object-cover"
+                                />
+                              ) : (
+                                <span className="flex h-full items-center justify-center text-orange-950/25">
+                                  <ImageOff className="size-4" aria-hidden="true" />
+                                </span>
+                              )}
+                            </div>
+                            <div className="min-w-0">
+                              <div className="flex items-center gap-1.5">
+                                <p className="truncate font-black text-[#25130b]">
+                                  {product.name}
+                                </p>
+                                {product.isFeatured ? (
+                                  <Star
+                                    className="size-3.5 shrink-0 fill-amber-400 text-amber-400"
+                                    aria-label="Featured"
+                                  />
+                                ) : null}
+                              </div>
+                              <p className="mt-0.5 max-w-48 truncate text-xs text-orange-950/40">
+                                {product.description}
+                                {product.addOnsCount > 0
+                                  ? ` · ${product.addOnsCount} add-on${product.addOnsCount > 1 ? "s" : ""}`
+                                  : ""}
+                              </p>
+                            </div>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <span className="inline-flex items-center rounded-full bg-orange-950/5 px-2.5 py-1 text-[11px] font-bold text-orange-950/55">
+                            {product.categoryName}
+                          </span>
+                        </TableCell>
+                        <TableCell className="font-black tabular-nums">
+                          {formatPeso(product.price)}
+                        </TableCell>
+                        <TableCell>
+                          <StockCell row={product} />
+                        </TableCell>
+                        <TableCell>
+                          <AvailabilityToggle row={product} />
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <div className="flex justify-end gap-1.5">
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              asChild
+                              className="h-8 rounded-full px-3 text-xs font-bold text-orange-950/55 hover:bg-orange-950/5 hover:text-red-700"
+                            >
+                              <Link href={`/admin/menu/${product.id}/edit`}>
+                                <Edit className="size-3.5" aria-hidden="true" />
+                                Edit
+                              </Link>
+                            </Button>
+                            <DeleteProductDialog
+                              productId={product.id}
+                              productName={product.name}
+                            />
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </>
             )}
           </div>
         </>

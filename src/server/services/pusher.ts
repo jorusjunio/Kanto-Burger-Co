@@ -31,6 +31,22 @@ function getPusherServer(): Pusher | null {
   return pusherServerInstance;
 }
 
+/** Authorizes a client to join a presence channel (e.g. "presence-staff"),
+    stamping their Pusher member id/info from the server-verified identity. */
+export function authorizePresenceChannel(
+  socketId: string,
+  channel: string,
+  presenceData: Pusher.PresenceChannelData,
+) {
+  const pusher = getPusherServer();
+
+  if (!pusher) {
+    return null;
+  }
+
+  return pusher.authorizeChannel(socketId, channel, presenceData);
+}
+
 export async function triggerRealtimeEvent(
   channel: string,
   event: string,

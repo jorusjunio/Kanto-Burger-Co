@@ -7,12 +7,13 @@ import {
   UserRole,
 } from "@/generated/prisma/enums";
 import { RealtimeOrderListener } from "@/features/orders/realtime-order-listener";
+import { PresenceBeacon } from "@/features/admin/realtime/presence-beacon";
 import { getCurrentSession } from "@/server/auth/session";
 import { prisma } from "@/server/db/prisma";
 import { AdminSidebar } from "@/components/admin/admin-sidebar";
 
 /**
- * Operational alerts for the sidebar — the three things that actually need a
+ * Operational alerts for the sidebar: the three things that actually need a
  * manager's hand: new orders, GCash payments awaiting verification, and stock
  * running low. Live: the realtime listener refreshes the layout on order events.
  */
@@ -57,6 +58,7 @@ export default async function ProtectedAdminLayout({
         channelName="admin-orders"
         events={["order-created", "order-updated"]}
       />
+      <PresenceBeacon />
       <div className="flex min-h-screen bg-[#f7f3ea]">
         {/* Sidebar owns its own desktop (fixed) + mobile (drawer) positioning.
             Who's signed in lives in the sidebar account row, not on every page. */}
@@ -71,12 +73,12 @@ export default async function ProtectedAdminLayout({
           }}
         />
 
-        {/* Main body — pl-64 on desktop so the fixed sidebar doesn't overlap */}
+        {/* Main body: pl-64 on desktop so the fixed sidebar doesn't overlap */}
         <div className="flex-1 lg:pl-64 flex flex-col min-w-0">
           {/* MAIN VIEW CONTENT CONTAINER */}
           <main className="flex-1 px-4 py-6 lg:px-8 lg:py-7 w-full">
-            {/* Mobile-only spacer so page headers clear the fixed hamburger */}
-            <div className="h-10 lg:hidden" />
+            {/* Mobile-only spacer so page headers clear the blob-shaped trigger */}
+            <div className="h-24 lg:hidden" />
             {children}
           </main>
         </div>

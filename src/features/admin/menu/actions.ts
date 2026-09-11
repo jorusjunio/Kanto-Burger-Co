@@ -93,7 +93,7 @@ export async function moveCategory(formData: FormData) {
 
   const target = direction === "up" ? index - 1 : index + 1;
   if (target < 0 || target >= all.length) {
-    return; // already at the edge — nothing to do
+    return; // already at the edge, nothing to do
   }
 
   const reordered = [...all];

@@ -4,7 +4,7 @@ import { UserRole } from "@/generated/prisma/enums";
 import { getCurrentSession } from "@/server/auth/session";
 
 /**
- * Page-level access guards (they redirect — unlike the throwing session helpers
+ * Page-level access guards (they redirect, unlike the throwing session helpers
  * in server/auth used by server actions).
  */
 
@@ -26,7 +26,7 @@ export async function requireStaffPage(callbackUrl?: string) {
 }
 
 /**
- * Managers (ADMIN) only — records, reports, menu, categories. Kitchen crew
+ * Managers (ADMIN) only: records, reports, menu, categories. Kitchen crew
  * (STAFF) are bounced to the live board, which is the only page they own.
  */
 export async function requireManagerPage() {

@@ -79,7 +79,7 @@ export function SalesAnalyticsChart({ series }: { series: SalesSeries }) {
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
-          {/* Range — segmented pill */}
+          {/* Range: segmented pill */}
           <div className="flex items-center gap-0.5 rounded-full bg-orange-950/[0.05] p-0.5">
             {ranges.map(({ key, label }) => (
               <button
@@ -99,7 +99,7 @@ export function SalesAnalyticsChart({ series }: { series: SalesSeries }) {
             ))}
           </div>
 
-          {/* Metric — segmented pill */}
+          {/* Metric: segmented pill */}
           <div className="flex items-center gap-0.5 rounded-full bg-orange-950/[0.05] p-0.5">
             {metrics.map(({ key, label }) => (
               <button

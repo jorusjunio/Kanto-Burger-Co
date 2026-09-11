@@ -1,7 +1,7 @@
 /**
  * Staff-area callback allowlist: /admin pages and the kitchen board. Anything
  * else (external URLs, protocol-relative tricks, storefront paths) falls back
- * to /admin — role guards there bounce STAFF on to /kitchen.
+ * to /admin (role guards there bounce STAFF on to /kitchen).
  */
 export function sanitizeAdminCallbackUrl(value: string | null) {
   if (!value || value.startsWith("//")) {

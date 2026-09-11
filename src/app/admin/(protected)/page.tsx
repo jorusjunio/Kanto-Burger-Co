@@ -254,7 +254,7 @@ export default async function AdminDashboardPage() {
         </p>
       </div>
 
-      {/* Metrics Grid — each card links to where you act on it */}
+      {/* Metrics Grid: each card links to where you act on it */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {stats.map(
           ({ label, value, sub, Icon, iconClass, valueClass, href }, index) => (

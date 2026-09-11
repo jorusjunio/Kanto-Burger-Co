@@ -139,7 +139,7 @@ type AddOnRow = {
 };
 
 /** Serialize rows into the `name | price | availability` lines the server
- *  action already parses — the row editor is purely a UI upgrade. */
+ *  action already parses. The row editor is purely a UI upgrade. */
 function addOnsToText(rows: AddOnRow[]) {
   return rows
     .filter((row) => row.name.trim() !== "")
@@ -175,12 +175,12 @@ function AddOnsEditor({ initial }: { initial: AddOnRow[] }) {
 
   return (
     <div className="space-y-2.5">
-      {/* Serialized payload — same format the server action already parses. */}
+      {/* Serialized payload: same format the server action already parses. */}
       <input type="hidden" name="addOns" value={addOnsToText(rows)} />
 
       {rows.length === 0 ? (
         <p className="rounded-lg bg-orange-950/[0.03] px-3.5 py-3 text-xs text-orange-950/40">
-          No add-ons yet — e.g. Extra Cheese, Bacon Strips.
+          No add-ons yet, e.g. Extra Cheese, Bacon Strips.
         </p>
       ) : (
         rows.map((row, index) => (
@@ -188,7 +188,7 @@ function AddOnsEditor({ initial }: { initial: AddOnRow[] }) {
             <Input
               value={row.name}
               onChange={(event) =>
-                // "|" is the serializer's delimiter — keep it out of names.
+                // "|" is the serializer's delimiter, keep it out of names.
                 updateRow(row.key, {
                   name: event.target.value.replaceAll("|", ""),
                 })
@@ -382,7 +382,7 @@ export function ProductForm({
                 step="0.01"
                 defaultValue={product ? Number(product.price) : ""}
                 required
-                className={fieldClassName}
+                className={`${fieldClassName} admin-number-input`}
               />
             </div>
           </div>
@@ -468,7 +468,7 @@ export function ProductForm({
           </details>
         </section>
 
-        {/* Add-ons — row editor; serializes to the same format the action parses */}
+        {/* Add-ons: row editor; serializes to the same format the action parses */}
         <section className={`${cardClassName} space-y-4`}>
           <SectionLabel icon={Layers}>Add-ons</SectionLabel>
           <AddOnsEditor
@@ -524,7 +524,7 @@ export function ProductForm({
                 min="0"
                 defaultValue={product?.stockQuantity ?? 0}
                 required
-                className={fieldClassName}
+                className={`${fieldClassName} admin-number-input`}
               />
             </div>
             <div className="space-y-2">
@@ -536,7 +536,7 @@ export function ProductForm({
                 min="0"
                 defaultValue={product?.lowStockThreshold ?? 5}
                 required
-                className={fieldClassName}
+                className={`${fieldClassName} admin-number-input`}
               />
             </div>
           </div>

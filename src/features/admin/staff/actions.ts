@@ -30,7 +30,7 @@ const addStaffSchema = z.object({
  * Register a Google account as staff/admin. The auth signIn callback only lets
  * a Google login through if its email already exists as a User, so creating the
  * row here is what grants access. An unusable random password keeps password
- * login disabled — Google is the way in.
+ * login disabled: Google is the way in.
  */
 export async function addStaffMember(
   _prevState: StaffActionState,

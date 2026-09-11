@@ -58,9 +58,9 @@ export function DeleteProductDialog({
         <DialogHeader>
           <DialogTitle>Delete “{productName}”?</DialogTitle>
           <DialogDescription>
-            This removes the product from your menu and the storefront. Any past
-            orders that include it stay intact — it&apos;s hidden, not erased
-            from order history.
+            This removes the product from your menu and the storefront. Any
+            past orders that include it stay intact. It&apos;s hidden, not
+            erased, from order history.
           </DialogDescription>
         </DialogHeader>
         <DialogFooter>

@@ -52,7 +52,7 @@ export function LoginForm({ googleEnabled = false }: { googleEnabled?: boolean }
   const [isPending, startTransition] = useTransition();
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   // Stay in the loading state after a successful sign-in until the browser
-  // actually navigates — otherwise the button flickers back to "Sign In".
+  // actually navigates, otherwise the button flickers back to "Sign In".
   const [isRedirecting, setIsRedirecting] = useState(false);
 
   const busy = isPending || isGoogleLoading || isRedirecting;
@@ -60,7 +60,7 @@ export function LoginForm({ googleEnabled = false }: { googleEnabled?: boolean }
   function handleGoogleSignIn() {
     setError("");
     // OAuth does a full-page redirect to Google, so keep the button in its
-    // loading state until the browser navigates away — a transition would end
+    // loading state until the browser navigates away: a transition would end
     // the moment this handler returns and make the spinner flicker.
     setIsGoogleLoading(true);
     signIn("google", { callbackUrl }).catch(() => {

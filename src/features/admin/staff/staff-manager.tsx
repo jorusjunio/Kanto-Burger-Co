@@ -23,6 +23,14 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { cn } from "@/lib/utils";
 
 import {
@@ -31,6 +39,7 @@ import {
   setStaffRole,
   type StaffActionState,
 } from "./actions";
+import { useOnlineStaffIds } from "./use-online-staff-ids";
 
 export type StaffRow = {
   id: string;
@@ -81,8 +90,8 @@ function AddStaffForm() {
         Add a team member
       </h2>
       <p className="mt-1 text-xs text-orange-950/45">
-        Enter their Google account email — they sign in with Google, no password
-        needed.
+        Enter their Google account email. They sign in with Google, no
+        password needed.
       </p>
 
       <div className="mt-4 grid gap-3 sm:grid-cols-[1fr_1fr_auto] sm:items-end">
@@ -112,7 +121,7 @@ function AddStaffForm() {
           />
         </div>
         <div className="flex items-center gap-2">
-          {/* Role radio pills — most new accounts are crew, so STAFF leads. */}
+          {/* Role radio pills: most new accounts are crew, so STAFF leads. */}
           <div className="flex h-10 items-center rounded-full bg-orange-950/[0.05] p-1">
             {[
               ["STAFF", "Crew"],
@@ -237,11 +246,13 @@ export function StaffManager({
   members: StaffRow[];
   currentUserId: string;
 }) {
+  const onlineIds = useOnlineStaffIds();
+
   return (
     <div className="space-y-5">
       <AddStaffForm />
 
-      <div className="overflow-hidden rounded-xl bg-white ring-1 ring-orange-900/10">
+      <div className="rounded-xl bg-white ring-1 ring-orange-900/10">
         <div className="flex items-center justify-between border-b border-orange-900/8 px-5 py-3.5">
           <h2 className="text-[13px] font-black uppercase tracking-wide text-[#25130b]">
             Team
@@ -251,65 +262,101 @@ export function StaffManager({
           </span>
         </div>
 
-        <ul className="divide-y divide-orange-900/6">
-          {members.map((member) => {
-            const isSelf = member.id === currentUserId;
-            return (
-              <li
-                key={member.id}
-                className="flex flex-wrap items-center gap-3 px-5 py-3.5"
-              >
-                <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-orange-950/[0.06] text-sm font-black text-orange-950/60">
-                  {initials(member.name, member.email)}
-                </span>
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-2">
-                    <p className="truncate text-sm font-bold text-[#25130b]">
-                      {member.name}
-                    </p>
-                    {isSelf ? (
-                      <span className="rounded-full bg-orange-950/[0.06] px-2 py-0.5 text-[10px] font-black uppercase tracking-wider text-orange-950/45">
-                        You
+        <Table className="admin-table sm:min-w-[560px]">
+          <TableHeader>
+            <TableRow>
+              <TableHead>Member</TableHead>
+              <TableHead className="hidden sm:table-cell">Status</TableHead>
+              <TableHead>Role</TableHead>
+              <TableHead className="pr-5 text-right">Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {members.map((member) => {
+              const isSelf = member.id === currentUserId;
+              const isOnline = onlineIds.has(member.id);
+              return (
+                <TableRow key={member.id}>
+                  <TableCell>
+                    <div className="flex items-center gap-3">
+                      <span className="relative flex size-9 shrink-0 items-center justify-center rounded-full bg-orange-950/[0.06] text-sm font-black text-orange-950/60">
+                        {initials(member.name, member.email)}
+                        {isOnline ? (
+                          <span
+                            className="absolute -bottom-0.5 -right-0.5 size-2.5 rounded-full bg-emerald-500 ring-2 ring-white"
+                            aria-hidden="true"
+                          />
+                        ) : null}
                       </span>
-                    ) : null}
-                  </div>
-                  <p className="truncate text-xs text-orange-950/45">
-                    {member.email}
-                  </p>
-                </div>
-
-                {isSelf ? (
-                  /* No self-service on your own account — avoids lockout. */
-                  <RoleBadge role={member.role} />
-                ) : (
-                  <div className="flex items-center gap-2">
-                    <form action={setStaffRole}>
-                      <input type="hidden" name="userId" value={member.id} />
-                      <input
-                        type="hidden"
-                        name="role"
-                        value={member.role === "ADMIN" ? "STAFF" : "ADMIN"}
-                      />
-                      {/* Clicking the badge flips the role. */}
-                      <button
-                        type="submit"
-                        title={
-                          member.role === "ADMIN"
-                            ? "Make crew"
-                            : "Make manager"
-                        }
-                        className="transition-transform hover:scale-105 active:scale-95"
-                      >
-                        <RoleBadge role={member.role} />
-                      </button>
-                    </form>
-                    <RemoveDialog member={member} />
-                  </div>
-                )}
-              </li>
-            );
-          })}
-        </ul>
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-2">
+                          <p className="truncate text-sm font-bold text-[#25130b]">
+                            {member.name}
+                          </p>
+                          {isSelf ? (
+                            <span className="rounded-full bg-orange-950/[0.06] px-2 py-0.5 text-[10px] font-black uppercase tracking-wider text-orange-950/45">
+                              You
+                            </span>
+                          ) : null}
+                        </div>
+                        <p className="truncate text-xs text-orange-950/45">
+                          {member.email}
+                        </p>
+                      </div>
+                    </div>
+                  </TableCell>
+                  <TableCell className="hidden sm:table-cell">
+                    {isOnline ? (
+                      <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-600/10 px-2.5 py-1 text-[11px] font-black uppercase tracking-wider text-emerald-700">
+                        <span className="size-1.5 rounded-full bg-emerald-500" />
+                        Active now
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center gap-1.5 rounded-full bg-orange-950/[0.05] px-2.5 py-1 text-[11px] font-bold uppercase tracking-wider text-orange-950/35">
+                        <span className="size-1.5 rounded-full bg-orange-950/20" />
+                        Offline
+                      </span>
+                    )}
+                  </TableCell>
+                  <TableCell>
+                    {isSelf ? (
+                      /* No self-service on your own account, avoids lockout. */
+                      <RoleBadge role={member.role} />
+                    ) : (
+                      <form action={setStaffRole}>
+                        <input type="hidden" name="userId" value={member.id} />
+                        <input
+                          type="hidden"
+                          name="role"
+                          value={member.role === "ADMIN" ? "STAFF" : "ADMIN"}
+                        />
+                        {/* Clicking the badge flips the role. */}
+                        <button
+                          type="submit"
+                          title={
+                            member.role === "ADMIN"
+                              ? "Make crew"
+                              : "Make manager"
+                          }
+                          className="transition-transform hover:scale-105 active:scale-95"
+                        >
+                          <RoleBadge role={member.role} />
+                        </button>
+                      </form>
+                    )}
+                  </TableCell>
+                  <TableCell className="pr-5 text-right">
+                    {isSelf ? null : (
+                      <div className="flex justify-end">
+                        <RemoveDialog member={member} />
+                      </div>
+                    )}
+                  </TableCell>
+                </TableRow>
+              );
+            })}
+          </TableBody>
+        </Table>
       </div>
     </div>
   );

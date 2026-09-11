@@ -18,12 +18,12 @@ function toConnectionState(pusherState: string): ConnectionState {
 const labels: Record<ConnectionState, string> = {
   live: "Live",
   connecting: "Connecting…",
-  offline: "Offline — orders may be missing",
+  offline: "Offline, orders may be missing",
 };
 
 /**
  * Tells the crew whether the board is actually receiving realtime updates.
- * A frozen board looks identical to a quiet night — this dot is the difference.
+ * A frozen board looks identical to a quiet night: this dot is the difference.
  */
 export function ConnectionIndicator() {
   // Start "connecting" on both server and client (hydration-safe), then sync to
