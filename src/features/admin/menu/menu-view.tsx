@@ -3,17 +3,10 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useMemo, useState } from "react";
-import {
-  AlertTriangle,
-  Edit,
-  ImageOff,
-  Plus,
-  Search,
-  Star,
-  Utensils,
-} from "lucide-react";
+import { Edit, ImageOff, Plus, Search, Star, Utensils } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { ADMIN_MOBILE_HEADER_OFFSET_CLASS } from "@/components/admin/admin-header-offset";
 import {
   Table,
   TableBody,
@@ -45,13 +38,6 @@ export type AdminMenuRow = {
 };
 
 const ALL = "ALL";
-
-/* Availability tabs: the manager's main lens on the menu. */
-const availabilityTabs = [
-  [ALL, "All"],
-  ["LIVE", "Live"],
-  ["HIDDEN", "Hidden"],
-] as const;
 
 type StockState = "untracked" | "ok" | "low" | "out";
 
@@ -185,13 +171,10 @@ export function MenuView({
   /** Optional view-switcher (Products | Categories) rendered under the header. */
   tabs?: React.ReactNode;
 }) {
-  const [tab, setTab] = useState<string>(ALL);
   const [category, setCategory] = useState<string>(ALL);
-  const [attentionOnly, setAttentionOnly] = useState(false);
   const [query, setQuery] = useState("");
 
-  // Search + category narrow the pool; tab counts and the attention chip are
-  // computed against this pool so every number stays truthful while filtering.
+  // Search + category narrow the pool that the table renders.
   const pool = useMemo(() => {
     const q = query.trim().toLowerCase();
     return products.filter(
@@ -203,29 +186,7 @@ export function MenuView({
     );
   }, [products, category, query]);
 
-  const attentionCount = useMemo(
-    () =>
-      pool.filter((product) => {
-        const state = stockState(product);
-        return state === "low" || state === "out";
-      }).length,
-    [pool],
-  );
-
-  const tabCounts: Record<string, number> = {
-    [ALL]: pool.length,
-    LIVE: pool.filter((product) => product.isAvailable).length,
-    HIDDEN: pool.filter((product) => !product.isAvailable).length,
-  };
-
-  const filtered = pool.filter(
-    (product) =>
-      (tab === ALL ||
-        (tab === "LIVE" ? product.isAvailable : !product.isAvailable)) &&
-      (!attentionOnly ||
-        stockState(product) === "low" ||
-        stockState(product) === "out"),
-  );
+  const filtered = pool;
 
   // Category chips come from the data itself so empty categories don't clutter.
   const categories = useMemo(() => {
@@ -240,11 +201,8 @@ export function MenuView({
     <div className="space-y-5">
       {/* ── Header ── */}
       <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-        <div>
-          <p className="text-xs font-black uppercase tracking-wide text-red-700">
-            Admin
-          </p>
-          <h1 className="mt-1 text-2xl font-black text-[#25130b]">Menu</h1>
+        <div className={ADMIN_MOBILE_HEADER_OFFSET_CLASS}>
+          <h1 className="text-2xl font-black text-[#25130b]">Menu</h1>
           <p className="mt-1 text-sm text-orange-950/45">
             Products, pricing, availability, and stock.
           </p>
@@ -282,78 +240,43 @@ export function MenuView({
 
       {products.length > 0 ? (
         <>
-          {/* ── Availability tabs + attention chip ── */}
+          {/* ── Category filters ── */}
           <div className="flex flex-wrap items-center gap-2">
-            {availabilityTabs.map(([value, label]) => (
-              <button
-                key={value}
-                type="button"
-                onClick={() => setTab(value)}
-                className={cn(
-                  "inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-bold ring-1 transition-colors",
-                  tab === value
-                    ? "bg-[#25130b] text-white ring-[#25130b]"
-                    : "bg-white text-orange-950/60 ring-orange-900/10 hover:text-red-700",
-                )}
-              >
-                {label}
-                <span className="tabular-nums opacity-70">
-                  {tabCounts[value]}
-                </span>
-              </button>
-            ))}
-
-            {attentionCount > 0 ? (
-              <button
-                type="button"
-                onClick={() => setAttentionOnly((current) => !current)}
-                className={cn(
-                  "inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-bold ring-1 transition-colors",
-                  attentionOnly
-                    ? "bg-red-600 text-white ring-red-600"
-                    : "bg-red-50 text-red-700 ring-red-200 hover:bg-red-100",
-                )}
-              >
-                <AlertTriangle className="size-3.5" aria-hidden="true" />
-                Needs attention
-                <span className="tabular-nums opacity-80">
-                  {attentionCount}
-                </span>
-              </button>
-            ) : null}
-
-            {/* Category chips, pushed right on wide screens */}
+            {/* Horizontal scroll instead of wrap so a long category list
+                stays one tidy line. */}
             {categories.length > 1 ? (
-              <div className="flex flex-wrap items-center gap-1.5 sm:ml-auto">
-                <button
-                  type="button"
-                  onClick={() => setCategory(ALL)}
-                  className={cn(
-                    "rounded-full px-3 py-1.5 text-xs font-bold transition-colors",
-                    category === ALL
-                      ? "bg-red-600 text-white"
-                      : "bg-white text-orange-950/55 ring-1 ring-orange-900/10 hover:text-red-700",
-                  )}
-                >
-                  All categories
-                </button>
-                {categories.map(([id, name]) => (
+              <div className="min-w-0 max-w-full overflow-x-auto [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+                <div className="flex w-max items-center gap-1.5">
                   <button
-                    key={id}
                     type="button"
-                    onClick={() =>
-                      setCategory((current) => (current === id ? ALL : id))
-                    }
+                    onClick={() => setCategory(ALL)}
                     className={cn(
-                      "rounded-full px-3 py-1.5 text-xs font-bold transition-colors",
-                      category === id
-                        ? "bg-red-600 text-white"
-                        : "bg-white text-orange-950/55 ring-1 ring-orange-900/10 hover:text-red-700",
+                      "shrink-0 rounded-full px-3 py-1.5 text-xs font-bold ring-1 transition-colors",
+                      category === ALL
+                        ? "bg-[#25130b] text-white ring-[#25130b]"
+                        : "bg-white text-orange-950/55 ring-orange-900/10 hover:text-red-700",
                     )}
                   >
-                    {name}
+                    All categories
                   </button>
-                ))}
+                  {categories.map(([id, name]) => (
+                    <button
+                      key={id}
+                      type="button"
+                      onClick={() =>
+                        setCategory((current) => (current === id ? ALL : id))
+                      }
+                      className={cn(
+                        "shrink-0 rounded-full px-3 py-1.5 text-xs font-bold ring-1 transition-colors",
+                        category === id
+                          ? "bg-[#25130b] text-white ring-[#25130b]"
+                          : "bg-white text-orange-950/55 ring-orange-900/10 hover:text-red-700",
+                      )}
+                    >
+                      {name}
+                    </button>
+                  ))}
+                </div>
               </div>
             ) : null}
           </div>

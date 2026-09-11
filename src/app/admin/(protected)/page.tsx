@@ -2,6 +2,7 @@ import Link from "next/link";
 import { ArrowRight, Clock, ShoppingCart, TrendingUp, Utensils } from "lucide-react";
 
 import { requireManagerPage } from "@/features/admin/auth/guards";
+import { ADMIN_MOBILE_HEADER_OFFSET_CLASS } from "@/components/admin/admin-header-offset";
 import { formatPeso } from "@/lib/format";
 import { prisma } from "@/server/db/prisma";
 import { SalesAnalyticsChart } from "@/features/admin/sales-analytics-chart";
@@ -244,11 +245,8 @@ export default async function AdminDashboardPage() {
   return (
     <div className="space-y-6">
       {/* Page header */}
-      <div>
-        <p className="text-xs font-black uppercase tracking-wide text-red-700">
-          Admin
-        </p>
-        <h1 className="mt-1 text-2xl font-black text-[#25130b]">Dashboard</h1>
+      <div className={ADMIN_MOBILE_HEADER_OFFSET_CLASS}>
+        <h1 className="text-2xl font-black text-[#25130b]">Dashboard</h1>
         <p className="mt-1 text-sm font-medium text-orange-950/40">
           {todayLabel}
         </p>

@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { requireManagerPage } from "@/features/admin/auth/guards";
+import { ADMIN_MOBILE_HEADER_OFFSET_CLASS } from "@/components/admin/admin-header-offset";
 import { CategoriesManager } from "@/features/admin/menu/categories-manager";
 import { MenuView } from "@/features/admin/menu/menu-view";
 import {
@@ -59,11 +60,8 @@ export default async function AdminMenuPage({
 
     return (
       <div className="space-y-5">
-        <div>
-          <p className="text-xs font-black uppercase tracking-wide text-red-700">
-            Admin
-          </p>
-          <h1 className="mt-1 text-2xl font-black text-[#25130b]">Menu</h1>
+        <div className={ADMIN_MOBILE_HEADER_OFFSET_CLASS}>
+          <h1 className="text-2xl font-black text-[#25130b]">Menu</h1>
           <p className="mt-1 text-sm text-orange-950/45">
             Menu groups: the order here is the order customers see.
           </p>

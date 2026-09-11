@@ -11,6 +11,7 @@ import { PresenceBeacon } from "@/features/admin/realtime/presence-beacon";
 import { getCurrentSession } from "@/server/auth/session";
 import { prisma } from "@/server/db/prisma";
 import { AdminSidebar } from "@/components/admin/admin-sidebar";
+import { getStoreSettings } from "@/features/admin/settings/queries";
 
 /**
  * Operational alerts for the sidebar: the three things that actually need a
@@ -50,7 +51,10 @@ export default async function ProtectedAdminLayout({
   }
 
   const isAdmin = session.user.role === UserRole.ADMIN;
-  const alerts = await getSidebarAlerts();
+  const [alerts, storeSettings] = await Promise.all([
+    getSidebarAlerts(),
+    getStoreSettings(),
+  ]);
 
   return (
     <>
@@ -65,6 +69,7 @@ export default async function ProtectedAdminLayout({
         <AdminSidebar
           isManager={isAdmin}
           alerts={alerts}
+          isAcceptingOrders={storeSettings.isAcceptingOrders}
           user={{
             name: session.user.name ?? null,
             email: session.user.email ?? null,
@@ -75,10 +80,11 @@ export default async function ProtectedAdminLayout({
 
         {/* Main body: pl-64 on desktop so the fixed sidebar doesn't overlap */}
         <div className="flex-1 lg:pl-64 flex flex-col min-w-0">
-          {/* MAIN VIEW CONTENT CONTAINER */}
-          <main className="flex-1 px-4 py-6 lg:px-8 lg:py-7 w-full">
-            {/* Mobile-only spacer so page headers clear the blob-shaped trigger */}
-            <div className="h-24 lg:hidden" />
+          {/* MAIN VIEW CONTENT CONTAINER. pt-24 on mobile/tablet clears the
+              floating top bar from AdminSidebar (top-3 margin + h-14 +
+              breathing room); lg:py-7 replaces it once that bar is hidden
+              and the real sidebar takes over. */}
+          <main className="flex-1 px-4 pb-6 pt-24 lg:px-8 lg:py-7 w-full">
             {children}
           </main>
         </div>

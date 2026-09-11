@@ -1310,16 +1310,6 @@
     }
   }
 
-  /* Organic blob behind the mobile sidebar trigger, flush with the corner. */
-  .admin-menu-blob {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 84px;
-    height: 84px;
-    background: #0c0a09;
-    border-radius: 0 55% 60% 100% / 0 45% 75% 100%;
-  }
 
   /* Hide the native up/down spinner on admin number inputs (price, stock,
      etc.). Typing the value directly is enough; the stepper was dead weight. */

@@ -1,10 +1,11 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { ChevronRight, ClipboardList, Download, FilterX, Search } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { ADMIN_MOBILE_HEADER_OFFSET_CLASS } from "@/components/admin/admin-header-offset";
 import {
   Table,
   TableBody,
@@ -96,6 +97,25 @@ export function OrdersView({ orders }: { orders: AdminOrderRow[] }) {
   const router = useRouter();
   const [status, setStatus] = useState<string>(ALL);
   const [query, setQuery] = useState("");
+  const tableScrollRef = useRef<HTMLDivElement>(null);
+
+  // Table's own wrapper div sets only overflow-x, and per CSS spec a
+  // non-"visible" overflow-x forces the browser to compute overflow-y as
+  // "auto" too; there's no way to keep overflow-y at "visible" next to it,
+  // inline style or not. That silently made the wrapper itself (which never
+  // actually scrolls, since it's never height-constrained) the sticky
+  // header's containing scroll box instead of the pane we want. Rather than
+  // fight the spec, give the wrapper the height cap directly so it becomes
+  // the one real scrolling pane, and drop the redundant outer div.
+  useEffect(() => {
+    const container = tableScrollRef.current?.querySelector<HTMLElement>(
+      '[data-slot="table-container"]',
+    );
+    if (container) {
+      container.style.maxHeight = "65vh";
+      container.style.overflowY = "auto";
+    }
+  });
 
   // Search narrows the pool; tab counts are computed against this pool so the
   // numbers stay truthful while searching.
@@ -151,11 +171,8 @@ export function OrdersView({ orders }: { orders: AdminOrderRow[] }) {
     <div className="space-y-5">
       {/* ── Header ── */}
       <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-        <div>
-          <p className="text-xs font-black uppercase tracking-wide text-red-700">
-            Admin
-          </p>
-          <h1 className="mt-1 text-2xl font-black text-[#25130b]">Orders</h1>
+        <div className={ADMIN_MOBILE_HEADER_OFFSET_CLASS}>
+          <h1 className="text-2xl font-black text-[#25130b]">Orders</h1>
           <p className="mt-1 text-sm text-orange-950/45">
             Track incoming orders and update kitchen/payment status.
           </p>
@@ -329,10 +346,16 @@ export function OrdersView({ orders }: { orders: AdminOrderRow[] }) {
                 </ul>
 
                 {/* Desktop/tablet: full table. */}
-                <div className="hidden max-h-[65vh] overflow-auto sm:block">
+                <div
+                  ref={tableScrollRef}
+                  className="hidden sm:block"
+                >
                   <Table className="admin-table">
-                    <TableHeader className="sticky top-0 z-10 bg-white shadow-[0_1px_0_rgba(120,53,15,0.08)]">
-                      <TableRow>
+                    <TableHeader>
+                      {/* position:sticky goes on each <th>, not <thead>;
+                          sticky on the row-group itself doesn't reliably
+                          stick across browsers in a table layout. */}
+                      <TableRow className="[&>th]:sticky [&>th]:top-0 [&>th]:z-10 [&>th]:bg-white [&>th]:shadow-[0_1px_0_rgba(120,53,15,0.08)]">
                         <TableHead>Order</TableHead>
                         <TableHead>Customer</TableHead>
                         <TableHead>Status</TableHead>

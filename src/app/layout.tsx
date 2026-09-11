@@ -36,7 +36,10 @@ export default function RootLayout({
       data-scroll-behavior="smooth"
       suppressHydrationWarning
     >
-      <body className="relative flex min-h-screen flex-col">
+      <body
+        className="relative flex min-h-screen flex-col overflow-x-hidden"
+        suppressHydrationWarning
+      >
         {children}
         <Toaster
           position="top-center"

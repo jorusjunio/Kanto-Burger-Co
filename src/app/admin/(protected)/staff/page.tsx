@@ -1,4 +1,5 @@
 import { requireManagerPage } from "@/features/admin/auth/guards";
+import { ADMIN_MOBILE_HEADER_OFFSET_CLASS } from "@/components/admin/admin-header-offset";
 import { StaffManager } from "@/features/admin/staff/staff-manager";
 import { getStaffMembers } from "@/features/admin/staff/queries";
 import { isGoogleAuthEnabled } from "@/server/auth/config";
@@ -9,11 +10,8 @@ export default async function AdminStaffPage() {
 
   return (
     <div className="space-y-5">
-      <div>
-        <p className="text-xs font-black uppercase tracking-wide text-red-700">
-          Admin
-        </p>
-        <h1 className="mt-1 text-2xl font-black text-[#25130b]">Staff</h1>
+      <div className={ADMIN_MOBILE_HEADER_OFFSET_CLASS}>
+        <h1 className="text-2xl font-black text-[#25130b]">Staff</h1>
         <p className="mt-1 text-sm text-orange-950/45">
           Who can sign in: managers see everything, crew get the kitchen board.
         </p>

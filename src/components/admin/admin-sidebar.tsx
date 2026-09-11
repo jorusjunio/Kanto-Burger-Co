@@ -3,9 +3,10 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   AlertTriangle,
+  Bell,
   Check,
   Clock,
   LayoutDashboard,
@@ -100,49 +101,51 @@ function SidebarAlertsBlock({
     alerts.pendingOrders + alerts.paymentsToVerify + alerts.lowStock;
 
   return (
-    <div className="border-t border-white/8 px-3 py-4">
-      <p className="mb-2 px-3 text-[10px] font-bold uppercase tracking-widest text-stone-500">
-        Needs attention
-      </p>
-      {total === 0 ? (
-        <p className="flex items-center gap-2 px-3 py-1.5 text-xs font-bold text-stone-500">
-          <Check className="size-4 text-emerald-500" aria-hidden="true" />
-          All clear
+    <div className="shrink-0 px-3 py-4">
+      <div className="rounded-xl bg-white/[0.04] p-3 ring-1 ring-white/5">
+        <p className="mb-2 px-1 text-[10px] font-bold uppercase tracking-widest text-stone-500">
+          Needs attention
         </p>
-      ) : (
-        <div className="space-y-0.5">
-          {alerts.pendingOrders > 0 ? (
-            <AlertRow
-              href="/kitchen"
-              label={`New order${alerts.pendingOrders !== 1 ? "s" : ""} waiting`}
-              count={alerts.pendingOrders}
-              Icon={Clock}
-              tone="red"
-              onNavigate={onNavigate}
-            />
-          ) : null}
-          {alerts.paymentsToVerify > 0 ? (
-            <AlertRow
-              href="/admin/orders"
-              label="GCash to verify"
-              count={alerts.paymentsToVerify}
-              Icon={Smartphone}
-              tone="sky"
-              onNavigate={onNavigate}
-            />
-          ) : null}
-          {alerts.lowStock > 0 ? (
-            <AlertRow
-              href="/admin/menu"
-              label="Low on stock"
-              count={alerts.lowStock}
-              Icon={AlertTriangle}
-              tone="amber"
-              onNavigate={onNavigate}
-            />
-          ) : null}
-        </div>
-      )}
+        {total === 0 ? (
+          <p className="flex items-center gap-2 px-1 py-1.5 text-xs font-bold text-stone-500">
+            <Check className="size-4 text-emerald-500" aria-hidden="true" />
+            All clear
+          </p>
+        ) : (
+          <div className="space-y-0.5">
+            {alerts.pendingOrders > 0 ? (
+              <AlertRow
+                href="/kitchen"
+                label={`New order${alerts.pendingOrders !== 1 ? "s" : ""} waiting`}
+                count={alerts.pendingOrders}
+                Icon={Clock}
+                tone="red"
+                onNavigate={onNavigate}
+              />
+            ) : null}
+            {alerts.paymentsToVerify > 0 ? (
+              <AlertRow
+                href="/admin/orders"
+                label="GCash to verify"
+                count={alerts.paymentsToVerify}
+                Icon={Smartphone}
+                tone="sky"
+                onNavigate={onNavigate}
+              />
+            ) : null}
+            {alerts.lowStock > 0 ? (
+              <AlertRow
+                href="/admin/menu"
+                label="Low on stock"
+                count={alerts.lowStock}
+                Icon={AlertTriangle}
+                tone="amber"
+                onNavigate={onNavigate}
+              />
+            ) : null}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
@@ -170,9 +173,9 @@ function SidebarBody({
   );
 
   return (
-    <div className="flex h-full flex-col bg-stone-950">
+    <div className="flex h-full min-h-0 flex-col bg-stone-950">
       {/* Brand header */}
-      <div className="flex items-center justify-between px-5 py-6">
+      <div className="shrink-0 flex items-center justify-between px-5 py-6">
         <div className="flex items-center gap-3">
           <span className="flex size-9 items-center justify-center rounded-full bg-white shadow-sm">
             <Image
@@ -200,8 +203,10 @@ function SidebarBody({
         ) : null}
       </div>
 
-      {/* Navigation */}
-      <nav className="flex-1 space-y-0.5 border-t border-white/8 px-3 py-5">
+      {/* Navigation: the only part that scrolls, so the brand header above
+          and the alerts/account rows below always stay on screen even on
+          short mobile viewports. */}
+      <nav className="min-h-0 flex-1 overflow-y-auto space-y-0.5 border-t border-white/8 px-3 py-5">
         <p className="mb-2 px-3 text-[10px] font-bold uppercase tracking-widest text-stone-500">
           Menu
         </p>
@@ -246,7 +251,7 @@ function SidebarBody({
 
       {/* Account + sign out: single quiet row; who's signed in lives here,
           not in every page header. */}
-      <div className="border-t border-white/8 px-4 py-4">
+      <div className="shrink-0 border-t border-white/8 px-4 py-4">
         <div className="flex items-center gap-3">
           <span className="relative shrink-0">
             {user.image ? (
@@ -292,12 +297,38 @@ export function AdminSidebar({
   isManager,
   user,
   alerts,
+  isAcceptingOrders,
 }: {
   isManager: boolean;
   user: SidebarUser;
   alerts: SidebarAlerts;
+  isAcceptingOrders: boolean;
 }) {
   const [isOpen, setIsOpen] = useState(false);
+  const [notifOpen, setNotifOpen] = useState(false);
+  const alertTotal =
+    alerts.pendingOrders + alerts.paymentsToVerify + alerts.lowStock;
+
+  // Top bar collapses a little once the page scrolls past a small
+  // threshold, a subtle "settled" state, not a hide/show toggle.
+  const [collapsed, setCollapsed] = useState(false);
+  const tickingRef = useRef(false);
+
+  useEffect(() => {
+    const THRESHOLD = 24;
+
+    function handleScroll() {
+      if (tickingRef.current) return;
+      tickingRef.current = true;
+      requestAnimationFrame(() => {
+        setCollapsed(window.scrollY > THRESHOLD);
+        tickingRef.current = false;
+      });
+    }
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   return (
     <>
@@ -306,17 +337,103 @@ export function AdminSidebar({
         <SidebarBody isManager={isManager} user={user} alerts={alerts} />
       </aside>
 
-      {/* Mobile trigger, an organic corner blob instead of a plain floating circle */}
-      <div className="fixed left-0 top-0 z-50 lg:hidden">
-        <div className="admin-menu-blob" aria-hidden="true" />
+      {/* Mobile/tablet: a floating top nav bar (not the desktop sidebar's
+          replacement, just the drawer trigger + brand context, since the
+          real sidebar only exists at lg+). Side margins make it read as a
+          compact, self-contained bar instead of an edge-to-edge strip with
+          an awkward empty middle. Stays put while content scrolls underneath
+          it; layout.tsx reserves matching top clearance on <main>. */}
+      <div
+        className={cn(
+          "fixed top-3 z-30 flex h-14 items-center gap-3 rounded-xl bg-[#f7f3ea] px-4 shadow-[0_2px_10px_rgba(0,0,0,0.08)] ring-1 ring-orange-900/8 transition-[left,right] duration-300 ease-out lg:hidden",
+          collapsed ? "inset-x-10" : "inset-x-3",
+        )}
+      >
+        {/* Left cluster */}
+        <div className="flex shrink-0 items-center gap-3">
+          <button
+            type="button"
+            onClick={() => {
+              setNotifOpen(false);
+              setIsOpen(true);
+            }}
+            aria-label="Open navigation menu"
+            className="flex size-10 shrink-0 items-center justify-center rounded-full bg-[#0c0a09] outline-none transition-transform duration-150 active:scale-95 focus-visible:bg-red-800"
+          >
+            <Menu className="size-4 text-white" aria-hidden="true" />
+          </button>
+          <span className="h-5 w-px shrink-0 bg-orange-900/15" aria-hidden="true" />
+          <span className="text-xs font-black uppercase tracking-wide text-red-700">
+            Admin
+          </span>
+        </div>
+
+        {/* Middle: read-only store status, sourced from the same
+            isAcceptingOrders toggle as the Settings page, otherwise this
+            is buried there and no one glances at it. */}
+        <div className="flex flex-1 items-center justify-center">
+          <span className="inline-flex items-center gap-1.5 text-[11px] font-bold text-orange-950/50">
+            <span
+              className={cn(
+                "size-1.5 shrink-0 rounded-full",
+                isAcceptingOrders ? "bg-emerald-500" : "bg-red-500",
+              )}
+              aria-hidden="true"
+            />
+            Store {isAcceptingOrders ? "open" : "closed"}
+          </span>
+        </div>
+
+        {/* Notification bell: the same "Needs attention" alerts the desktop
+            sidebar nav shows, surfaced here since mobile/tablet has no nav
+            rail to put them in. */}
         <button
           type="button"
-          onClick={() => setIsOpen(true)}
-          aria-label="Open navigation"
-          className="absolute left-4 top-4 flex size-8 items-center justify-center text-white transition-transform duration-200 hover:scale-105 active:scale-95"
+          onClick={() => setNotifOpen((current) => !current)}
+          aria-label="Notifications"
+          aria-expanded={notifOpen}
+          className={cn(
+            "relative flex size-10 shrink-0 items-center justify-center rounded-full outline-none transition-all duration-200 ease-out active:scale-90 focus-visible:bg-orange-950/10",
+            notifOpen
+              ? "bg-orange-950/10 text-orange-950"
+              : "text-orange-950/60 hover:bg-orange-950/5 hover:text-orange-950",
+          )}
         >
-          <Menu className="size-5" />
+          <Bell
+            className={cn(
+              "size-[18px] transition-transform duration-200 ease-out",
+              notifOpen && "rotate-12",
+            )}
+            aria-hidden="true"
+          />
+          {alertTotal > 0 ? (
+            <span className="absolute right-2 top-2 size-2 rounded-full bg-red-600 ring-2 ring-[#f7f3ea]" />
+          ) : null}
         </button>
+      </div>
+
+      {/* Notification panel + its own click-outside backdrop. Always
+          mounted (not conditionally rendered) so opening/closing animates
+          via opacity + scale instead of popping in/out instantly. */}
+      <div
+        className={cn(
+          "fixed inset-0 z-30 transition-opacity duration-200 lg:hidden",
+          notifOpen ? "opacity-100" : "pointer-events-none opacity-0",
+        )}
+        onClick={() => setNotifOpen(false)}
+      />
+      <div
+        className={cn(
+          "fixed right-3 top-20 z-40 w-72 max-w-[calc(100vw-1.5rem)] origin-top-right overflow-hidden rounded-xl bg-stone-950 shadow-2xl ring-1 ring-black/20 transition-all duration-200 ease-out lg:hidden",
+          notifOpen
+            ? "translate-y-0 scale-100 opacity-100"
+            : "pointer-events-none -translate-y-1 scale-95 opacity-0",
+        )}
+      >
+        <SidebarAlertsBlock
+          alerts={alerts}
+          onNavigate={() => setNotifOpen(false)}
+        />
       </div>
 
       {/* Mobile overlay */}
@@ -331,7 +448,7 @@ export function AdminSidebar({
       {/* Mobile drawer */}
       <aside
         className={cn(
-          "fixed left-0 top-0 z-50 h-screen w-64 shadow-2xl transition-transform duration-300 lg:hidden",
+          "fixed left-0 top-0 z-50 h-dvh w-64 shadow-2xl transition-transform duration-300 lg:hidden",
           isOpen ? "translate-x-0" : "-translate-x-full",
         )}
       >
