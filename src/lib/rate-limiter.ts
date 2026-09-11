@@ -172,3 +172,6 @@ export const authRateLimiter = new RateLimiter(10, 15 * 60 * 1000, "rl:auth"); /
 // Throttles the payment settlement webhook (keyed per intent id) so the settle
 // endpoint can't be brute-forced independently of checkout.
 export const paymentCallbackRateLimiter = new RateLimiter(20, 60 * 1000, "rl:pay"); // 20 / min
+// Caps how often a customer can re-open payment for one order — every attempt
+// may create resources at the gateway.
+export const paymentResumeRateLimiter = new RateLimiter(5, 10 * 60 * 1000, "rl:payresume"); // 5 / 10 min

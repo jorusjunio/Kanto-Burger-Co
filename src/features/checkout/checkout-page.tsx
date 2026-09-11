@@ -31,6 +31,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useCartStore } from "@/features/cart/cart-store";
+import { goToGateway } from "@/features/payments/gateway-redirect";
 import { formatPeso } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
@@ -132,7 +133,7 @@ export function CheckoutPage({
       // Online (GCash) orders go to the payment gateway first; other methods
       // go straight to the order tracker.
       if (result.redirectUrl) {
-        router.push(result.redirectUrl);
+        goToGateway(router, result.redirectUrl);
         return;
       }
 

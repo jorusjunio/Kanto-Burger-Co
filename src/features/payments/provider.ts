@@ -1,6 +1,7 @@
 import { logger } from "@/lib/logger";
 
 import { mockPaymentProvider } from "./providers/mock";
+import { paymongoPaymentProvider } from "./providers/paymongo";
 import type { PaymentProvider } from "./types";
 
 // Registry of available providers. Add real providers (maya, stripe, xendit)
@@ -8,6 +9,7 @@ import type { PaymentProvider } from "./types";
 // interface, so the rest of the app is untouched.
 const providers: Record<string, PaymentProvider> = {
   mock: mockPaymentProvider,
+  paymongo: paymongoPaymentProvider,
 };
 
 /** Resolve the active provider from PAYMENT_PROVIDER (defaults to mock). */

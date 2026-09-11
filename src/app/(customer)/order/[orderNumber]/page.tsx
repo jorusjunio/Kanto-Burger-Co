@@ -4,6 +4,8 @@ import { RealtimeOrderListener } from "@/features/orders/realtime-order-listener
 import { formatPeso } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import { OrderReceiptClient } from "@/features/orders/components/order-receipt-client";
+import { canResumePayment } from "@/features/payments/resume";
+import { ResumePaymentButton } from "@/features/payments/resume-payment-button";
 
 type OrderPageProps = {
   params: Promise<{
@@ -151,6 +153,23 @@ export default async function OrderPage({ params, searchParams }: OrderPageProps
               <p className="mt-0.5 text-xs font-black text-[#25130b]">{order.paymentStatus}</p>
             </div>
           </div>
+
+          {canResumePayment(order) ? (
+            <div className="mx-3 mb-3 flex flex-col gap-2 rounded-lg border border-amber-300/60 bg-amber-50 p-3 sm:mx-4 sm:mb-4 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <p className="text-xs font-black text-amber-900">
+                  Payment still pending
+                </p>
+                <p className="mt-0.5 text-[10px] font-medium text-amber-800/80">
+                  Finish paying with GCash — if you already started, you&apos;ll pick up where you left off.
+                </p>
+              </div>
+              <ResumePaymentButton
+                orderNumber={order.orderNumber}
+                trackingToken={order.trackingToken}
+              />
+            </div>
+          ) : null}
 
           {/* Items List */}
           <div className="border-y-2 border-dashed border-orange-900/10 px-3 py-3 sm:px-4 sm:py-4">

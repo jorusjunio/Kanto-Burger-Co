@@ -38,4 +38,13 @@ export const mockPaymentProvider: PaymentProvider = {
   parseCallback(payload: unknown): PaymentCallback {
     return callbackSchema.parse(payload);
   },
+
+  // Mock sessions never expire — the gateway screen works as long as the
+  // order exists, so the same session is always resumable.
+  async resumeSession(intentId: string): Promise<PaymentSession> {
+    return {
+      intentId,
+      redirectUrl: `/checkout/pay/${encodeURIComponent(intentId)}`,
+    };
+  },
 };

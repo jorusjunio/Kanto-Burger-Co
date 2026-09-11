@@ -32,4 +32,12 @@ export interface PaymentProvider {
   createSession(input: CreatePaymentSessionInput): Promise<PaymentSession>;
   /** Normalize a provider-specific webhook body into a PaymentCallback. */
   parseCallback(payload: unknown): PaymentCallback;
+  /**
+   * Re-open an existing session so a customer can finish paying an order they
+   * abandoned. Returns null when the session is gone (expired, consumed) and
+   * the caller should mint a fresh one instead — minting unconditionally would
+   * orphan a still-payable session, and a payment against it could no longer
+   * be matched back to the order.
+   */
+  resumeSession(intentId: string): Promise<PaymentSession | null>;
 }

@@ -2,8 +2,10 @@ import { notFound, redirect } from "next/navigation";
 import { CreditCard, Lock } from "lucide-react";
 
 import { getPaymentSessionByIntentId } from "@/features/payments/queries";
+import { getQrPhStatus } from "@/features/payments/providers/paymongo";
 import { signIntent } from "@/features/payments/signing";
 import { MockGatewayForm } from "@/features/payments/mock-gateway-form";
+import { QrPhGateway } from "@/features/payments/qrph-gateway";
 import { formatPeso } from "@/lib/format";
 
 export default async function PaymentGatewayPage({
@@ -23,7 +25,16 @@ export default async function PaymentGatewayPage({
     redirect(`/order/${session.orderNumber}?token=${session.trackingToken}`);
   }
 
-  const signature = signIntent(intentId);
+  const isPaymongo = session.paymentProvider === "paymongo";
+  const qr = isPaymongo ? await getQrPhStatus(intentId) : null;
+
+  // Sandbox key: PayMongo hands back a hosted Authorize/Fail simulator
+  // instead of a real, scannable QR — send the customer straight there.
+  if (qr?.testUrl) {
+    redirect(qr.testUrl);
+  }
+
+  const signature = isPaymongo ? null : signIntent(intentId);
 
   return (
     <main className="storefront-bg flex min-h-[100dvh] items-center justify-center px-4 py-16">
@@ -36,7 +47,9 @@ export default async function PaymentGatewayPage({
             <p className="text-[11px] font-black uppercase tracking-widest text-sky-600">
               Secure Payment
             </p>
-            <h1 className="text-lg font-black text-[#25130b]">GCash Gateway</h1>
+            <h1 className="text-lg font-black text-[#25130b]">
+              {isPaymongo ? "GCash / QR Ph" : "GCash Gateway"}
+            </h1>
           </div>
         </div>
 
@@ -53,17 +66,28 @@ export default async function PaymentGatewayPage({
         </div>
 
         <div className="my-6">
-          <MockGatewayForm
-            intentId={intentId}
-            signature={signature}
-            orderNumber={session.orderNumber}
-            trackingToken={session.trackingToken}
-          />
+          {isPaymongo ? (
+            <QrPhGateway
+              intentId={intentId}
+              qrImageUrl={qr?.qrImageUrl ?? null}
+              orderNumber={session.orderNumber}
+              trackingToken={session.trackingToken}
+            />
+          ) : (
+            <MockGatewayForm
+              intentId={intentId}
+              signature={signature!}
+              orderNumber={session.orderNumber}
+              trackingToken={session.trackingToken}
+            />
+          )}
         </div>
 
         <p className="flex items-center justify-center gap-1.5 text-[11px] font-medium text-orange-950/40">
           <Lock className="size-3" aria-hidden="true" />
-          Simulated gateway — no real charge is made.
+          {isPaymongo
+            ? "Secured by PayMongo QR Ph."
+            : "Simulated gateway — no real charge is made."}
         </p>
       </div>
     </main>

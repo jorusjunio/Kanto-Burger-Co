@@ -12,6 +12,7 @@ export async function getPaymentSessionByIntentId(intentId: string) {
         total: true,
         paymentMethod: true,
         paymentStatus: true,
+        paymentProvider: true,
       },
     });
   } catch (error) {

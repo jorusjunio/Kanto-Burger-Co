@@ -256,7 +256,8 @@ export async function createOrder(
   // Automated gateway: for online (GCash) orders, open a payment session and
   // hand the customer a redirect URL. Runs AFTER the order transaction commits,
   // so it never touches the stock-decrement locking. A failure here leaves a
-  // valid PENDING order the customer can still pay from their tracker.
+  // valid PENDING order the customer can still pay from their tracker via
+  // `resumePayment` (features/payments/resume-actions.ts).
   let redirectUrl: string | undefined;
   if (values.paymentMethod === "GCASH") {
     try {
