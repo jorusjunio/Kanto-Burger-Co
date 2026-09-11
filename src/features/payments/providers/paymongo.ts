@@ -2,6 +2,7 @@ import { z } from "zod";
 
 import { getRequiredEnv } from "@/server/env";
 
+import { hasQrExpired } from "../qrph-view";
 import type {
   CreatePaymentSessionInput,
   PaymentCallback,
@@ -180,12 +181,11 @@ export const paymongoPaymentProvider: PaymentProvider = {
 
   async resumeSession(intentId: string): Promise<PaymentSession | null> {
     try {
-      const { status } = await getQrPhStatus(intentId);
-      // An expired QR sends the intent back to awaiting_payment_method; only
-      // then is it safe to mint a replacement. Any other state (QR still
-      // live, payment processing or already succeeded but the webhook hasn't
-      // landed) resumes the same intent, so the customer can't pay twice.
-      if (status === "awaiting_payment_method") return null;
+      // Only a QR that can no longer be paid gets replaced. A live one, or a
+      // payment still processing or already succeeded but not yet settled by
+      // the webhook, resumes the same intent so the customer can't pay twice.
+      const { expired } = await getQrPhStatus(intentId);
+      if (expired) return null;
     } catch (error) {
       // 404: the intent doesn't exist under the current key (e.g. created in
       // the other test/live mode), so treat it as gone. Anything else is
@@ -219,16 +219,26 @@ export async function getQrPhStatus(paymentIntentId: string): Promise<{
   qrImageUrl: string | null;
   testUrl: string | null;
   expiresAt: string | null;
+  /** The code can no longer be paid (see hasQrExpired), judged at fetch time
+   *  so callers, including render code, never need to read the clock. */
+  expired: boolean;
 }> {
   const json = await paymongoRequest("GET", `/payment_intents/${paymentIntentId}`);
   const parsed = attachResponseSchema.parse(json);
+  const status = parsed.data.attributes.status;
   const code = parsed.data.attributes.next_action?.code;
+  const expiresAt = code?.expires_at ?? null;
 
   return {
-    status: parsed.data.attributes.status,
+    status,
     qrImageUrl: code?.image_url ?? null,
     testUrl: code?.test_url ?? null,
-    expiresAt: code?.expires_at ?? null,
+    expiresAt,
+    expired: hasQrExpired({
+      status,
+      expiresAtMs: expiresAt ? Date.parse(expiresAt) : null,
+      now: Date.now(),
+    }),
   };
 }
 

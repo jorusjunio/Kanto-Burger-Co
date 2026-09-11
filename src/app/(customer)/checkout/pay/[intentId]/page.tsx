@@ -41,11 +41,19 @@ export default async function PaymentGatewayPage({
   }
 
   // Sandbox key: PayMongo hands back a hosted Authorize/Fail simulator
-  // instead of a real, scannable QR, so send the customer straight there.
-  // Kept outside the try above because redirect() works by throwing.
-  if (qr?.testUrl) {
+  // instead of a real, scannable QR, so send the customer straight there,
+  // unless the code has already expired (PayMongo keeps the simulator link
+  // around even then). Kept outside the try above because redirect() works
+  // by throwing.
+  if (qr?.testUrl && !qr.expired) {
     redirect(qr.testUrl);
   }
+
+  // Report an expired code as expired from the very first render, so a dead
+  // QR is never shown while the client clock catches up.
+  const gatewayStatus = qr?.expired
+    ? "awaiting_payment_method"
+    : (qr?.status ?? "unavailable");
 
   const signature = isPaymongo ? null : signIntent(intentId);
 
@@ -83,7 +91,7 @@ export default async function PaymentGatewayPage({
             <QrPhGateway
               intentId={intentId}
               qrImageUrl={qr?.qrImageUrl ?? null}
-              status={qr?.status ?? "unavailable"}
+              status={gatewayStatus}
               expiresAt={qr?.expiresAt ?? null}
               orderNumber={session.orderNumber}
               trackingToken={session.trackingToken}

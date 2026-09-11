@@ -1,7 +1,12 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { EXPIRY_GRACE_MS, formatRemaining, getQrViewState } from "./qrph-view";
+import {
+  EXPIRY_GRACE_MS,
+  formatRemaining,
+  getQrViewState,
+  hasQrExpired,
+} from "./qrph-view";
 
 const EXPIRES = Date.parse("2026-09-11T14:55:00Z");
 
@@ -52,6 +57,33 @@ test("no QR image, a failed lookup or an unknown status is unavailable", () => {
 
 test("a live QR without expires_at never expires on the client", () => {
   assert.equal(state({ expiresAtMs: null, now: EXPIRES * 2 }), "active");
+});
+
+test("hasQrExpired: still awaiting_next_action past expires_at counts as expired", () => {
+  // PayMongo can keep reporting awaiting_next_action long after expiry; the
+  // server must still mint a fresh QR instead of resuming the dead one.
+  const at = (now: number) =>
+    hasQrExpired({ status: "awaiting_next_action", expiresAtMs: EXPIRES, now });
+
+  assert.equal(at(EXPIRES + EXPIRY_GRACE_MS), true);
+  assert.equal(at(EXPIRES + 20 * 60_000), true);
+  assert.equal(at(EXPIRES + EXPIRY_GRACE_MS - 1), false);
+  assert.equal(at(EXPIRES - 60_000), false);
+});
+
+test("hasQrExpired: a payment in flight is never treated as expired", () => {
+  for (const status of ["processing", "succeeded"]) {
+    assert.equal(
+      hasQrExpired({ status, expiresAtMs: EXPIRES, now: EXPIRES + 20 * 60_000 }),
+      false,
+    );
+  }
+});
+
+test("hasQrExpired: without a clock or expires_at it relies on the status alone", () => {
+  assert.equal(hasQrExpired({ status: "awaiting_next_action", expiresAtMs: EXPIRES, now: null }), false);
+  assert.equal(hasQrExpired({ status: "awaiting_next_action", expiresAtMs: null, now: EXPIRES * 2 }), false);
+  assert.equal(hasQrExpired({ status: "awaiting_payment_method", expiresAtMs: null, now: null }), true);
 });
 
 test("formatRemaining renders m:ss and clamps at zero", () => {

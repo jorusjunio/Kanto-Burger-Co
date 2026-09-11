@@ -1,11 +1,34 @@
 export type QrViewState = "active" | "confirming" | "expired" | "unavailable";
 
 /**
- * PayMongo flips an expired intent back to `awaiting_payment_method` a moment
- * after `expires_at`. Waiting a little before calling it expired means
- * "Generate a new QR" mints a fresh code instead of resuming the dying one.
+ * Grace period past `expires_at` before a QR counts as expired, so a payment
+ * scanned in the last second has time to show up as processing first.
  */
 export const EXPIRY_GRACE_MS = 10_000;
+
+/**
+ * True once a QR Ph code can no longer be paid. PayMongo's intent status is
+ * not enough on its own: in practice it can stay `awaiting_next_action` long
+ * after `expires_at`, so the timestamp is checked too. Shared by the pay page
+ * and `resumeSession`, which must agree, or "Generate a new QR" would hand
+ * back the same dead code.
+ */
+export function hasQrExpired(input: {
+  status: string;
+  expiresAtMs: number | null;
+  now: number | null;
+}): boolean {
+  if (input.status === "awaiting_payment_method") {
+    return true;
+  }
+
+  return (
+    input.status === "awaiting_next_action" &&
+    input.expiresAtMs !== null &&
+    input.now !== null &&
+    input.now >= input.expiresAtMs + EXPIRY_GRACE_MS
+  );
+}
 
 /** Which screen the QR Ph gateway should show. `now` is null until the
  *  component mounts, so the server render never depends on the clock. */
@@ -20,15 +43,7 @@ export function getQrViewState(input: {
     return "confirming";
   }
 
-  if (input.status === "awaiting_payment_method") {
-    return "expired";
-  }
-
-  if (
-    input.expiresAtMs !== null &&
-    input.now !== null &&
-    input.now >= input.expiresAtMs + EXPIRY_GRACE_MS
-  ) {
+  if (hasQrExpired(input)) {
     return "expired";
   }
 
