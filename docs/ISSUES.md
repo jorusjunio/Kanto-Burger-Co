@@ -24,13 +24,14 @@ na-verify talaga; ⚠️ kapag bahagya pa lang.
 | # | Issue | Status | Na-verify | Commit |
 | --- | --- | --- | --- | --- |
 | 1 | Walang retry-payment path | ✅ Fixed | 2026-09-11 | `3f12430` |
-| 2 | Mahinang `PAYMENT_SIGNING_SECRET` | ✅ Fixed | 2026-09-11 | wala (`.env` ay hindi naka-commit) |
-| 3 | Live secret sa `.env` | ✅ Fixed (may natitirang rekomendasyon) | 2026-09-11 | wala (`.env`) |
+| 2 | Mahinang `PAYMENT_SIGNING_SECRET` | ✅ Fixed (local at production) | 2026-09-11 | wala (env vars) |
+| 3 | Live secret sa `.env` | ✅ Fixed | 2026-09-11 | wala (`.env`) |
 | 14 | Hindi naka-commit ang payment work | ✅ Fixed | 2026-09-11 | `3f12430`, `beac845`, `ec9c47f` |
+| 20 | Hindi pa kumpleto ang PayMongo sa production | ⚠️ Kumpleto ang setup, hinihintay ang ₱1 test | 2026-09-11 | wala (Vercel env vars) |
 | 4 to 13, 15 to 19 | | Open | | |
 
 Kasalukuyang estado (2026-09-11, pagkatapos ng mga fix): `npm test` 60 / 60,
-`npx tsc --noEmit` 0 errors.
+`npx tsc --noEmit` 0 errors, `npm run build` pasado.
 
 ---
 
@@ -73,19 +74,25 @@ i-cancel ng admin.
 ---
 
 ### 2. Mahina/predictable ang `PAYMENT_SIGNING_SECRET`
-**File:** `.env` (`PAYMENT_SIGNING_SECRET`)
+**File:** `.env` (`PAYMENT_SIGNING_SECRET`), at Vercel env vars (Production)
 
-**Status: ✅ FIXED (2026-09-11, na-double check)**
-- Pinalitan ng random na 256-bit value (`crypto.randomBytes(32)`). Hindi
-  ipinakita ang value kahit saan.
-- Na-overwrite ang unang rotation nang ma-save ang isang lumang editor buffer
-  ng `.env`; inulit ito at na-verify pagkatapos.
-- **Double-check** (direktang basa sa `.env` sa disk, hindi screenshot): may
-  value, **hindi** ito ang lumang `kantoBurgerCo...` string, at 64 hex chars
-  ito. `npm test` 60 / 60.
+**Status: ✅ FIXED sa local at production (2026-09-11, na-double check)**
+- **Local:** pinalitan ng random na 256-bit value (`crypto.randomBytes(32)`).
+  Hindi ipinakita ang value kahit saan. Na-overwrite ang unang rotation nang
+  ma-save ang isang lumang editor buffer ng `.env`; inulit ito at na-verify
+  pagkatapos.
+- **Double-check (local)**, direktang basa sa `.env` sa disk, hindi
+  screenshot: may value, **hindi** ito ang lumang `kantoBurgerCo...` string, at
+  64 hex chars ito. `npm test` 60 / 60.
+- **Production:** inilagay sa Vercel ang hiwalay na random value (mula sa
+  `.env.vercel-production`, iba sa local), tapos nag-redeploy.
+- **Double-check (production)**, sa live site nang walang ipinapakitang value:
+  ang signature na gawa sa bagong secret ay **tinanggap** ng
+  `/api/payments/callback`, at ang gawa sa lumang `kantoBurgerCo...` string ay
+  **tinanggihan** (401). Ang unang probe ay nagpakita pa ng lumang value dahil
+  tumakbo ito bago naging live ang redeploy; inulit pagkatapos ng redeploy.
 - Ligtas itong i-rotate anumang oras: kinukwenta ang signature sa bawat render
   ng pay page, walang naka-imbak.
-- Paalala: sa production (Vercel), mag-generate ng hiwalay na value.
 
 Ang dating value ay `"kantoBurgerCoSecretKey9876543210UsingHmac"`, isang
 human-written, nahuhulaang string. Ito ang HMAC secret na nagpo-protekta sa
@@ -106,16 +113,16 @@ para sa production.
 ### 3. Live production secret naka-imbak sa `.env`
 **File:** `.env` (dating `PAYMONGO_LIVE_SECRET_KEY="sk_live_..."`)
 
-**Status: ✅ FIXED sa `.env` (2026-09-11, na-double check)**
+**Status: ✅ FIXED (2026-09-11, na-double check)**
 - Tinanggal ang 3 linya: `PAYMONGO_LIVE_SECRET_KEY`, at ang mga naka-comment
   out na live `PAYMONGO_SECRET_KEY` at live `PAYMONGO_WEBHOOK_SECRET`.
 - **Double-check:** 0 na `sk_live_` at 0 na live webhook secret sa `.env`;
   `sk_test_` ang active na `PAYMONGO_SECRET_KEY`; naka-ignore pa rin ang
   `.env` (`git check-ignore .env`).
-- ⚠️ **Natitira (ikaw lang ang makakagawa):** hindi pa na-regenerate ang live
-  key sa PayMongo dashboard. Lumabas ito sa mga screenshot habang
-  nagde-develop, kaya inirerekomenda pa ring i-regenerate (Developers → API
-  Keys → Regenerate) bago tumanggap ng totoong bayad nang seryoso.
+- **Na-regenerate ang live key** sa PayMongo dashboard (2026-09-11, ginawa ng
+  user; hindi ito makikita mula sa labas). Patay na ang lumang key na lumabas
+  sa mga screenshot, at ang bago ay nasa Vercel (Production) lang, wala sa
+  anumang local file.
 
 Hindi ito binabasa ng app (ang `PAYMONGO_SECRET_KEY` lang ang ginagamit), pero
 ito ay **live production credential** na kayang mag-charge ng totoong pera,
@@ -131,6 +138,45 @@ maco-commit. Pero:
 kunin muna sa dashboard. Sa production (Vercel), env vars lang ang gamitin.
 Kung may pag-aalinlangan na na-expose na ito, i-regenerate ang key sa
 dashboard (Developers → API Keys → Regenerate).
+
+---
+
+### 20. Hindi pa kumpleto ang PayMongo setup sa production
+**Saan:** Vercel env vars (Production) at PayMongo dashboard
+
+Dati, walang laman ang `PAYMENT_PROVIDER` sa production, kaya `mock` ang
+default. Sa mock gateway, **kahit sino ay puwedeng pumindot ng "Pay now" at
+maging PAID ang GCash order nang walang bayad**, dahil ang pay page mismo ang
+gumagawa ng valid na signature para sa browser. Naisara na ito, at inilagay na
+rin ang totoong PayMongo setup:
+- `PAYMONGO_SECRET_KEY`: ang bagong live key (na-regenerate, tingnan ang #3)
+- `PAYMONGO_WEBHOOK_SECRET`: mula sa isang **live** webhook na nakaturo sa
+  `https://kanto-burger-co.vercel.app/api/payments/webhooks/paymongo`
+
+**Status: ⚠️ Kumpleto ang setup, hinihintay ang ₱1 end-to-end test (2026-09-11)**
+- ✅ `PAYMENT_PROVIDER="paymongo"` na sa production. **Double-check:** ang live
+  `/api/payments/callback` ay tumanggi (500 mula sa PayMongo parser) sa
+  mock-style payload na may valid na bagong signature, na mangyayari lang
+  kapag hindi mock ang provider.
+- ✅ `NEXTAUTH_URL`: ang live `/api/auth/providers` ay nagpapakita ng
+  `https://kanto-burger-co.vercel.app/...` na callback URLs, at naka-enable
+  ang Google sign-in.
+- ✅ `PAYMONGO_WEBHOOK_SECRET`: **Double-check:** pagkatapos ng redeploy
+  (05:49:41 UTC), ang live webhook route ay sumasagot na ng 401 "Invalid
+  signature" imbes na 500, kaya may secret na sa production.
+- ✅ Ginawa ng user sa PayMongo dashboard ang bagong live webhook papunta sa
+  production URL (events: `source.chargeable`, `payment.paid`,
+  `payment.failed`), at na-disable ang lumang webhook na nakaturo sa ngrok.
+  Walang delete sa PayMongo; disable ang katumbas, dahil wala nang ipinapadala
+  ang naka-disable na webhook.
+- ✅ `PAYMONGO_SECRET_KEY` (bagong live key) ay nasa Vercel Production, ayon sa
+  user. Hindi ito masusubukan mula sa labas nang hindi gumagawa ng order.
+- ⏳ **Natitirang patunay:** ang 401 ay nagsasabing *may* webhook secret, hindi
+  na *tugma* ito sa webhook. Kailangan ng ₱1 na totoong bayad sa live site:
+  dapat maging PAID ang order, at may successful na delivery sa Event
+  Deliveries ng bagong webhook.
+
+**Fix:** Tapos na ang setup. Ang natitira ay ang ₱1 end-to-end test.
 
 ---
 
@@ -319,6 +365,9 @@ PayMongo sa mock payload shape), kaya hindi ito exploitable ngayon. Pero ito
 ay attack surface na walang silbi sa production, at ang seguridad nito ay
 nakasalalay lang sa detalye ng ibang provider.
 
+Nakumpirma ito sa live site noong 2026-09-11: ang valid na signature ay
+umaabot sa PayMongo parser at nagba-500 (tingnan ang #20).
+
 **Fix:** I-guard ang route: agad mag-404 kapag hindi `mock` ang aktibong provider.
 
 ---
@@ -339,9 +388,10 @@ lahat ng ginawa natin.
 - **Double-check:** `git status` sa lahat ng payment paths ay walang natitira;
   `git show --stat 3f12430` ay payment files lang (walang admin o online-staff
   file ng ibang ginagawa); naka-ignore pa rin ang `.env`.
+- Naka-push na sa GitHub at na-deploy sa Vercel (`cb6437a`, deploy success).
 - Paalala: may em dash ang commit message ng `3f12430` (naisulat bago ko
-  nalaman ang no-em-dash rule). Hindi ko binago ang git history nang walang
-  pahintulot.
+  nalaman ang no-em-dash rule). Nasa GitHub na ito, kaya kailangan ng history
+  rewrite para mapalitan.
 
 ### 15. Naka-log ang phone number ng customer (PII)
 **File:** `src/features/checkout/actions.ts:59`
@@ -413,7 +463,8 @@ Para malinaw kung ano ang hindi kailangang galawin:
 
 1. ~~I-commit ang kasalukuyang payment-gateway work (#14)~~ ✅
 2. ~~Ayusin ang retry-payment path (#1)~~ ✅
-3. ~~I-rotate ang `PAYMENT_SIGNING_SECRET` at tanggalin ang live key sa `.env` (#2, #3)~~ ✅ (i-regenerate pa ang live key sa dashboard)
-4. QR expiry handling at stock cleanup job (#4, #5)
-5. Webhook hardening: rate limit, retry semantics (#6, #7, #11)
-6. Bago mag-production deploy: Upstash at Pusher env vars (#12), i-guard ang mock route (#13)
+3. ~~I-rotate ang `PAYMENT_SIGNING_SECRET` at tanggalin ang live key sa `.env` (#2, #3)~~ ✅
+4. Tapusin ang PayMongo sa production (#20): setup ✅, ₱1 end-to-end test na lang
+5. QR expiry handling at stock cleanup job (#4, #5)
+6. Webhook hardening: rate limit, retry semantics (#6, #7, #11)
+7. Bago lumaki ang traffic: Upstash at Pusher env vars (#12), i-guard ang mock route (#13)
