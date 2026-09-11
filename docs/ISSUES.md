@@ -1,8 +1,8 @@
-# Known Issues — Kanto Burger Co.
+# Known Issues: Kanto Burger Co.
 
 Audit date: **2026-09-11** (after the PayMongo QR Ph payment-gateway integration).
 
-Static checks at the time of this audit — all green:
+Static checks at the time of this audit, all green:
 
 | Check | Command | Result |
 | --- | --- | --- |
@@ -15,7 +15,26 @@ user impact · **P2** = worth fixing, limited blast radius · **P3** = polish.
 
 ---
 
-## P0 — Critical
+## Progress
+
+Patakaran: bawat natapos na issue ay idinodokumento sa sariling entry nito,
+kasama kung ano ang binago at ang ebidensya ng double-check. ✅ lang kapag
+na-verify talaga; ⚠️ kapag bahagya pa lang.
+
+| # | Issue | Status | Na-verify | Commit |
+| --- | --- | --- | --- | --- |
+| 1 | Walang retry-payment path | ✅ Fixed | 2026-09-11 | `3f12430` |
+| 2 | Mahinang `PAYMENT_SIGNING_SECRET` | ✅ Fixed | 2026-09-11 | wala (`.env` ay hindi naka-commit) |
+| 3 | Live secret sa `.env` | ✅ Fixed (may natitirang rekomendasyon) | 2026-09-11 | wala (`.env`) |
+| 14 | Hindi naka-commit ang payment work | ✅ Fixed | 2026-09-11 | `3f12430`, `beac845`, `ec9c47f` |
+| 4 to 13, 15 to 19 | | Open | | |
+
+Kasalukuyang estado (2026-09-11, pagkatapos ng mga fix): `npm test` 60 / 60,
+`npx tsc --noEmit` 0 errors.
+
+---
+
+## P0: Critical
 
 ### 1. Walang paraan para bayaran ulit ang isang PENDING na order
 **Files:** `src/features/checkout/actions.ts:256-289`, `src/app/(customer)/order/[orderNumber]/page.tsx`
@@ -26,48 +45,56 @@ naka-catch at naka-log lang ito, at ang customer ay diretso sa order tracker
 customer ang QR page o nag-expire ang QR (30 min default).
 
 Ang comment sa `actions.ts:259` ay nagsasabing *"leaves a valid PENDING order
-the customer can still pay from their tracker"* — **hindi ito totoo**; walang
-ganoong path sa tracker page. Ang order ay permanenteng na-stuck: bayad na ang
-stock, walang mababayaran ang customer, at kailangang manual na i-cancel ng
-admin.
+the customer can still pay from their tracker"*, pero **hindi ito totoo**:
+walang ganoong path sa tracker page. Ang order ay permanenteng na-stuck: bawas
+na ang stock, walang mababayaran ang customer, at kailangang manual na
+i-cancel ng admin.
 
-**Status: ✅ FIXED (2026-09-11)**
+**Status: ✅ FIXED (2026-09-11, commit `3f12430`)**
 - `resumePayment` server action (`src/features/payments/resume-actions.ts`) na
   may DI core `resumePaymentWithDeps` (`resume.ts`). **Ginagamit ulit ang
-  existing session kung buhay pa**, at gagawa lang ng bago kapag patay na —
-  kung basta gagawa ng bago, maiiwang orphan ang lumang QR at hindi na
-  matutugma sa order ang bayad dito.
+  existing session kung buhay pa**, at gagawa lang ng bago kapag patay na. Kung
+  basta gagawa ng bago, maiiwang orphan ang lumang QR at hindi na matutugma sa
+  order ang bayad dito.
 - Bagong `resumeSession()` sa `PaymentProvider` interface. PayMongo: bago lang
   kapag `awaiting_payment_method` (expired) o 404 (ibang test/live mode); ibang
   error ay ibinabato para hindi maka-orphan ng buhay na QR habang may outage.
 - "Pay via GCash" banner sa tracker, naka-gate sa shared na
-  `canResumePayment()` — nakatago sa PAID, CANCELLED, hindi-GCash, at sa mga
+  `canResumePayment()`. Nakatago ito sa PAID, CANCELLED, hindi-GCash, at sa mga
   legacy order na may manual `gcashReference` (proteksyon laban sa dobleng
   singil).
 - Rate limit: 5 kada 10 minuto bawat order.
-- Na-verify sa browser: abandoned na sandbox order → button → bumalik sa
-  parehong source (resumed, hindi bago); walang button sa paid at legacy
-  orders. 10 unit tests sa `resume.test.ts`.
+- Naitama na ang comment sa `actions.ts:259`.
+- **Double-check:** sa browser, abandoned na sandbox order → button → bumalik
+  sa parehong source (resumed, hindi bago), at hindi nagbago ang
+  `paymentIntentId` sa DB; walang button sa paid at legacy orders. 10 unit
+  tests sa `resume.test.ts`; `tsc` 0 errors; lint clean.
 
 ---
 
 ### 2. Mahina/predictable ang `PAYMENT_SIGNING_SECRET`
-**File:** `.env:30`
+**File:** `.env` (`PAYMENT_SIGNING_SECRET`)
 
-**Status: ⚠️ Na-rotate, pero na-overwrite** — Napalitan ng random na 256-bit
-value noong 2026-09-11, pero bumalik ang lumang value nang ma-save ang isang
-lumang editor buffer ng `.env`. Kailangang i-rotate ulit (tingnan ang Fix sa
-ibaba). Ligtas itong gawin anumang oras: kinukwenta ang signature sa bawat
-render ng pay page, walang naka-imbak.
+**Status: ✅ FIXED (2026-09-11, na-double check)**
+- Pinalitan ng random na 256-bit value (`crypto.randomBytes(32)`). Hindi
+  ipinakita ang value kahit saan.
+- Na-overwrite ang unang rotation nang ma-save ang isang lumang editor buffer
+  ng `.env`; inulit ito at na-verify pagkatapos.
+- **Double-check** (direktang basa sa `.env` sa disk, hindi screenshot): may
+  value, **hindi** ito ang lumang `kantoBurgerCo...` string, at 64 hex chars
+  ito. `npm test` 60 / 60.
+- Ligtas itong i-rotate anumang oras: kinukwenta ang signature sa bawat render
+  ng pay page, walang naka-imbak.
+- Paalala: sa production (Vercel), mag-generate ng hiwalay na value.
 
-Ang kasalukuyang value ay `"kantoBurgerCoSecretKey9876543210UsingHmac"` — isang
+Ang dating value ay `"kantoBurgerCoSecretKey9876543210UsingHmac"`, isang
 human-written, nahuhulaang string. Ito ang HMAC secret na nagpo-protekta sa
-`/api/payments/callback` (mock gateway settlement). Kung ang parehong value ay
-madala sa production **at** naka-`PAYMENT_PROVIDER="mock"`, kayang mag-forge ng
+`/api/payments/callback` (mock gateway settlement). Kung madala ang parehong
+value sa production **at** naka-`PAYMENT_PROVIDER="mock"`, kayang mag-forge ng
 kahit sino ng valid signature at i-mark na **PAID** ang kahit anong order nang
 walang bayad.
 
-`.env.example` ay tamang nagsasabi ng `"generate-a-long-random-string"` — ang
+Tama ang sinasabi ng `.env.example` (`"generate-a-long-random-string"`); ang
 aktwal na dev value lang ang mahina.
 
 **Fix:** Palitan ng cryptographically random na value
@@ -77,13 +104,24 @@ para sa production.
 ---
 
 ### 3. Live production secret naka-imbak sa `.env`
-**File:** `.env:42` — `PAYMONGO_LIVE_SECRET_KEY="sk_live_..."`
+**File:** `.env` (dating `PAYMONGO_LIVE_SECRET_KEY="sk_live_..."`)
+
+**Status: ✅ FIXED sa `.env` (2026-09-11, na-double check)**
+- Tinanggal ang 3 linya: `PAYMONGO_LIVE_SECRET_KEY`, at ang mga naka-comment
+  out na live `PAYMONGO_SECRET_KEY` at live `PAYMONGO_WEBHOOK_SECRET`.
+- **Double-check:** 0 na `sk_live_` at 0 na live webhook secret sa `.env`;
+  `sk_test_` ang active na `PAYMONGO_SECRET_KEY`; naka-ignore pa rin ang
+  `.env` (`git check-ignore .env`).
+- ⚠️ **Natitira (ikaw lang ang makakagawa):** hindi pa na-regenerate ang live
+  key sa PayMongo dashboard. Lumabas ito sa mga screenshot habang
+  nagde-develop, kaya inirerekomenda pa ring i-regenerate (Developers → API
+  Keys → Regenerate) bago tumanggap ng totoong bayad nang seryoso.
 
 Hindi ito binabasa ng app (ang `PAYMONGO_SECRET_KEY` lang ang ginagamit), pero
 ito ay **live production credential** na kayang mag-charge ng totoong pera,
 nakatambay sa isang local file para lang sa mga diagnostic script natin.
 
-Naka-gitignore naman ang `.env` (`.gitignore:30` — `.env*`), kaya hindi ito
+Naka-gitignore naman ang `.env` (`.gitignore:34`, `.env*`), kaya hindi ito
 maco-commit. Pero:
 - Naka-plaintext pa rin sa disk
 - Nakita natin ito sa mga screenshot habang nagde-develop
@@ -96,7 +134,7 @@ dashboard (Developers → API Keys → Regenerate).
 
 ---
 
-## P1 — High
+## P1: High
 
 ### 4. Na-lock na stock sa mga inabandonang GCash order
 **File:** `src/features/checkout/actions.ts:202-228`
@@ -124,7 +162,7 @@ gayong may stock pa naman talaga.
 
 Nag-e-expire ang QR Ph code pagkatapos ng **30 minuto**. Kinukuha ng
 `getQrPhStatus()` ang `status` ng Payment Intent, pero **binabalewala ito ng
-page** — `qrImageUrl` lang ang ipinapasa sa component.
+page**: `qrImageUrl` lang ang ipinapasa sa component.
 
 Resulta: pagkatapos mag-expire, patuloy pa ring nakikita ng customer ang patay
 na QR at ang "Naghihintay ng bayad..." habang buhay. Kung may mag-scan, mabibigo
@@ -155,7 +193,7 @@ bago pa man ma-reject.
 
 ---
 
-### 7. Nilulunok ang error kapag nabigo ang `chargeSource` — mawawala ang bayad
+### 7. Nilulunok ang error kapag nabigo ang `chargeSource`, kaya mawawala ang bayad
 **File:** `src/app/api/payments/webhooks/paymongo/route.ts:56-63`
 
 ```ts
@@ -168,7 +206,7 @@ return NextResponse.json({ ok: true });
 ```
 
 Kapag nabigo ang `chargeSource`, nagba-`200 OK` pa rin tayo. Ituturing ito ni
-PayMongo na successful na delivery at **hindi na ito uulitin** — kaya ang isang
+PayMongo na successful na delivery at **hindi na ito uulitin**, kaya ang isang
 source na binayaran na ng customer ay hindi na kailanman magiging Payment.
 Nagbayad ang customer, hindi na-settle ang order.
 
@@ -179,7 +217,7 @@ events), pero magiging live agad ito kapag na-enable na ang direct GCash channel
 
 ---
 
-## P2 — Medium
+## P2: Medium
 
 ### 8. Nasisira ang pay page kapag mismatch ang PayMongo mode
 **File:** `src/app/(customer)/checkout/pay/[intentId]/page.tsx:29`
@@ -187,12 +225,17 @@ events), pero magiging live agad ito kapag na-enable na ang direct GCash channel
 Ginagamit ng `getQrPhStatus()` ang **kasalukuyang** `PAYMONGO_SECRET_KEY`. Ang
 mga payment intent ay nakatali sa mode kung saan sila ginawa (test o live).
 
-Kaya kapag nagpalit ng keys (gaya ng ginawa natin ngayon — live test tapos balik
-sa sandbox), ang mga order na ginawa sa kabilang mode ay **hindi na mabubuksan**
-ang pay page — mag-e-error (404 mula PayMongo) papunta sa error boundary, nang
-walang malinaw na paliwanag.
+Kaya kapag nagpalit ng keys (gaya ng ginawa natin: live test tapos balik sa
+sandbox), ang mga order na ginawa sa kabilang mode ay **hindi na mabubuksan**
+ang pay page. Mag-e-error ito (404 mula PayMongo) papunta sa error boundary,
+nang walang malinaw na paliwanag.
 
 Aktwal na apektado ngayon: ang totoong ₱1 na live order (`KBC-260911-044541-XGKG`).
+
+Tandaan: ang **tracker button** (#1) ay hindi na naaapektuhan nito, dahil
+tinatrato ng `resumeSession()` ang 404 bilang "patay na session" at gumagawa ng
+bago. Ang direktang pagbukas lang ng lumang `/checkout/pay/...` URL ang
+nasisira pa.
 
 **Fix:** I-catch ang `PaymongoApiError` sa page at magpakita ng malinaw na
 mensahe ("Hindi na available ang payment session na ito") sa halip na
@@ -205,7 +248,7 @@ mag-crash.
 
 Ang polling interval (bawat 4 segundo) ay tumatakbo hangga't nakabukas ang page.
 Kapag iniwan ng customer ang tab nang ilang oras, patuloy ang pag-hit sa
-`/api/payments/session/[intentId]` — **900 DB query kada oras, kada tab**.
+`/api/payments/session/[intentId]`: **900 DB query kada oras, kada tab**.
 
 **Fix:** Maglagay ng max attempts (hal. huminto pagkatapos ng QR expiry window),
 o dagdagan ang interval sa paglipas ng oras (backoff), o huminto kapag
@@ -216,7 +259,7 @@ o dagdagan ang interval sa paglipas ng oras (backoff), o huminto kapag
 ### 10. Walang rate limit at walang token check ang status endpoint
 **File:** `src/app/api/payments/session/[intentId]/route.ts`
 
-Bukas ang endpoint sa kahit sino na may hawak ng intent id — walang tracking
+Bukas ang endpoint sa kahit sino na may hawak ng intent id: walang tracking
 token check (hindi tulad ng order tracker, `src/features/orders/queries.ts`),
 walang rate limiting.
 
@@ -233,12 +276,12 @@ limiter.
 **File:** `src/app/api/payments/webhooks/paymongo/route.ts:70-72`
 
 Dalawang throw ang hindi naka-catch:
-- `parseCallback()` — nagta-throw ng `ZodError` kapag kulang ang payload ng
+- `parseCallback()`: nagta-throw ng `ZodError` kapag kulang ang payload ng
   `payment_intent_id` **at** `source.id`
-- `settlePaymentWithDeps()` → `assertCanSettleToPaid()` — nagta-throw ng
+- `settlePaymentWithDeps()` → `assertCanSettleToPaid()`: nagta-throw ng
   `PaymentSettlementError` kapag ang order ay CASH/COD o final na ang status
 
-Parehong magiging unhandled 500 — na ituturing ni PayMongo bilang retryable
+Parehong magiging unhandled 500, na ituturing ni PayMongo bilang retryable
 failure, kaya paulit-ulit nitong ipapadala ang parehong hindi mapoprosesong
 event.
 
@@ -249,18 +292,18 @@ payload na talagang hindi natin kayang iproseso (para huminto ang retry), at
 ---
 
 ### 12. Hindi naka-configure ang Pusher at Upstash Redis
-**File:** `.env:19-24` (Pusher), walang Upstash vars
+**File:** `.env` (blangko ang Pusher vars, walang Upstash vars)
 
-- **Pusher blangko** → tahimik na naka-skip ang lahat ng realtime event
+- **Blangko ang Pusher**: tahimik na naka-skip ang lahat ng realtime event
   (`"Pusher not configured, skipping event trigger"` sa logs). Hindi
   nag-a-auto-update ang admin dashboard at customer tracker; kailangang
   mag-refresh manually.
-- **Walang Upstash** → in-memory na rate limiter
+- **Walang Upstash**: in-memory na rate limiter
   (`src/lib/rate-limiter.ts:114-129`). Sa Vercel serverless, bawat instance ay
   may sariling counter, kaya epektibong **walang bisa** ang rate limiting sa
   production.
 
-Parehong may tamang fallback at warning — hindi ito bug, kundi hindi pa tapos
+Parehong may tamang fallback at warning. Hindi ito bug, kundi hindi pa tapos
 na configuration. Pero P0 ang Upstash kapag deploy na sa production.
 
 **Fix:** I-set ang mga env vars bago mag-production deploy.
@@ -272,7 +315,7 @@ na configuration. Pero P0 ang Upstash kapag deploy na sa production.
 
 Naka-register ang mock settlement route kahit `PAYMENT_PROVIDER="paymongo"`.
 Kasalukuyan itong nagfe-fail-closed (mag-t-throw ang `parseCallback` ng
-PayMongo sa mock payload shape), kaya hindi ito exploitable ngayon — pero ito
+PayMongo sa mock payload shape), kaya hindi ito exploitable ngayon. Pero ito
 ay attack surface na walang silbi sa production, at ang seguridad nito ay
 nakasalalay lang sa detalye ng ibang provider.
 
@@ -280,75 +323,86 @@ nakasalalay lang sa detalye ng ibang provider.
 
 ---
 
-## P3 — Low / polish
+## P3: Low / polish
 
 ### 14. Hindi pa naka-commit ang lahat ng payment-gateway work
 Walo (8) na bagong file at apat (4) na binagong file ang nasa working tree
 lang. Isang aksidenteng `git checkout` o `git reset --hard` ay tatanggalin ang
-lahat ng ginawa natin ngayon.
+lahat ng ginawa natin.
 
-**Fix:** I-commit na.
+**Status: ✅ FIXED (2026-09-11, na-double check)**
+- `3f12430` feat: 21 files, payment code at tests.
+- `beac845` docs: itong `ISSUES.md`.
+- `ec9c47f` chore: sinama na sa repo ang `.env.example` (dati ay naka-ignore
+  dahil tinatamaan ng `.env*` pattern) at itinama ang komento nito tungkol sa
+  pag-register ng test-mode webhook.
+- **Double-check:** `git status` sa lahat ng payment paths ay walang natitira;
+  `git show --stat 3f12430` ay payment files lang (walang admin o online-staff
+  file ng ibang ginagawa); naka-ignore pa rin ang `.env`.
+- Paalala: may em dash ang commit message ng `3f12430` (naisulat bago ko
+  nalaman ang no-em-dash rule). Hindi ko binago ang git history nang walang
+  pahintulot.
 
 ### 15. Naka-log ang phone number ng customer (PII)
 **File:** `src/features/checkout/actions.ts:59`
 
-`logger.warn("Rate limit exceeded for checkout", { customerPhone })` — pumapasok
-ang raw phone number sa production logs. Mas mabuti ang hashed o partially
-masked (`09XX***5853`).
+Pumapasok ang raw phone number sa production logs dahil sa
+`logger.warn("Rate limit exceeded for checkout", { customerPhone })`. Mas
+mabuti ang hashed o partially masked (`09XX***5853`).
 
 ### 16. Madaling lusutan ang checkout rate limiter
 **File:** `src/features/checkout/actions.ts:57`
 
-Naka-key ito sa `customerPhone`, na galing mismo sa user — sapat na ang magbago
+Naka-key ito sa `customerPhone`, na galing mismo sa user. Sapat na ang magbago
 ng isang digit para makaiwas. Mas matibay kung IP-based, o kombinasyon ng
 pareho.
 
 ### 17. Hindi constant-time ang paghahambing ng tracking token
 **File:** `src/features/orders/queries.ts:18`
 
-`order.trackingToken !== trackingToken` — teoretikal na timing attack.
+Teoretikal na timing attack ang `order.trackingToken !== trackingToken`.
 Praktikal na hindi mapapakinabangan sa isang 32-char random hex sa ibabaw ng
 network latency, pero may `crypto.timingSafeEqual` na tayong ginagamit sa
 `signing.ts` kung gusto nating pare-pareho ang pattern.
 
 ### 18. Dead code habang naka-gate pa ang GCash channel
-**File:** `src/features/payments/providers/paymongo.ts:206-233`
+**File:** `src/features/payments/providers/paymongo.ts` (`getChargeableSource`, `chargeSource`)
 
 Hindi kailanman tumatakbo ang `getChargeableSource()` at `chargeSource()` sa
 kasalukuyang QR Ph flow. Sinasadya ito (handa na sila kapag na-verify na ang
-business at na-enable ang direct GCash) at may komento na nagpapaliwanag —
-pero hindi pa nasusubukan ang code path na iyon.
+business at na-enable ang direct GCash) at may komento na nagpapaliwanag. Pero
+hindi pa nasusubukan ang code path na iyon.
 
 ### 19. Luma na ang komento tungkol sa `PAYMENT_PROVIDER` sa `.env`
-**File:** `.env:32-33`
+**File:** `.env` (komento sa itaas ng `PAYMONGO_PUBLIC_KEY`)
 
-Sabi ng komento na panatilihing `"mock"` hanggang masubukan ang provider —
-pero `"paymongo"` na ang naka-set at nasubukan na natin nang buo. Maling
-gabay na para sa susunod na babasa.
+Sabi ng komento na panatilihing `"mock"` hanggang masubukan ang provider, pero
+`"paymongo"` na ang naka-set at nasubukan na natin nang buo. Maling gabay na
+para sa susunod na babasa.
 
 ---
 
-## Hindi issue — maayos na bahagi
+## Hindi issue: maayos na bahagi
 
 Para malinaw kung ano ang hindi kailangang galawin:
 
-- **Auth / RBAC** — tama ang pagkakabahagi. Ang `proxy.ts` ang humahadlang sa
+- **Auth / RBAC**: tama ang pagkakabahagi. Ang `proxy.ts` ang humahadlang sa
   mga hindi naka-sign-in; ang mga page ay gumagamit ng `requireManagerPage()`;
   ang mga server action ay `requireAdminRoleSession()`. Naka-gate din ang
   Google sign-in sa `User` table.
-- **Security headers** — kumpletong CSP, `frame-ancestors: none`, nosniff,
+- **Security headers**: kumpletong CSP, `frame-ancestors: none`, nosniff,
   Permissions-Policy (`next.config.ts`).
-- **Server-side trust** — muling binabasa ang presyo at availability mula sa DB
+- **Server-side trust**: muling binabasa ang presyo at availability mula sa DB
   sa loob ng checkout transaction; hindi pinagkakatiwalaan ang client.
-- **Stock concurrency** — conditional na `updateMany` na may `gte` guard —
+- **Stock concurrency**: conditional na `updateMany` na may `gte` guard, ang
   tamang paraan para maiwasan ang oversell sa magkasabay na order.
-- **Idempotent settlement** — naka-key sa unique na `paymentIntentId`, may
+- **Idempotent settlement**: naka-key sa unique na `paymentIntentId`, may
   state-machine guard. Ligtas ang paulit-ulit na webhook.
-- **Webhook signature verification** — HMAC sa raw body bago mag-parse,
+- **Webhook signature verification**: HMAC sa raw body bago mag-parse,
   `timingSafeEqual`, tumatanggap ng test at live digest.
-- **Rate limiter** — maayos na Redis/memory backend split, fail-open na may
+- **Rate limiter**: maayos na Redis/memory backend split, fail-open na may
   logging.
-- **Error boundaries** — kumpleto ang `error.tsx` / `not-found.tsx` /
+- **Error boundaries**: kumpleto ang `error.tsx` / `not-found.tsx` /
   `loading.tsx` sa lahat ng route group.
 - **Walang `any`, walang stray `console.log`, walang TODO/FIXME** sa buong
   `src/`.
@@ -357,9 +411,9 @@ Para malinaw kung ano ang hindi kailangang galawin:
 
 ## Iminumungkahing pagkakasunod-sunod
 
-1. I-commit ang kasalukuyang payment-gateway work (#14)
-2. Ayusin ang retry-payment path (#1) — ito ang may pinakamalinaw na epekto sa customer
-3. I-rotate ang `PAYMENT_SIGNING_SECRET` at tanggalin ang live key sa `.env` (#2, #3)
-4. QR expiry handling + stock cleanup job (#4, #5)
-5. Webhook hardening — rate limit, retry semantics (#6, #7, #11)
-6. Bago mag-production deploy: Upstash + Pusher env vars (#12), i-guard ang mock route (#13)
+1. ~~I-commit ang kasalukuyang payment-gateway work (#14)~~ ✅
+2. ~~Ayusin ang retry-payment path (#1)~~ ✅
+3. ~~I-rotate ang `PAYMENT_SIGNING_SECRET` at tanggalin ang live key sa `.env` (#2, #3)~~ ✅ (i-regenerate pa ang live key sa dashboard)
+4. QR expiry handling at stock cleanup job (#4, #5)
+5. Webhook hardening: rate limit, retry semantics (#6, #7, #11)
+6. Bago mag-production deploy: Upstash at Pusher env vars (#12), i-guard ang mock route (#13)
