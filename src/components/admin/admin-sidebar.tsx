@@ -337,6 +337,17 @@ export function AdminSidebar({
         <SidebarBody isManager={isManager} user={user} alerts={alerts} />
       </aside>
 
+      {/* Solid full-bleed curtain behind the floating bar below. The bar has
+          side margins (inset-x-3/10) so it doesn't span edge-to-edge; without
+          this, content scrolling upward peeks out beside the bar and gets cut
+          off mid-shape right where the bar's edge is, instead of disappearing
+          cleanly. This curtain matches the page background and covers the
+          bar's full vertical footprint edge-to-edge so nothing peeks through. */}
+      <div
+        className="fixed inset-x-0 top-0 z-20 h-20 bg-[#f7f3ea] lg:hidden"
+        aria-hidden="true"
+      />
+
       {/* Mobile/tablet: a floating top nav bar (not the desktop sidebar's
           replacement, just the drawer trigger + brand context, since the
           real sidebar only exists at lg+). Side margins make it read as a

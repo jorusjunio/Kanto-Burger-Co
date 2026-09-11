@@ -24,6 +24,8 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import {
+  ADMIN_STICKY_TABLE_CONTAINER_CLASS,
+  ADMIN_STICKY_TABLE_HEAD_ROW_CLASS,
   Table,
   TableBody,
   TableCell,
@@ -262,9 +264,12 @@ export function StaffManager({
           </span>
         </div>
 
-        <Table className="admin-table sm:min-w-[560px]">
+        <Table
+          className="admin-table sm:min-w-[560px]"
+          containerClassName={ADMIN_STICKY_TABLE_CONTAINER_CLASS}
+        >
           <TableHeader>
-            <TableRow>
+            <TableRow className={ADMIN_STICKY_TABLE_HEAD_ROW_CLASS}>
               <TableHead>Member</TableHead>
               <TableHead className="hidden sm:table-cell">Status</TableHead>
               <TableHead>Role</TableHead>

@@ -46,6 +46,9 @@ export function CategoryNav({ categories }: CategoryNavProps) {
   );
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
+  // Hidden while the hero is still in view; reveals once the visitor
+  // actually scrolls down, so it doesn't sit visible over the hero.
+  const [revealed, setRevealed] = useState(false);
   // When pinned to the page bottom the last category owns the active state —
   // the observer must not override it (its band sits too high to ever see a
   // short final section).
@@ -88,6 +91,8 @@ export function CategoryNav({ categories }: CategoryNavProps) {
      section (e.g. Combos) can never reach it — detect page bottom instead. ─── */
   useEffect(() => {
     const handleScroll = () => {
+      setRevealed(window.scrollY >= 100);
+
       if (window.scrollY < 100) {
         nearBottomRef.current = false;
         setActiveCategory("all");
@@ -222,7 +227,14 @@ export function CategoryNav({ categories }: CategoryNavProps) {
   }
 
   return (
-    <div className="sticky top-0 z-50 border-b border-orange-900/8 bg-[#fffbf2]/90 backdrop-blur-xl">
+    <div
+      className={cn(
+        "sticky top-0 z-50 border-b border-orange-900/8 bg-[#fffbf2] transition-all duration-300 ease-out",
+        revealed
+          ? "translate-y-0 opacity-100"
+          : "pointer-events-none -translate-y-2 opacity-0",
+      )}
+    >
       <div className="mx-auto max-w-6xl px-4 py-3 sm:px-6">
         {/* ── Segmented control — hugs its content (centered); scrolls only
             when the categories overflow the row. ── */}

@@ -8,6 +8,8 @@ import { Edit, ImageOff, Plus, Search, Star, Utensils } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ADMIN_MOBILE_HEADER_OFFSET_CLASS } from "@/components/admin/admin-header-offset";
 import {
+  ADMIN_STICKY_TABLE_CONTAINER_CLASS,
+  ADMIN_STICKY_TABLE_HEAD_ROW_CLASS,
   Table,
   TableBody,
   TableCell,
@@ -372,9 +374,12 @@ export function MenuView({
                 </ul>
 
                 {/* Desktop/tablet: full table. */}
-                <Table className="admin-table hidden sm:min-w-[760px] sm:table">
+                <Table
+                  className="admin-table hidden sm:min-w-[760px] sm:table"
+                  containerClassName={ADMIN_STICKY_TABLE_CONTAINER_CLASS}
+                >
                   <TableHeader>
-                    <TableRow>
+                    <TableRow className={ADMIN_STICKY_TABLE_HEAD_ROW_CLASS}>
                       <TableHead>Product</TableHead>
                       <TableHead>Category</TableHead>
                       <TableHead>Price</TableHead>

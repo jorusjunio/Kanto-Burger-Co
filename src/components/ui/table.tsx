@@ -4,11 +4,15 @@ import * as React from "react"
 
 import { cn } from "@/lib/utils"
 
-function Table({ className, ...props }: React.ComponentProps<"table">) {
+function Table({
+  className,
+  containerClassName,
+  ...props
+}: React.ComponentProps<"table"> & { containerClassName?: string }) {
   return (
     <div
       data-slot="table-container"
-      className="relative w-full overflow-x-auto"
+      className={cn("relative w-full overflow-x-auto", containerClassName)}
     >
       <table
         data-slot="table"
@@ -18,6 +22,32 @@ function Table({ className, ...props }: React.ComponentProps<"table">) {
     </div>
   )
 }
+
+/**
+ * Shared "sticky header while scrolling within the table" recipe, used by
+ * every admin table so they behave the same way instead of each growing its
+ * own variant.
+ *
+ * `containerClassName`: pass to Table's `containerClassName` prop. Caps the
+ * table at a scrollable height. It must set BOTH axes' overflow here (not
+ * just overflow-y): per the CSS overflow spec, a non-"visible" overflow-x
+ * forces the browser to compute overflow-y as "auto" too, no matter what you
+ * set it to. Table's own container already sets overflow-x-auto, so if this
+ * height cap lived on a separate ancestor div instead, THAT div would get
+ * silently promoted to a phantom scroll container by the same spec rule
+ * (auto overflow-y, but never anything to scroll since it has no height cap)
+ * and steal the sticky header's positioning context, so the header would just
+ * scroll away with everything else. Applying the cap directly to Table's own
+ * container sidesteps that: it becomes the one real scrolling pane.
+ *
+ * `headRowClassName`: pass to the header `<TableRow>`. Sticky goes on each
+ * `<th>` (via the `[&>th]` selector), not on `<TableHeader>`/`<thead>`, since
+ * sticky on the row-group element doesn't reliably stick across browsers in
+ * a table layout.
+ */
+const ADMIN_STICKY_TABLE_CONTAINER_CLASS = "max-h-[65vh] overflow-y-auto"
+const ADMIN_STICKY_TABLE_HEAD_ROW_CLASS =
+  "[&>th]:sticky [&>th]:top-0 [&>th]:z-10 [&>th]:bg-white [&>th]:shadow-[0_1px_0_rgba(120,53,15,0.08)]"
 
 function TableHeader({ className, ...props }: React.ComponentProps<"thead">) {
   return (
@@ -113,4 +143,6 @@ export {
   TableRow,
   TableCell,
   TableCaption,
+  ADMIN_STICKY_TABLE_CONTAINER_CLASS,
+  ADMIN_STICKY_TABLE_HEAD_ROW_CLASS,
 }
