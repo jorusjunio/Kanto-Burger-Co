@@ -32,7 +32,8 @@ na-verify talaga; ⚠️ kapag bahagya pa lang.
 | 14 | Hindi naka-commit ang payment work | ✅ Fixed | 2026-09-11 | `3f12430`, `beac845`, `ec9c47f` |
 | 20 | Hindi pa kumpleto ang PayMongo sa production | ⚠️ Kumpleto ang setup, hinihintay ang ₱1 test | 2026-09-11 | wala (Vercel env vars) |
 | 21 | Walang paraan pabalik mula sa QR page | ✅ Fixed | 2026-09-11 | `fcb1534` |
-| 4, 6, 7, 10 to 13, 15 to 19, 22 | | Open | | |
+| 22 | Puwedeng maging PAID ang GCash order kahit walang bayad | ✅ Fixed | 2026-09-12 | hindi pa naka-commit |
+| 4, 6, 7, 10 to 13, 15 to 19 | | Open | | |
 
 Kasalukuyang estado (2026-09-11, pagkatapos ng mga fix): `npm test` 73 / 73,
 `npx tsc --noEmit` 0 errors, `npm run lint` 0 errors, `npm run build` pasado.
@@ -470,10 +471,33 @@ Nangyari ito sa dalawang test order noong 2026-09-11:
 `awaiting_next_action` pa rin ang intent at 0 ang payment;
 `KBC-260911-142545-KEFZ` ay COMPLETED at PAID.
 
-**Fix (pumili):** itago o i-disable ang manual "Paid" para sa mga order na may
-`paymentProvider = "paymongo"` (o humingi muna ng kumpirmasyon), at huwag
-awtomatikong i-PAID ang PayMongo order kapag kinumpleto nang hindi pa
-settled ng webhook.
+**Status: ✅ FIXED (2026-09-12, hindi pa naka-commit)**
+- Sa `action-handlers.ts`, hindi na kasama ang `PaymentMethod.GCASH` sa
+  `shouldSettlePayment`: naka-`COMPLETED` at hindi pa `PAID` na lang ang
+  dating kundisyon, dinagdagan ng `paymentMethod !== GCASH`. Mananatili sa
+  kasalukuyang status ang bayad ng GCash order kapag nakumpleto; ang webhook
+  o ang manual na "Mark as paid" button (nandiyan na dati, walang binago) na
+  lang ang magpapasya.
+- Idinagdag ang `paymentMethod` sa `OrderWithRestockItems` type, dahil hindi
+  pa ito kasama roon kahit ginagamit na ng code (`Pick<Order, ...>` na
+  hiwalay sa aktwal na Prisma query, kaya hindi ito nahuli ng tsc bago
+  idagdag ang field sa Pick).
+- Cash at COD: walang pagbabago, awtomatiko pa ring PAID pagka-COMPLETED.
+- **Double-check:** bagong unit test
+  ("completing an unpaid GCash order does not auto-settle its payment") na
+  nagpapatunay na walang `paymentStatus` key sa update kapag GCash; 3 lumang
+  test ay dinagdagan ng `paymentMethod: CASH` sa mock para tumugma sa bagong
+  Pick type. `npm test` 74 / 74; `tsc` at lint 0 errors.
+- **Double-check sa browser (totoong end-to-end, hindi mock):** gumawa ng
+  bagong GCash order (`KBC-260912-000953-WAY3`), nag-login bilang admin, at
+  dinala ang order mula PENDING → PREPARING → READY → COMPLETED gamit ang
+  totoong mga button, nang hindi binabayaran. Sa server (query sa DB) at sa
+  UI pagka-reload: **COMPLETED** ang status, pero **PENDING** pa rin ang
+  payment, "Awaiting GCash" ang badge, at nandiyan pa rin ang "Mark as paid"
+  button. Ibinalik ang 1 unit ng stock na nagamit ng test order (hindi na
+  puwedeng i-cancel ang COMPLETED order sa app, kaya direkta na lang sa DB).
+
+**Fix:** Tapos na.
 
 ---
 
