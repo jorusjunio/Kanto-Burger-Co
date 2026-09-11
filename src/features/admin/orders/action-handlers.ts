@@ -35,7 +35,10 @@ type OrderUpdatePayload = Pick<
 > & { timestamp?: number };
 
 /** Order + line items read inside the status transaction to restore stock. */
-type OrderWithRestockItems = Pick<Order, "status" | "paymentStatus"> & {
+type OrderWithRestockItems = Pick<
+  Order,
+  "status" | "paymentStatus" | "paymentMethod"
+> & {
   items: Array<
     Pick<OrderItem, "quantity" | "productId"> & {
       product: Pick<Product, "id" | "trackStock"> | null;
@@ -149,11 +152,14 @@ export async function updateOrderStatusWithDeps(
 
     assertAllowedStatusTransition(currentOrder.status, nextStatus);
 
-    // Completing an order settles the payment: for cash/COD the customer pays on
-    // hand-off, and even GCash orders are guaranteed paid by the time they close.
-    // Auto-marking Paid here spares staff a second manual step (see kitchen flow).
+    // Completing an order settles the payment for CASH/COD, since the customer
+    // pays on hand-off. GCash is excluded: it settles through the PayMongo
+    // webhook (or an explicit admin "Paid" override), and auto-marking it Paid
+    // here would let kitchen staff complete an order that was never actually
+    // paid for.
     const shouldSettlePayment =
       nextStatus === OrderStatus.COMPLETED &&
+      currentOrder.paymentMethod !== PaymentMethod.GCASH &&
       currentOrder.paymentStatus !== PaymentStatus.PAID;
 
     const updatedOrder = await tx.order.update({

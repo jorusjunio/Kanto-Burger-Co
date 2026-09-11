@@ -87,6 +87,7 @@ test("cancelling an active order restores tracked product stock once per tracked
             findUnique: async () => ({
               status: OrderStatus.PREPARING,
               paymentStatus: PaymentStatus.UNPAID,
+              paymentMethod: PaymentMethod.CASH,
               items: [
                 {
                   quantity: 3,
@@ -170,6 +171,7 @@ test("completing an unpaid order auto-settles its payment to PAID", async () => 
             findUnique: async () => ({
               status: OrderStatus.READY,
               paymentStatus: PaymentStatus.UNPAID,
+              paymentMethod: PaymentMethod.CASH,
               items: [],
             }),
             update: async (args: { data: Record<string, unknown> }) => {
@@ -218,6 +220,7 @@ test("completing an already-paid order leaves its payment untouched", async () =
             findUnique: async () => ({
               status: OrderStatus.READY,
               paymentStatus: PaymentStatus.PAID,
+              paymentMethod: PaymentMethod.CASH,
               items: [],
             }),
             update: async (args: { data: Record<string, unknown> }) => {
@@ -243,6 +246,55 @@ test("completing an already-paid order leaves its payment untouched", async () =
     deps,
   );
 
+  assert.equal(orderUpdates.length, 1);
+  assert.deepEqual(orderUpdates[0].data, { status: OrderStatus.COMPLETED });
+});
+
+test("completing an unpaid GCash order does not auto-settle its payment", async () => {
+  const orderUpdates: Array<{ data: Record<string, unknown> }> = [];
+  const deps: AdminOrderActionDeps = {
+    requireAdminSession: async () => ({ user: { id: "staff-1" } }),
+    prisma: {
+      $transaction: (<T>(
+        callback: (tx: OrderTransactionClient) => Promise<T>,
+      ): Promise<T> =>
+        callback({
+          order: {
+            findUnique: async () => ({
+              status: OrderStatus.OUT_FOR_DELIVERY,
+              paymentStatus: PaymentStatus.PENDING,
+              paymentMethod: PaymentMethod.GCASH,
+              items: [],
+            }),
+            update: async (args: { data: Record<string, unknown> }) => {
+              orderUpdates.push(args);
+              return orderPayload({
+                status: OrderStatus.COMPLETED,
+                paymentStatus: PaymentStatus.PENDING,
+              });
+            },
+          },
+          product: {
+            update: async () => ({ count: 0 }),
+          },
+        })) as AdminOrderActionDeps['prisma']['$transaction'],
+      order: {
+        findUnique: async () => ({ paymentMethod: PaymentMethod.GCASH }),
+        update: async () => orderPayload(),
+      },
+    },
+    revalidatePath: () => {},
+    triggerRealtimeEvent: async () => {},
+  };
+
+  await updateOrderStatusWithDeps(
+    formData({ orderId: "order-1", status: OrderStatus.COMPLETED }),
+    deps,
+  );
+
+  // No paymentStatus key at all: kitchen completing a GCash order must never
+  // fabricate a settlement the webhook (or an explicit admin override) hasn't
+  // actually confirmed.
   assert.equal(orderUpdates.length, 1);
   assert.deepEqual(orderUpdates[0].data, { status: OrderStatus.COMPLETED });
 });
