@@ -26,11 +26,15 @@ na-verify talaga; ⚠️ kapag bahagya pa lang.
 | 1 | Walang retry-payment path | ✅ Fixed | 2026-09-11 | `3f12430` |
 | 2 | Mahinang `PAYMENT_SIGNING_SECRET` | ✅ Fixed (local at production) | 2026-09-11 | wala (env vars) |
 | 3 | Live secret sa `.env` | ✅ Fixed | 2026-09-11 | wala (`.env`) |
+| 5 | Hindi hinahawakan ang pag-expire ng QR | ⚠️ Bahagya (UI tapos, kailangang makita sa live) | 2026-09-11 | hindi pa naka-commit |
+| 8 | Nasisira ang pay page kapag mismatch ang mode | ✅ Fixed | 2026-09-11 | hindi pa naka-commit |
+| 9 | Walang katapusang polling sa QR page | ✅ Fixed | 2026-09-11 | hindi pa naka-commit |
 | 14 | Hindi naka-commit ang payment work | ✅ Fixed | 2026-09-11 | `3f12430`, `beac845`, `ec9c47f` |
 | 20 | Hindi pa kumpleto ang PayMongo sa production | ⚠️ Kumpleto ang setup, hinihintay ang ₱1 test | 2026-09-11 | wala (Vercel env vars) |
-| 4 to 13, 15 to 19 | | Open | | |
+| 21 | Walang paraan pabalik mula sa QR page | ✅ Fixed | 2026-09-11 | hindi pa naka-commit |
+| 4, 6, 7, 10 to 13, 15 to 19 | | Open | | |
 
-Kasalukuyang estado (2026-09-11, pagkatapos ng mga fix): `npm test` 60 / 60,
+Kasalukuyang estado (2026-09-11, pagkatapos ng mga fix): `npm test` 70 / 70,
 `npx tsc --noEmit` 0 errors, `npm run build` pasado.
 
 ---
@@ -169,12 +173,16 @@ rin ang totoong PayMongo setup:
   `payment.failed`), at na-disable ang lumang webhook na nakaturo sa ngrok.
   Walang delete sa PayMongo; disable ang katumbas, dahil wala nang ipinapadala
   ang naka-disable na webhook.
-- ✅ `PAYMONGO_SECRET_KEY` (bagong live key) ay nasa Vercel Production, ayon sa
-  user. Hindi ito masusubukan mula sa labas nang hindi gumagawa ng order.
+- ✅ `PAYMONGO_SECRET_KEY` (bagong live key): **Double-check:** ang ₱1 test
+  order sa live site (`KBC-260911-142545-KEFZ`) ay nakakuha ng live PayMongo
+  intent at ng totoong QR (hindi sandbox simulator), kaya gumagana ang key sa
+  production.
 - ⏳ **Natitirang patunay:** ang 401 ay nagsasabing *may* webhook secret, hindi
   na *tugma* ito sa webhook. Kailangan ng ₱1 na totoong bayad sa live site:
   dapat maging PAID ang order, at may successful na delivery sa Event
-  Deliveries ng bagong webhook.
+  Deliveries ng bagong webhook. Noong unang subok (2026-09-11, mga 10:25 PM),
+  "QRPH will be back soon" ang sinabi ng GCash: down ang QR Ph service sa
+  panig ng GCash, hindi ng app.
 
 **Fix:** Tapos na ang setup. Ang natitira ay ang ₱1 end-to-end test.
 
@@ -216,6 +224,24 @@ sila nang walang paliwanag.
 
 Hindi rin naka-subscribe ang webhook natin sa `qrph.expired` event, kaya
 walang nakakaalam ang server na patay na ang session.
+
+**Status: ⚠️ Bahagya (2026-09-11, hindi pa naka-commit)**
+- ✅ Kinukuha na ng `getQrPhStatus()` ang `expires_at` ng QR, at may countdown
+  ang QR page ("Waiting for payment · expires in m:ss").
+- ✅ Kapag expired (PayMongo `awaiting_payment_method`, o lampas na sa
+  `expires_at` at 10 segundong palugit), papalitan ang patay na QR ng "This QR
+  code has expired" at "Generate a new QR" button. Ginagamit nito ang parehong
+  `resumePayment` ng tracker, na gagawa ng bagong QR dahil patay na ang luma.
+- ✅ Bagong "Confirming your payment" state kapag nagbayad na pero hindi pa
+  dumarating ang webhook, para hindi ito maipakitang expired.
+- Nasa pure function ang pagpapasya ng state (`src/features/payments/qrph-view.ts`).
+- **Double-check:** 10 unit tests sa `qrph-view.test.ts` para sa lahat ng
+  state, sa palugit, at sa countdown; `tsc` 0 errors; build pasado.
+- ⏳ Hindi pa nakikita sa browser ang countdown at expired screens: sa live
+  mode lang sila lumalabas (sa sandbox, dumidiretso ang page sa PayMongo
+  simulator), kaya kailangan munang ma-deploy.
+- ❌ Hindi pa naka-subscribe sa `qrph.expired` webhook event. Ang epekto nito
+  sa stock ay nasa #4.
 
 **Fix:** I-handle ang `status` mula sa `getQrPhStatus()` (`awaiting_next_action`
 = buhay; iba = expired/tapos). Magpakita ng countdown at "Generate new QR"
@@ -263,6 +289,24 @@ events), pero magiging live agad ito kapag na-enable na ang direct GCash channel
 
 ---
 
+### 21. Walang paraan pabalik mula sa QR page
+**File:** `src/features/payments/qrph-gateway.tsx`
+
+Kapag napunta ang customer sa QR page at hindi makabayad (hal. down ang QR Ph
+ng GCash, gaya noong 2026-09-11 ng gabi), wala siyang paraan para umalis o
+bumalik sa order niya. Walang link sa page, at ang "Pay via GCash" retry button
+(#1) ay nasa order tracker, na hindi niya mapupuntahan kung hindi niya na-save
+ang link (kailangan ng tracking token).
+
+**Status: ✅ FIXED (2026-09-11, hindi pa naka-commit)**
+- May "Pay later / view my order" link na sa lahat ng state ng QR page
+  (active, confirming, expired, unavailable), papunta sa tracker na may token.
+- **Double-check (browser):** mula sa pay page ng `KBC-260911-142545-KEFZ`,
+  dinala ng link sa tracker, at lumabas ang "Payment still pending" banner at
+  ang "Pay via GCash" button.
+
+---
+
 ## P2: Medium
 
 ### 8. Nasisira ang pay page kapag mismatch ang PayMongo mode
@@ -276,12 +320,19 @@ sandbox), ang mga order na ginawa sa kabilang mode ay **hindi na mabubuksan**
 ang pay page. Mag-e-error ito (404 mula PayMongo) papunta sa error boundary,
 nang walang malinaw na paliwanag.
 
-Aktwal na apektado ngayon: ang totoong ₱1 na live order (`KBC-260911-044541-XGKG`).
-
-Tandaan: ang **tracker button** (#1) ay hindi na naaapektuhan nito, dahil
-tinatrato ng `resumeSession()` ang 404 bilang "patay na session" at gumagawa ng
-bago. Ang direktang pagbukas lang ng lumang `/checkout/pay/...` URL ang
-nasisira pa.
+**Status: ✅ FIXED (2026-09-11, hindi pa naka-commit)**
+- Nasa try/catch na ang `getQrPhStatus()` sa pay page. Kapag pumalya
+  (PayMongo outage, o intent mula sa ibang test/live mode), "We couldn't load
+  the QR code" ang lalabas, may "Try again" at "Pay later / view my order",
+  imbes na error boundary. Nasa labas pa rin ng try ang `redirect()` papunta
+  sa sandbox simulator, dahil throw ang paraan ng paggana nito.
+- **Double-check (browser):** binuksan ang pay page ng live na ₱1 order
+  (`KBC-260911-142545-KEFZ`) gamit ang local na test key (404 sa PayMongo):
+  lumabas ang "unavailable" state, walang error boundary, at gumana ang link
+  papunta sa tracker. Ang tanging console issue ay ang sinasadyang
+  `Failed to load PayMongo QR status` log.
+- Hindi rin naaapektuhan ang **tracker button** (#1), dahil tinatrato ng
+  `resumeSession()` ang 404 bilang "patay na session" at gumagawa ng bago.
 
 **Fix:** I-catch ang `PaymongoApiError` sa page at magpakita ng malinaw na
 mensahe ("Hindi na available ang payment session na ito") sa halip na
@@ -295,6 +346,14 @@ mag-crash.
 Ang polling interval (bawat 4 segundo) ay tumatakbo hangga't nakabukas ang page.
 Kapag iniwan ng customer ang tab nang ilang oras, patuloy ang pag-hit sa
 `/api/payments/session/[intentId]`: **900 DB query kada oras, kada tab**.
+
+**Status: ✅ FIXED (2026-09-11, hindi pa naka-commit)**
+- Tumatakbo lang ang polling habang puwede pang bayaran ang QR (active) o
+  habang kinukumpirma ang bayad (confirming). Titigil ito kapag expired o
+  unavailable, kaya natatapos ito kasabay ng buhay ng QR (mga 30 minuto).
+- **Double-check (browser):** 12 segundo sa "unavailable" state: 0 request sa
+  `/api/payments/session` (sa lumang code, 3 sana, isa kada 4 segundo).
+  Unit-tested ang pagpapasya ng state sa `qrph-view.test.ts`.
 
 **Fix:** Maglagay ng max attempts (hal. huminto pagkatapos ng QR expiry window),
 o dagdagan ang interval sa paglipas ng oras (backoff), o huminto kapag
@@ -351,6 +410,13 @@ payload na talagang hindi natin kayang iproseso (para huminto ang retry), at
 
 Parehong may tamang fallback at warning. Hindi ito bug, kundi hindi pa tapos
 na configuration. Pero P0 ang Upstash kapag deploy na sa production.
+
+Update (2026-09-11): may Pusher vars na sa local `.env`. Sa production, wala
+pa: sa live JavaScript, nandoon ang Pusher library pero wala ang setup code
+(`/api/presence/auth`), na tinatanggal lang ng build kapag walang
+`NEXT_PUBLIC_PUSHER_KEY`. Kaya lahat ay OFFLINE sa Staff page ng live site at
+walang realtime updates doon. Nasa `.env.vercel-pusher` ang 6 na variable na
+ilalagay sa Vercel.
 
 **Fix:** I-set ang mga env vars bago mag-production deploy.
 
@@ -465,6 +531,6 @@ Para malinaw kung ano ang hindi kailangang galawin:
 2. ~~Ayusin ang retry-payment path (#1)~~ ✅
 3. ~~I-rotate ang `PAYMENT_SIGNING_SECRET` at tanggalin ang live key sa `.env` (#2, #3)~~ ✅
 4. Tapusin ang PayMongo sa production (#20): setup ✅, ₱1 end-to-end test na lang
-5. QR expiry handling at stock cleanup job (#4, #5)
+5. QR page: daan pabalik, expiry UI at polling (#21, #5, #8, #9) ✅, kailangan pang makita sa live; stock cleanup (#4) at `qrph.expired` na lang
 6. Webhook hardening: rate limit, retry semantics (#6, #7, #11)
 7. Bago lumaki ang traffic: Upstash at Pusher env vars (#12), i-guard ang mock route (#13)
